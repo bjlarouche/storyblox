@@ -1,6 +1,6 @@
 import Log from "@rbxts/log";
 import Roact from "@rbxts/roact";
-import { hooked, useEffect, useState } from "@rbxts/roact-hooked";
+import { withHooks, useEffect, useState } from "@rbxts/roact-hooked";
 import { ReplicatedStorage } from "@rbxts/services";
 import { DarkTheme, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
 import { STORYBLOX_LOGO } from "constants/AppConstants";
@@ -29,7 +29,7 @@ export interface StorybloxProps {
 	logoSrc?: string;
 }
 
-const Storyblox = hooked<StorybloxProps>((props) => {
+const Storyblox = withHooks<StorybloxProps>((props) => {
 	const {
 		root,
 		extension = DEFAULT_EXTENSION,

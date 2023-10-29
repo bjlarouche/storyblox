@@ -1,5 +1,5 @@
 import Roact from "@rbxts/roact";
-import { hooked, useEffect, useState } from "@rbxts/roact-hooked";
+import { withHooks, useEffect, useState } from "@rbxts/roact-hooked";
 import { Icon, Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, Input } from "@rbxts/uiblox";
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
@@ -15,7 +15,7 @@ export interface StoriesSidebarProps {
 	onToggleTheme: () => void;
 }
 
-const StoriesSidebar = hooked<StoriesSidebarProps>(
+const StoriesSidebar = withHooks<StoriesSidebarProps>(
 	({ stories, logoSrc, onClick, primaryThemeEnabled, onToggleTheme }) => {
 		const { themeButton, menuIcon, corner, logo, filterInput, storiesTree, divider, versionLabel, releaseLabel } =
 			useStoriesSidebarStyles();

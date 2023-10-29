@@ -1,5 +1,5 @@
 import Roact from "@rbxts/roact";
-import { hooked, useState } from "@rbxts/roact-hooked";
+import { withHooks, useState } from "@rbxts/roact-hooked";
 import { CustomizedProps } from "@rbxts/uiblox";
 import useCanvasStyles from "./Canvas.styles";
 
@@ -7,7 +7,7 @@ type DefaultCanvasComponent = Frame;
 
 export interface CanvasProps {}
 
-const Canvas = hooked<CustomizedProps<DefaultCanvasComponent, CanvasProps>>((props) => {
+const Canvas = withHooks<CustomizedProps<DefaultCanvasComponent, CanvasProps>>((props) => {
 	const { className, [Roact.Children]: children } = props;
 	const { root, scrollable, pageLayout, padding } = useCanvasStyles();
 

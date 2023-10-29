@@ -190,7 +190,7 @@ const template = (props: ProgressBarProps) => {
 
   maid.GiveTask(RunService.Heartbeat.Connect(stepper));
 
-  const MyComponent = hooked<ProgressBarProps>(({
+  const MyComponent = withHooks<ProgressBarProps>(({
     progress,
   }) => {
     const { container, progressBar, label } = useProgressBarStyles();

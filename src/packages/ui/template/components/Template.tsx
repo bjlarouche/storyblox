@@ -1,5 +1,5 @@
 import Roact from "@rbxts/roact";
-import { hooked, useEffect, useState } from "@rbxts/roact-hooked";
+import { withHooks, useEffect, useState } from "@rbxts/roact-hooked";
 import { Story } from "../../../../interfaces";
 import { DefaultTheme, Shadow } from "@rbxts/uiblox";
 import { Button } from "@rbxts/uiblox/out/ui/packages/button";
@@ -12,7 +12,7 @@ export interface TemplateProps {
 	story?: Story;
 }
 
-const Template = hooked<TemplateProps>(({ story }) => {
+const Template = withHooks<TemplateProps>(({ story }) => {
 	const { root, container, corner, navBar, canvas } = useTemplateStyles();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
