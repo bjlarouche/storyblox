@@ -146,7 +146,7 @@ disconnect any event listeners used by your story.
 ```javascript
 import Maid from '@rbxts/maid';
 import Roact from '@rbxts/roact';
-import { hooked, useState } from '@rbxts/roact-hooked';
+import { markPureComponent, useState } from '@rbxts/roact-hooked';
 import { Lighting, RunService } from '@rbxts/services';
 import { ProgressBar } from '@rbxts/uiblox';
 import { ProgressBarProps } from '@rbxts/uiblox/out/ui/packages/progressBar/components/ProgressBar';
@@ -190,9 +190,7 @@ const template = (props: ProgressBarProps) => {
 
   maid.GiveTask(RunService.Heartbeat.Connect(stepper));
 
-  const MyComponent = withHooks<ProgressBarProps>(({
-    progress,
-  }) => {
+  function MyComponent({ progress }: ProgressBarProps) {
     const { container, progressBar, label } = useProgressBarStyles();
 
     const [percentage, setPercentage] = useState<number>(progress);
@@ -218,7 +216,7 @@ const template = (props: ProgressBarProps) => {
         <ProgressBar className={progressBar} progress={percentage || 0} />
       </frame>
     )
-  })
+  }
 
   const callback = () => {
     maid.DoCleaning();

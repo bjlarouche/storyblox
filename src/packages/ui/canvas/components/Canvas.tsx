@@ -1,5 +1,5 @@
 import Roact from "@rbxts/roact";
-import { withHooks, useState } from "@rbxts/roact-hooked";
+import { markPureComponent, useState } from "@rbxts/roact-hooked";
 import { CustomizedProps } from "@rbxts/uiblox";
 import useCanvasStyles from "./Canvas.styles";
 
@@ -7,7 +7,7 @@ type DefaultCanvasComponent = Frame;
 
 export interface CanvasProps {}
 
-const Canvas = withHooks<CustomizedProps<DefaultCanvasComponent, CanvasProps>>((props) => {
+function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
 	const { className, [Roact.Children]: children } = props;
 	const { root, scrollable, pageLayout, padding } = useCanvasStyles();
 
@@ -22,8 +22,10 @@ const Canvas = withHooks<CustomizedProps<DefaultCanvasComponent, CanvasProps>>((
 				Event={{
 					ChildAdded: (scrollingFrame, child) => {
 						if (child.IsA("Frame")) {
-							const xSize = child.AbsoluteSize.X <= scrollingFrame.AbsoluteCanvasSize.X ? 0 : child.AbsoluteSize.X;
-							const ySize = child.AbsoluteSize.Y <= scrollingFrame.AbsoluteCanvasSize.Y ? 0 : child.AbsoluteSize.Y;
+							const xSize =
+								child.AbsoluteSize.X <= scrollingFrame.AbsoluteCanvasSize.X ? 0 : child.AbsoluteSize.X;
+							const ySize =
+								child.AbsoluteSize.Y <= scrollingFrame.AbsoluteCanvasSize.Y ? 0 : child.AbsoluteSize.Y;
 
 							setCanvasSize(new UDim2(0, xSize, 0, ySize));
 						}
@@ -45,6 +47,6 @@ const Canvas = withHooks<CustomizedProps<DefaultCanvasComponent, CanvasProps>>((
 			</scrollingframe>
 		</frame>
 	);
-});
+}
 
-export default Canvas;
+export default markPureComponent(Canvas);
