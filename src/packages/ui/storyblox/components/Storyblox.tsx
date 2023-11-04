@@ -3,7 +3,7 @@ import Roact from "@rbxts/roact";
 import { markPureComponent, useEffect, useState } from "@rbxts/roact-hooked";
 import { ReplicatedStorage } from "@rbxts/services";
 import { DarkTheme, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
-import { STORYBLOX_LOGO } from "constants/AppConstants";
+import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story, StoryExport } from "../../../../interfaces";
 import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
@@ -27,6 +27,8 @@ export interface StorybloxProps {
 	primaryTheme?: Theme;
 	secondaryTheme?: Theme;
 	logoSrc?: string;
+	version?: string;
+	release?: string;
 }
 
 function Storyblox(props: StorybloxProps) {
@@ -36,6 +38,8 @@ function Storyblox(props: StorybloxProps) {
 		primaryTheme = DarkTheme,
 		secondaryTheme = LightTheme,
 		logoSrc = STORYBLOX_LOGO,
+		version = VERSION,
+		release = RELEASE,
 	} = props;
 
 	const [stories, setStories] = useState<Story[]>([]);
@@ -99,6 +103,8 @@ function Storyblox(props: StorybloxProps) {
 				<StoriesSidebar
 					stories={stories}
 					logoSrc={logoSrc}
+					version={version}
+					release={release}
 					onClick={(story: Story) => {
 						setSelectedStory(story);
 					}}

@@ -9,13 +9,23 @@ import { RELEASE, VERSION } from "constants/AppConstants";
 export interface StoriesSidebarProps {
 	stories: Story[];
 	logoSrc: string;
+	version?: string;
+	release?: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onClick: (story: Story<any>) => void;
 	primaryThemeEnabled: boolean;
 	onToggleTheme: () => void;
 }
 
-function StoriesSidebar({ stories, logoSrc, onClick, primaryThemeEnabled, onToggleTheme }: StoriesSidebarProps) {
+function StoriesSidebar({
+	stories,
+	logoSrc,
+	version,
+	release,
+	onClick,
+	primaryThemeEnabled,
+	onToggleTheme,
+}: StoriesSidebarProps) {
 	const { themeButton, menuIcon, corner, logo, filterInput, storiesTree, divider, versionLabel, releaseLabel } =
 		useStoriesSidebarStyles();
 
@@ -104,8 +114,8 @@ function StoriesSidebar({ stories, logoSrc, onClick, primaryThemeEnabled, onTogg
 
 			<Divider className={divider} />
 
-			<textlabel {...versionLabel} Text={`Version ${VERSION}`}></textlabel>
-			<textlabel {...releaseLabel} Text={`${RELEASE}`}></textlabel>
+			<textlabel {...versionLabel} Text={`Version ${version}`}></textlabel>
+			<textlabel {...releaseLabel} Text={`${release}`}></textlabel>
 		</Sidebar>
 	);
 }
