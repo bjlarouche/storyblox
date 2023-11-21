@@ -1,7 +1,8 @@
 import { createStyles, makeStyles, ROBLOX_UI_OFFSET, Theme, WriteableStyle } from "@rbxts/uiblox";
 
 const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
-	const filterOffset = theme.spacing.calc(3) + theme.padding.calc(2);
+	const logoOffset = theme.spacing.calc(2);
+	const filterOffset = logoOffset + theme.spacing.calc(3) + theme.padding.calc(2);
 	const storiesOffset = filterOffset + theme.spacing.calc(2) + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(4) + theme.padding.calc(2);
 
@@ -9,19 +10,19 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 		themeButton: {
 			Size: new UDim2(
 				0,
-				theme.spacing.calc(3) - theme.padding.calc(1),
+				theme.options.constants.iconSizes.medium + theme.padding.calc(2),
 				0,
-				theme.spacing.calc(3) - theme.padding.calc(1),
+				theme.options.constants.iconSizes.medium + theme.padding.calc(2),
 			),
 			Position: new UDim2(
 				0,
-				theme.spacing.calc(4) + theme.padding.calc(2),
+				theme.spacing.calc(9) + theme.padding.calc(2.5),
 				0,
-				-ROBLOX_UI_OFFSET - theme.padding.calc(2) + theme.padding.calc(1),
+				theme.padding.calc(1) - ROBLOX_UI_OFFSET,
 			),
 			AnchorPoint: new Vector2(0, 0),
 			BackgroundColor3: Color3.fromRGB(0, 0, 0),
-			BackgroundTransparency: 0.5,
+			BackgroundTransparency: 0.3,
 			BorderSizePixel: 0,
 			Text: "",
 			ClipsDescendants: true,
@@ -30,14 +31,15 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 		menuIcon: {
 			Position: new UDim2(0.5, 0, 0.5, 0),
 			AnchorPoint: new Vector2(0.5, 0.5),
+			ImageColor3: theme.options.constants.extendedPalette.Common.White,
 			ZIndex: 5100,
 		} as WriteableStyle<ImageLabel>,
 		corner: {
-			CornerRadius: new UDim(0, theme.shape.borderRadius * 2.5),
+			CornerRadius: new UDim(theme.options.constants.iconSizes.medium + theme.padding.calc(2)),
 		} as WriteableStyle<UICorner>,
 		logo: {
 			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(2)),
-			Position: new UDim2(0.5, 0, 0, 0),
+			Position: new UDim2(0.5, 0, 0, logoOffset),
 			AnchorPoint: new Vector2(0.5, 0),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
