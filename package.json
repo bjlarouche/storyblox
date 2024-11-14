@@ -46,7 +46,7 @@
 		"@rbxts/roselect": "^0.1.1",
 		"@rbxts/services": "^1.5.5",
 		"@rbxts/types": "^1.0.813",
-		"@rbxts/uiblox": "^0.1.9",
+		"@rbxts/uiblox": "^0.1.10",
 		"roblox-ts": "^3.0.0",
 		"typescript": "^5.6.3"
 	},
