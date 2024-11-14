@@ -8,7 +8,7 @@ type DefaultCanvasComponent = Frame;
 export interface CanvasProps {}
 
 function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
-	const { className, [Roact.Children]: children } = props;
+	const { className, children } = props;
 	const { root, scrollable, pageLayout, padding } = useCanvasStyles();
 
 	const [canvasSize, setCanvasSize] = useState<UDim2>(new UDim2(0, 0, 0, 0));
