@@ -82,7 +82,6 @@ function StoriesSidebar({
 	return (
 		<Sidebar size="large">
 			<textbutton
-				Key="ThemeButton"
 				{...themeButton}
 				Event={{
 					MouseButton1Click: () => {
@@ -94,7 +93,7 @@ function StoriesSidebar({
 				<Icon icon={primaryThemeEnabled === true ? Icons.DarkTheme : Icons.LightTheme} className={menuIcon} />
 			</textbutton>
 
-			<imagelabel Key="Logo" Image={logoSrc} {...logo} />
+			<imagelabel Image={logoSrc} {...logo} />
 
 			<Input
 				variant="standard"
@@ -108,7 +107,7 @@ function StoriesSidebar({
 				}}
 			/>
 
-			<frame Key="StoriesTree" {...storiesTree}>
+			<frame {...storiesTree}>
 				{tree !== undefined && <TreeView tree={tree} icon={Icons.Book} filter={filter} />}
 			</frame>
 

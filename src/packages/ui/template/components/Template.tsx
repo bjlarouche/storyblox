@@ -67,12 +67,12 @@ function Template({ story }: TemplateProps) {
 	}, [story]);
 
 	return (
-		<frame Key="Template" {...root}>
-			<frame Key="Container" {...container}>
-				<uicorner Key="Corner" {...corner} />
+		<frame {...root}>
+			<frame {...container}>
+				<uicorner {...corner} />
 				<Shadow />
 
-				<frame Key="NavBar" {...navBar}>
+				<frame {...navBar}>
 					<Button
 						variant="text"
 						text="Canvas"

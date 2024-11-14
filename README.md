@@ -26,20 +26,20 @@ Install the package to get started.
 ### Example
 
 Mount the `Storyblox` Roact component however/wherever you want and just pass in
-the optional props for further customization. 
+the optional props for further customization.
 
 ```javascript
-    // root?: Instance;
-    //  default -> ReplicatedStorage
-    // extension?: `.${string}`;
-    //  default -> "*.stories"
-    // primaryTheme?: Theme;
-    //  default -> DarkTheme from @rbxts/uiblox
-    // secondaryTheme?: Theme;
-    // default -> LightTheme from @rbxts/uiblox
-    // logoSrc?: string;
-    // default -> Storyblox logo assetId
-    <Storyblox />
+// root?: Instance;
+//  default -> ReplicatedStorage
+// extension?: `.${string}`;
+//  default -> "*.stories"
+// primaryTheme?: Theme;
+//  default -> DarkTheme from @rbxts/uiblox
+// secondaryTheme?: Theme;
+// default -> LightTheme from @rbxts/uiblox
+// logoSrc?: string;
+// default -> Storyblox logo assetId
+<Storyblox />
 ```
 
 Next, just start writing stories for your components! By default, it will look for
@@ -208,7 +208,6 @@ const template = (props: ProgressBarProps) => {
 
     return (
       <frame
-        Key={"Container"}
         {...container}>
         <textlabel
           {...label}

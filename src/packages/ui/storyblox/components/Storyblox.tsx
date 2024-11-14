@@ -99,7 +99,7 @@ function Storyblox(props: StorybloxProps) {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<frame Key={`Storyblox-${theme}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+			<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 				<StoriesSidebar
 					stories={stories}
 					logoSrc={logoSrc}
