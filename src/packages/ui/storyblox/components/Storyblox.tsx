@@ -1,7 +1,7 @@
 import Log from "@rbxts/log";
 import Roact from "@rbxts/roact";
 import { markPureComponent, useEffect, useState } from "@rbxts/roact-hooked";
-import { ReplicatedStorage } from "@rbxts/services";
+import { Players, ReplicatedStorage } from "@rbxts/services";
 import { DarkTheme, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story, StoryExport } from "../../../../interfaces";
@@ -19,6 +19,7 @@ const VALID_ROOT_TYPES = [
 	"Workspace",
 	"ServerStorage",
 	"ServerScriptService",
+	"Player",
 ];
 
 export interface StorybloxProps {
@@ -78,7 +79,7 @@ function Storyblox(props: StorybloxProps) {
 				Log.Warn(`Issue adding story ${root.Name}...\n ${error}`);
 			}
 		} else if (VALID_ROOT_TYPES.includes(root.ClassName)) {
-			for (const child of root.GetChildren()) {
+			for (const child of root.GetDescendants()) {
 				findStories(child);
 			}
 		}
@@ -86,7 +87,7 @@ function Storyblox(props: StorybloxProps) {
 
 	// Did mount
 	useEffect(() => {
-		const stories = root || ReplicatedStorage;
+		const stories = root || Players.LocalPlayer || ReplicatedStorage;
 
 		// Listen for descendants to be added
 		root?.DescendantAdded.Connect((descendant) => {
