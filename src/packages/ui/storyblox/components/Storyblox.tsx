@@ -1,6 +1,5 @@
 import Log from "@rbxts/log";
-import React from "@rbxts/react";
-import { markPureComponent, useEffect, useState } from "@rbxts/roact-hooked";
+import React, { useEffect, useState } from "@rbxts/react";
 import { Players, ReplicatedStorage } from "@rbxts/services";
 import { DarkTheme, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
@@ -100,7 +99,7 @@ function Storyblox(props: StorybloxProps) {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<frame Key={`Storyblox-${theme}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+			<frame key={`Storyblox-${theme}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 				<StoriesSidebar
 					stories={stories}
 					logoSrc={logoSrc}
@@ -120,4 +119,4 @@ function Storyblox(props: StorybloxProps) {
 	);
 }
 
-export default markPureComponent(Storyblox);
+export default Storyblox;
