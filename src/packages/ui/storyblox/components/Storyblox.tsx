@@ -56,7 +56,11 @@ function Storyblox(props: StorybloxProps) {
 				error(`Story ${title} already exists`);
 			}
 
-			setStories((oldStories) => [...oldStories, story]);
+			setStories((oldStories) => {
+				const filteredStories = oldStories.filter((s) => s.title !== title);
+				filteredStories.push(story);
+				return filteredStories;
+			});
 		} catch {
 			// Component is unmounting. Do nothing.
 		}
