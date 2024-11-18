@@ -13,8 +13,9 @@ function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
 	const [canvasSize, setCanvasSize] = useState<UDim2>(new UDim2(0, 0, 0, 0));
 
 	return (
-		<frame {...root} {...className}>
+		<frame key="Canvas" {...root} {...className}>
 			<scrollingframe
+				key="Scrollable"
 				{...scrollable}
 				CanvasSize={canvasSize}
 				Event={{
@@ -39,8 +40,8 @@ function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
 					},
 				}}
 			>
-				<uipagelayout {...pageLayout} />
-				<uipadding {...padding} />
+				<uipagelayout key="PageLayout" {...pageLayout} />
+				<uipadding key="Padding" {...padding} />
 				{children}
 			</scrollingframe>
 		</frame>

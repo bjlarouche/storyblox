@@ -207,6 +207,7 @@ const template = (props: ProgressBarProps) => {
 
     return (
       <frame
+        key={"Container"}
         {...container}>
         <textlabel
           {...label}
