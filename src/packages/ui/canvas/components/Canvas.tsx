@@ -1,5 +1,4 @@
-import Roact from "@rbxts/roact";
-import { markPureComponent, useState } from "@rbxts/roact-hooked";
+import React, { useState } from "@rbxts/react";
 import { CustomizedProps } from "@rbxts/uiblox";
 import useCanvasStyles from "./Canvas.styles";
 
@@ -48,4 +47,4 @@ function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
 	);
 }
 
-export default markPureComponent(Canvas);
+export default Canvas;

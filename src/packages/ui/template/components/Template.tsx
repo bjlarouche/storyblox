@@ -1,5 +1,4 @@
-import Roact from "@rbxts/roact";
-import { markPureComponent, useEffect, useState } from "@rbxts/roact-hooked";
+import React, { useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
 import { DefaultTheme, Shadow } from "@rbxts/uiblox";
 import { Button } from "@rbxts/uiblox/out/ui/packages/button";
@@ -17,7 +16,7 @@ function Template({ story }: TemplateProps) {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [, setRenderedStory] = useState<Story<any> | undefined>();
-	const [template, setTemplate] = useState<Roact.Element | undefined>();
+	const [template, setTemplate] = useState<React.Element | undefined>();
 	const [, setTemplateCallback] = useState<() => void | undefined>();
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,7 +36,7 @@ function Template({ story }: TemplateProps) {
 		const [element, callback] = story.template(story?.props) as LuaTuple<[StoryElement, StoryCallback]>;
 
 		if (callback !== undefined) {
-			// Template is not a Roact element
+			// Template is not a React element
 			setTemplate(element);
 
 			setTemplateCallback((oldCallback) => {
@@ -47,7 +46,7 @@ function Template({ story }: TemplateProps) {
 				return callback;
 			});
 		} else {
-			// Template is a Roact element
+			// Template is a React element
 			const element = story.template(story?.props) as StoryElement;
 			setTemplate(element);
 
@@ -94,4 +93,4 @@ function Template({ story }: TemplateProps) {
 	);
 }
 
-export default markPureComponent(Template);
+export default Template;

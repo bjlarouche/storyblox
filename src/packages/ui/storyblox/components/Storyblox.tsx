@@ -1,5 +1,5 @@
 import Log from "@rbxts/log";
-import Roact from "@rbxts/roact";
+import React from "@rbxts/react";
 import { markPureComponent, useEffect, useState } from "@rbxts/roact-hooked";
 import { Players, ReplicatedStorage } from "@rbxts/services";
 import { DarkTheme, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";

@@ -25,7 +25,7 @@ Install the package to get started.
 
 ### Example
 
-Mount the `Storyblox` Roact component however/wherever you want and just pass in
+Mount the `Storyblox` React component however/wherever you want and just pass in
 the optional props for further customization.
 
 ```javascript
@@ -59,7 +59,7 @@ There can only be one story per title (they must be unique). Otherwise, it will
 only render the first story loaded with a given title.
 
 ```javascript
-import Roact from '@rbxts/roact';
+import React from '@rbxts/react';
 import { Story } from '@rbxts/storyblox';
 import { TreeView } from '@rbxts/uiblox';
 import { TreeViewProps } from '@rbxts/uiblox/out/ui/packages/treeView/components/TreeView';
@@ -145,8 +145,7 @@ disconnect any event listeners used by your story.
 
 ```javascript
 import Maid from '@rbxts/maid';
-import Roact from '@rbxts/roact';
-import { markPureComponent, useState } from '@rbxts/roact-hooked';
+import React, { useState } from '@rbxts/react';
 import { Lighting, RunService } from '@rbxts/services';
 import { ProgressBar } from '@rbxts/uiblox';
 import { ProgressBarProps } from '@rbxts/uiblox/out/ui/packages/progressBar/components/ProgressBar';
@@ -156,7 +155,7 @@ import useProgressBarStyles from './ProgressBar.styles';
 const template = (props: ProgressBarProps) => {
   const maid = new Maid(); // Maid to do cleaning once we are done
 
-  // Use IntValue so that Roact will re-render when the value changes / listen
+  // Use IntValue so that React will re-render when the value changes / listen
   // to lifecycle events
   const progressValue = new Instance("IntValue");
   progressValue.Name = "ProgressValue";
@@ -243,7 +242,7 @@ If your component does not extend from a props interface, you can omit them from
 the story.
 
 ```javascript
-import Roact from '@rbxts/roact';
+import React from '@rbxts/react';
 import { Story } from '@rbxts/storyblox';
 import { MyComponent } from './MyComponent';
 

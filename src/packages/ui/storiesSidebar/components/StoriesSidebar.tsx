@@ -1,5 +1,4 @@
-import Roact from "@rbxts/roact";
-import { markPureComponent, useEffect, useState } from "@rbxts/roact-hooked";
+import React, { useEffect, useState } from "@rbxts/react";
 import { Icon, Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, Input } from "@rbxts/uiblox";
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
@@ -20,8 +19,8 @@ export interface StoriesSidebarProps {
 function StoriesSidebar({
 	stories,
 	logoSrc,
-	version,
-	release,
+	version = VERSION,
+	release = RELEASE,
 	onClick,
 	primaryThemeEnabled,
 	onToggleTheme,
@@ -119,4 +118,4 @@ function StoriesSidebar({
 	);
 }
 
-export default markPureComponent(StoriesSidebar);
+export default StoriesSidebar;
