@@ -1,6 +1,6 @@
 import Log from "@rbxts/log";
 import React, { useEffect, useState } from "@rbxts/react";
-import { Players, ReplicatedStorage } from "@rbxts/services";
+import { ReplicatedStorage } from "@rbxts/services";
 import { DarkTheme, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story, StoryExport } from "../../../../interfaces";
@@ -90,7 +90,7 @@ function Storyblox(props: StorybloxProps) {
 
 	// Did mount
 	useEffect(() => {
-		const stories = root || Players.LocalPlayer || ReplicatedStorage;
+		const stories = root || ReplicatedStorage;
 
 		// Listen for descendants to be added
 		root?.DescendantAdded.Connect((descendant) => {
