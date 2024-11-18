@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/storyblox",
-	"version": "0.1.19",
+	"version": "0.1.20",
 	"description": "UI component explorer for roblox-ts developers",
 	"main": "out/init.lua",
 	"scripts": {
@@ -47,7 +47,7 @@
 		"@rbxts/react": "^17.2.1",
 		"@rbxts/react-roblox": "^17.2.1",
 		"@rbxts/services": "^1.5.5",
-		"@rbxts/uiblox": "^0.1.15"
+		"@rbxts/uiblox": "^0.1.16"
 	},
 	"directories": {
 		"doc": "docs"
