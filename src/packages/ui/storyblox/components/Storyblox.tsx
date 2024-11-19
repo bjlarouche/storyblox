@@ -140,6 +140,7 @@ function Storyblox(props: StorybloxProps) {
 
 		// Find existing stories
 		findStories(stories);
+		logDebug(`Finding stories in ${stories.GetFullName()}`);
 	}, []);
 
 	return (
