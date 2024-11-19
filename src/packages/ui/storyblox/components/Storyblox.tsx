@@ -84,7 +84,7 @@ function Storyblox(props: StorybloxProps) {
 				const { default: story } = storyExport;
 
 				// If the modulescript source code changes, refresh the story
-				var getPropertyChangedSignalConnection = root.GetPropertyChangedSignal("Source").Connect(() => {
+				const getPropertyChangedSignalConnection = root.GetPropertyChangedSignal("Source").Connect(() => {
 					logDebug(`Story source updated: ${root.GetFullName()}`);
 
 					const updatedStoryExport = require(root) as StoryExport<any>;
