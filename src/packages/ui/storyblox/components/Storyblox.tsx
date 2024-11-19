@@ -84,7 +84,7 @@ function Storyblox(props: StorybloxProps) {
 				const { default: story } = storyExport;
 
 				// If the modulescript source code changes, refresh the story
-				const getPropertyChangedSignalConnection = root.GetPropertyChangedSignal("Source").Connect(() => {
+				const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
 					logDebug(`Story source updated: ${root.GetFullName()}`);
 
 					const updatedStoryExport = require(root) as StoryExport<any>;
@@ -112,7 +112,7 @@ function Storyblox(props: StorybloxProps) {
 					setStories((oldStories) => oldStories.filter((s) => s.title !== story.title));
 
 					// Disconnect signal
-					getPropertyChangedSignalConnection.Disconnect();
+					geChangedConnection.Disconnect();
 
 					logDebug(`Story removed: ${story.title} because ${root.GetFullName()} was destroyed`);
 				});
