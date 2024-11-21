@@ -58,75 +58,83 @@ function Storyblox(props: StorybloxProps) {
 		[debugEnabled],
 	);
 
-	const trackStory = (story: Story) => {
-		try {
-			const { title } = story;
-
-			setStories((oldStories) => {
-				const filteredStories = oldStories.filter((s) => s.title !== title);
-
-				// We are effectively replacing the story if it already exists with the same title, this is to prevent duplicates, but ensure the latest version of the story is used
-				filteredStories.push(story);
-				return filteredStories;
-			});
-
-			logDebug(`Tracking story: ${title}`);
-		} catch (error) {
-			logDebug(`Issue tracking story ${story.title}: ${error}`);
-		}
-	};
-
-	const findStories = (root: Instance): void => {
-		if (root.IsA("ModuleScript") && root.Name.sub(-extension.size()) === extension) {
+	const trackStory = useCallback(
+		(story: Story) => {
 			try {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const storyExport = require(root) as StoryExport<any>;
-				const { default: story } = storyExport;
+				const { title } = story;
 
-				// If the modulescript source code changes, refresh the story
-				const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
-					logDebug(`Story source updated: ${root.GetFullName()}`);
+				setStories((oldStories) => {
+					const filteredStories = oldStories.filter((s) => s.title !== title);
 
-					const updatedStoryExport = require(root) as StoryExport<any>;
-					const { default: updatedStory } = updatedStoryExport;
-
-					if (updatedStory.title !== story.title) {
-						logDebug(`Story title changed from ${story.title} to ${updatedStory.title}`);
-
-						// Remove old story, if title changed, to prevent stale story from being displayed
-						setStories((oldStories) => {
-							const filteredStories = oldStories.filter((s) => s.title !== story.title);
-							return filteredStories;
-						});
-					}
-
-					// Add updated story
-					trackStory(updatedStory);
+					// We are effectively replacing the story if it already exists with the same title, this is to prevent duplicates, but ensure the latest version of the story is used
+					filteredStories.push(story);
+					return filteredStories;
 				});
 
-				// Start tracking story
-				trackStory(story);
-
-				// Remove story if root is being removed
-				root.Destroying.Connect(() => {
-					setStories((oldStories) => oldStories.filter((s) => s.title !== story.title));
-
-					// Disconnect signal
-					geChangedConnection.Disconnect();
-
-					logDebug(`Story removed: ${story.title} because ${root.GetFullName()} was destroyed`);
-				});
+				logDebug(`Tracking story: ${title}`);
 			} catch (error) {
-				logDebug(`Issue loading story from ${root.GetFullName()}: ${error}`);
+				logDebug(`Issue tracking story ${story.title}: ${error}`);
 			}
-		} else if (VALID_ROOT_TYPES.includes(root.ClassName)) {
-			for (const child of root.GetDescendants()) {
-				findStories(child);
-			}
-		} else {
-			logDebug(`${root.GetFullName()} has invalid root type: ${root.ClassName}`);
-		}
-	};
+		},
+		[setStories, logDebug],
+	);
+
+	const findStories = useCallback(
+		(root: Instance): void => {
+			task.spawn(() => {
+				if (root.IsA("ModuleScript") && root.Name.sub(-extension.size()) === extension) {
+					try {
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						const storyExport = require(root) as StoryExport<any>;
+						const { default: story } = storyExport;
+
+						// If the modulescript source code changes, refresh the story
+						const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
+							logDebug(`Story source updated: ${root.GetFullName()}`);
+
+							const updatedStoryExport = require(root) as StoryExport<any>;
+							const { default: updatedStory } = updatedStoryExport;
+
+							if (updatedStory.title !== story.title) {
+								logDebug(`Story title changed from ${story.title} to ${updatedStory.title}`);
+
+								// Remove old story, if title changed, to prevent stale story from being displayed
+								setStories((oldStories) => {
+									const filteredStories = oldStories.filter((s) => s.title !== story.title);
+									return filteredStories;
+								});
+							}
+
+							// Add updated story
+							trackStory(updatedStory);
+						});
+
+						// Start tracking story
+						trackStory(story);
+
+						// Remove story if root is being removed
+						root.Destroying.Connect(() => {
+							setStories((oldStories) => oldStories.filter((s) => s.title !== story.title));
+
+							// Disconnect signal
+							geChangedConnection.Disconnect();
+
+							logDebug(`Story removed: ${story.title} because ${root.GetFullName()} was destroyed`);
+						});
+					} catch (error) {
+						logDebug(`Issue loading story from ${root.GetFullName()}: ${error}`);
+					}
+				} else if (VALID_ROOT_TYPES.includes(root.ClassName)) {
+					for (const child of root.GetDescendants()) {
+						findStories(child);
+					}
+				} else {
+					logDebug(`${root.GetFullName()} has invalid root type: ${root.ClassName}`);
+				}
+			});
+		},
+		[trackStory, logDebug],
+	);
 
 	// Did mount
 	useEffect(() => {
@@ -141,7 +149,7 @@ function Storyblox(props: StorybloxProps) {
 		// Find existing stories
 		findStories(stories);
 		logDebug(`Finding stories in ${stories.GetFullName()}`);
-	}, []);
+	}, [root, findStories, logDebug]);
 
 	return (
 		<ThemeProvider theme={theme}>
