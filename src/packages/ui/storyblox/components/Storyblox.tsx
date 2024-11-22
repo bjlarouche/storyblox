@@ -1,7 +1,7 @@
 import Log from "@rbxts/log";
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { ReplicatedStorage } from "@rbxts/services";
-import { DarkTheme, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
+import { DarkTheme, ErrorBoundary, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story, StoryExport } from "../../../../interfaces";
 import { Template } from "../../template";
@@ -167,7 +167,25 @@ function Storyblox(props: StorybloxProps) {
 						setTheme(theme === primaryTheme ? secondaryTheme : primaryTheme);
 					}}
 				/>
-				<Template story={selectedStory} />
+				<ErrorBoundary
+					fallback={(e) => {
+						warn("Error rendering story", selectedStory?.title, e);
+						return (
+							<frame key="Error" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+								<textlabel
+									Text={`Error rendering story: ${selectedStory?.title}`}
+									Size={UDim2.fromScale(1, 1)}
+									BackgroundTransparency={1}
+									TextColor3={Color3.fromRGB(255, 0, 0)}
+									TextScaled={true}
+									Font={Enum.Font.SourceSans}
+								></textlabel>
+							</frame>
+						);
+					}}
+				>
+					<Template story={selectedStory} />
+				</ErrorBoundary>
 			</frame>
 		</ThemeProvider>
 	);
