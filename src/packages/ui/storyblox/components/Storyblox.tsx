@@ -1,7 +1,16 @@
 import Log from "@rbxts/log";
 import React, { useCallback, useEffect, useState } from "@rbxts/react";
 import { ReplicatedStorage } from "@rbxts/services";
-import { DarkTheme, ErrorBoundary, LightTheme, Theme, ThemeProvider } from "@rbxts/uiblox";
+import {
+	createStyles,
+	DarkTheme,
+	ErrorBoundary,
+	LightTheme,
+	makeStyles,
+	Theme,
+	ThemeProvider,
+	WriteableStyle,
+} from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story, StoryExport } from "../../../../interfaces";
 import { Template } from "../../template";
@@ -20,6 +29,27 @@ const VALID_ROOT_TYPES = [
 	"ServerScriptService",
 	"Player",
 ];
+
+const useStorybloxStyles = makeStyles((theme: Theme) =>
+	createStyles({
+		errorContainer: {
+			Size: new UDim2(1, 0, 1, 0),
+			BackgroundTransparency: 1,
+		} as WriteableStyle<Frame>,
+		errorMessage: {
+			AnchorPoint: new Vector2(0.5, 0.5),
+			Position: UDim2.fromScale(0.5, 0.5),
+			Size: new UDim2(1, -theme.spacing.calc(2), 1, -theme.spacing.calc(2)),
+			BackgroundTransparency: 1,
+			TextColor3: theme.palette.error.main,
+			TextScaled: true,
+			TextYAlignment: Enum.TextYAlignment.Top,
+			TextXAlignment: Enum.TextXAlignment.Left,
+			RichText: true,
+			Font: theme.typography.fontFamilies.semibold,
+		} as WriteableStyle<TextLabel>,
+	}),
+);
 
 export interface StorybloxProps {
 	root?: Instance;
@@ -43,6 +73,8 @@ function Storyblox(props: StorybloxProps) {
 		release = RELEASE,
 		debugEnabled,
 	} = props;
+
+	const { errorContainer, errorMessage } = useStorybloxStyles();
 
 	const [stories, setStories] = useState<Story[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
@@ -169,18 +201,24 @@ function Storyblox(props: StorybloxProps) {
 				/>
 				<ErrorBoundary
 					fallback={(e) => {
-						warn("Error rendering story", selectedStory?.title, e);
-						return (
-							<frame key="Error" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+						const errorComponnt = (
+							<frame key="Error" {...errorContainer}>
 								<textlabel
-									Text={`Error rendering story: ${selectedStory?.title}`}
-									Size={UDim2.fromScale(1, 1)}
-									BackgroundTransparency={1}
-									TextColor3={Color3.fromRGB(255, 0, 0)}
-									TextScaled={true}
-									Font={Enum.Font.SourceSans}
+									key="Message"
+									{...errorMessage}
+									Text={`<u>Unable to render <b>${selectedStory?.title}</b>...</u>\n\n${e}`}
 								></textlabel>
 							</frame>
+						);
+
+						return (
+							<Template
+								story={{
+									title: selectedStory?.title ?? "Error/Rendering",
+									component: () => errorComponnt,
+									template: () => errorComponnt,
+								}}
+							/>
 						);
 					}}
 				>
