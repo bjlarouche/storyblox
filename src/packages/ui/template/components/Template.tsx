@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
-import { DefaultTheme, Shadow } from "@rbxts/uiblox";
+import { DefaultTheme, ErrorBoundary, Shadow } from "@rbxts/uiblox";
 import { Button } from "@rbxts/uiblox/out/ui/packages/button";
 import { WriteableStyle } from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
@@ -87,7 +87,27 @@ function Template({ story }: TemplateProps) {
 					></Button>
 				</frame>
 
-				<Canvas className={canvas}>{template}</Canvas>
+				<Canvas className={canvas}>
+					<ErrorBoundary
+						fallback={(e) => {
+							warn("Error rendering story", story?.title, e);
+							return (
+								<frame key="Error" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+									<textlabel
+										Text={`Error rendering story: ${story?.title}`}
+										Size={UDim2.fromScale(1, 1)}
+										BackgroundTransparency={1}
+										TextColor3={Color3.fromRGB(255, 0, 0)}
+										TextScaled={true}
+										Font={Enum.Font.SourceSans}
+									></textlabel>
+								</frame>
+							);
+						}}
+					>
+						{template}
+					</ErrorBoundary>
+				</Canvas>
 			</frame>
 		</frame>
 	);
