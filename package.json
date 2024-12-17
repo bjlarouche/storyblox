@@ -47,7 +47,7 @@
 		"@rbxts/react": "^17.2.1",
 		"@rbxts/react-roblox": "^17.2.1",
 		"@rbxts/services": "^1.5.5",
-		"@rbxts/uiblox": "^0.1.32"
+		"@rbxts/uiblox": "^0.1.33"
 	},
 	"directories": {
 		"doc": "docs"
