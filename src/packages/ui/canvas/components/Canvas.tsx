@@ -14,6 +14,7 @@ function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
 
 	return (
 		<frame key="Canvas" {...root} {...className}>
+			<uipadding key="Padding" {...padding} />
 			<scrollingframe
 				key="Scrollable"
 				{...scrollable}
@@ -41,7 +42,6 @@ function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
 				}}
 			>
 				<uipagelayout key="PageLayout" {...pageLayout} />
-				<uipadding key="Padding" {...padding} />
 				{children}
 			</scrollingframe>
 		</frame>
