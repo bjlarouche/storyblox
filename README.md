@@ -61,8 +61,7 @@ only render the first story loaded with a given title.
 ```javascript
 import React from '@rbxts/react';
 import { Story } from '@rbxts/storyblox';
-import { TreeView } from '@rbxts/uiblox';
-import { TreeViewProps } from '@rbxts/uiblox/out/ui/packages/treeView/components/TreeView';
+import { TreeView, TreeViewProps } from '@rbxts/uiblox';
 
 const template = (props: TreeViewProps) => <TreeView {...props} />;
 

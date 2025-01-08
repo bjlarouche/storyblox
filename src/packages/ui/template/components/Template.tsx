@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
-import { DefaultTheme, Shadow } from "@rbxts/uiblox";
-import { Button } from "@rbxts/uiblox/out/ui/packages/button";
-import { WriteableStyle } from "@rbxts/uiblox";
+import { Button, DEFAULT_THEME, Shadow, WriteableStyle } from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import useTemplateStyles from "./Template.styles";
@@ -79,9 +77,9 @@ function Template({ story }: TemplateProps) {
 						color="secondary"
 						className={
 							{
-								Size: new UDim2(0, DefaultTheme.spacing.calc(5), 0, DefaultTheme.spacing.calc(2)),
-								Font: DefaultTheme.typography.fontFamilies.semibold,
-								TextColor3: DefaultTheme.options.constants.extendedPalette.Gray[50],
+								Size: new UDim2(0, DEFAULT_THEME.spacing.calc(5), 0, DEFAULT_THEME.spacing.calc(2)),
+								Font: DEFAULT_THEME.typography.fontFamilies.semibold,
+								TextColor3: DEFAULT_THEME.options.constants.extendedPalette.Gray[50],
 							} as WriteableStyle<TextButton>
 						}
 					></Button>
