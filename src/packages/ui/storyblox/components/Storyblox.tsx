@@ -8,10 +8,8 @@ import {
 	LightTheme,
 	makeStyles,
 	Theme,
-	ThemeActionTypes,
 	ThemeProvider,
 	useTheme,
-	useThemeCallbacks,
 	WriteableStyle,
 } from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
@@ -82,10 +80,7 @@ function Storyblox(props: StorybloxProps) {
 	const [stories, setStories] = useState<Story[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
 
-	const {
-		state: { theme },
-	} = useTheme();
-	const { onSetTheme } = useThemeCallbacks();
+	const { theme, setTheme } = useTheme();
 
 	const logDebug = useCallback(
 		(message: string) => {
@@ -190,7 +185,7 @@ function Storyblox(props: StorybloxProps) {
 	}, [root, findStories, logDebug]);
 
 	return (
-		<ThemeProvider theme={primaryTheme}>
+		<ThemeProvider initialTheme={primaryTheme}>
 			<frame key={`Storyblox-${theme}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 				<StoriesSidebar
 					stories={stories}
@@ -202,11 +197,11 @@ function Storyblox(props: StorybloxProps) {
 					}}
 					primaryThemeEnabled={theme === primaryTheme}
 					onToggleTheme={() => {
-						if (!onSetTheme) {
-							throw error("Unable to set theme, no callback provided");
+						if (!setTheme) {
+							throw error("Unable to set theme, set state action");
 						}
 
-						onSetTheme(theme === primaryTheme ? secondaryTheme : primaryTheme);
+						setTheme(theme === primaryTheme ? secondaryTheme : primaryTheme);
 					}}
 				/>
 				<ErrorBoundary
