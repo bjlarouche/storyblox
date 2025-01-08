@@ -185,7 +185,7 @@ function Storyblox(props: StorybloxProps) {
 	}, [root, findStories, logDebug]);
 
 	return (
-		<ThemeProvider initialTheme={primaryTheme}>
+		<ThemeProvider theme={primaryTheme}>
 			<frame key={`Storyblox-${theme}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 				<StoriesSidebar
 					stories={stories}
