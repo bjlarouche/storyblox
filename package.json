@@ -1,6 +1,6 @@
 {
 	"name": "@rbxts/storyblox",
-	"version": "0.1.53",
+	"version": "0.1.54",
 	"description": "UI component explorer for roblox-ts developers",
 	"main": "out/init.lua",
 	"scripts": {
