@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { FunctionComponent, useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
 import { Button, DEFAULT_THEME, Shadow, WriteableStyle } from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
@@ -16,6 +16,10 @@ function Template({ story }: TemplateProps) {
 	const [, setRenderedStory] = useState<Story<any> | undefined>();
 	const [template, setTemplate] = useState<React.Element | undefined>();
 	const [, setTemplateCallback] = useState<() => void | undefined>();
+
+	const Wrap: FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => (
+		<React.Fragment>{children}</React.Fragment>
+	);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const renderStory = (story: Story<any>) => {
@@ -85,7 +89,9 @@ function Template({ story }: TemplateProps) {
 					></Button>
 				</frame>
 
-				<Canvas className={canvas}>{template}</Canvas>
+				<Canvas className={canvas}>
+					<Wrap>{template}</Wrap>
+				</Canvas>
 			</frame>
 		</frame>
 	);
