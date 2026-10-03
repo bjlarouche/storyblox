@@ -13,12 +13,48 @@ import {
 	WriteableStyle,
 } from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
-import { Story, StoryExport } from "../../../../interfaces";
+import { Story } from "../../../../interfaces";
 import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
+import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { createStorySession } from "../storyRegistry";
 
 const DEFAULT_EXTENSION = ".stories";
+
+function storyFromExport(normalized: NormalizedStory): Story | undefined {
+	if (normalized.kind === "reject") return undefined;
+	if (normalized.kind === "react") return normalized.story as Story;
+	const mount = normalized.mount;
+	return {
+		title: normalized.title as Story["title"],
+		component: () => <frame />,
+		template: () => {
+			const target = new Instance("Frame");
+			target.Name = "NativeStory";
+			target.Size = new UDim2(1, 0, 1, 0);
+			target.BackgroundTransparency = 1;
+			const cleanup = mount(target);
+			const element = (
+				<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+					<frame
+						Size={new UDim2(1, 0, 1, 0)}
+						BackgroundTransparency={1}
+						ref={(parent: Frame | undefined) => {
+							if (parent) target.Parent = parent;
+						}}
+					/>
+				</frame>
+			);
+			return [
+				element,
+				() => {
+					if (typeOf(cleanup) === "function") (cleanup as () => void)();
+					pcall(() => target.Destroy());
+				},
+			] as LuaTuple<[ReturnType<Story["template"]>, () => void]>;
+		},
+	} as Story;
+}
 const VALID_ROOT_TYPES = [
 	"Folder",
 	"Script",
@@ -113,25 +149,27 @@ function Storyblox(props: StorybloxProps) {
 			task.spawn(() => {
 				if (root.IsA("ModuleScript") && root.Name.sub(-extension.size()) === extension) {
 					try {
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						const storyExport = require(root) as StoryExport<any>;
-						const { default: story } = storyExport;
+						const story = storyFromExport(normalizeExport(require(root), root.Name, extension));
+						if (story === undefined) {
+							logDebug(`Rejected story export ${root.GetFullName()}`);
+							return;
+						}
 
 						// If the modulescript source code changes, refresh the story
 						const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
 							logDebug(`Story source updated: ${root.GetFullName()}`);
 
-							const updatedStoryExport = require(root) as StoryExport<any>;
-							const { default: updatedStory } = updatedStoryExport;
+							const updatedStory = storyFromExport(normalizeExport(require(root), root.Name, extension));
+							if (updatedStory === undefined) {
+								session.remove(story.title);
+								return;
+							}
 
 							if (updatedStory.title !== story.title) {
 								logDebug(`Story title changed from ${story.title} to ${updatedStory.title}`);
-
-								// Remove old story, if title changed, to prevent stale story from being displayed
 								session.remove(story.title);
 							}
 
-							// Add updated story
 							trackStory(updatedStory);
 						});
 
