@@ -3,6 +3,7 @@ import { Story } from "../../../../interfaces";
 import { Button, DEFAULT_THEME, Shadow, WriteableStyle } from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
+import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import useTemplateStyles from "./Template.styles";
 
 export interface TemplateProps {
@@ -11,61 +12,42 @@ export interface TemplateProps {
 
 function Template({ story }: TemplateProps) {
 	const { root, container, corner, navBar, canvas } = useTemplateStyles();
-
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [, setRenderedStory] = useState<Story<any> | undefined>();
+	const [gate] = useState(createCleanupGate);
 	const [template, setTemplate] = useState<React.Element | undefined>();
-	const [, setTemplateCallback] = useState<() => void | undefined>();
+	const [failure, setFailure] = useState<unknown>();
 
 	const Wrap: FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => (
 		<React.Fragment>{children}</React.Fragment>
 	);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const renderStory = (story: Story<any>) => {
-		let alreadyRendered = false;
-		setRenderedStory((oldStory) => {
-			alreadyRendered = oldStory?.title === story.title; // Story with same name is already rendered
-			return alreadyRendered ? oldStory : story;
-		});
+	useEffect(() => {
+		return () => gate.dispose();
+	}, [gate]);
 
-		// Do not render more than once
-		if (alreadyRendered) {
+	useEffect(() => {
+		if (story === undefined) {
+			gate.replace(undefined);
+			setTemplate(undefined);
 			return;
 		}
 
-		// Fetch template element or tuple (with element and maid)
-		const [element, callback] = story.template(story?.props) as LuaTuple<[StoryElement, StoryCallback]>;
-
-		if (callback !== undefined) {
-			// Template is not a React element
-			setTemplate(element);
-
-			setTemplateCallback((oldCallback) => {
-				if (oldCallback !== undefined) {
-					oldCallback();
-				}
-				return callback;
-			});
-		} else {
-			// Template is a React element
-			const element = story.template(story?.props) as StoryElement;
-			setTemplate(element);
-
-			setTemplateCallback((oldCallback) => {
-				if (oldCallback) {
-					oldCallback();
-				}
-				return undefined;
-			});
+		try {
+			const [element, callback] = story.template(story.props as never) as LuaTuple<
+				[StoryElement, StoryCallback | undefined]
+			>;
+			const parsed = readTemplateResult(element, callback);
+			setTemplate(parsed.element as React.Element);
+			gate.replace(parsed.cleanup);
+		} catch (error) {
+			setTemplate(undefined);
+			gate.replace(undefined);
+			setFailure(error);
 		}
-	};
+	}, [story, gate]);
 
-	useEffect((): void => {
-		if (story !== undefined) {
-			renderStory(story);
-		}
-	}, [story]);
+	if (failure !== undefined) {
+		throw failure;
+	}
 
 	return (
 		<frame key="Template" {...root}>
