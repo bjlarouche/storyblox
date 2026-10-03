@@ -32,7 +32,7 @@ the optional props for further customization.
 // root?: Instance;
 //  default -> ReplicatedStorage
 // extension?: `.${string}`;
-//  default -> "*.stories"
+//  default -> ".stories"
 // primaryTheme?: Theme;
 //  default -> DarkTheme from @rbxts/uiblox
 // secondaryTheme?: Theme;
@@ -43,8 +43,9 @@ the optional props for further customization.
 ```
 
 Next, just start writing stories for your components! By default, it will look for
-Modulescripts in `ReplicatedStorage` named as `*.stories`, but you can change
-this by passing in a `root?: Instance` prop to the `Storyblox` component.
+ModuleScripts in `ReplicatedStorage` whose names end in `.stories`, but you can change
+this by passing in a `root?: Instance` prop to the `Storyblox` component. The loader
+reads the module `default` export.
 
 Here are some example stories:
 
@@ -55,8 +56,8 @@ interface. These props are passed to the `story.template` method when rendering
 the story.
 
 You should name your stories in the syntax `<component_name>/<story_name>`>.
-There can only be one story per title (they must be unique). Otherwise, it will
-only render the first story loaded with a given title.
+There can only be one story per title (they must be unique). A later module with
+the same title replaces the earlier one.
 
 ```javascript
 import React from '@rbxts/react';

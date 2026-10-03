@@ -115,3 +115,4 @@ out/tsconfig.tsbuildinfo
 
 **build.rbxl
 *.tgz
+src/constants/version.generated.ts
