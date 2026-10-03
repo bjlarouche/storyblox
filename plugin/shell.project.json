@@ -1,0 +1,6 @@
+{
+  "name": "storyblox-plugin",
+  "tree": {
+    "$path": "shell"
+  }
+}

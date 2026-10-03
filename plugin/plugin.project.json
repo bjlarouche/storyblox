@@ -1,0 +1,47 @@
+{
+  "name": "storyblox",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "StorybloxInclude": {
+        "$path": "../node_modules/roblox-ts/include"
+      }
+    },
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      "StorybloxPlugin": {
+        "$className": "Folder",
+        "init": {
+          "$path": "host"
+        },
+        "stories": {
+          "$path": "../out/fixtures/stories",
+          "Native.stories": {
+            "$path": "../fixtures/native"
+          }
+        },
+        "node_modules": {
+          "$className": "Folder",
+          "@rbxts": {
+            "$className": "Folder",
+            "react": { "$path": "../node_modules/@rbxts/react" },
+            "react-roblox": { "$path": "../node_modules/@rbxts/react-roblox" },
+            "react-reflex": { "$path": "../node_modules/@rbxts/react-reflex" },
+            "ReactLua": { "$path": "../node_modules/@rbxts/react-vendor" },
+            "pretty-react-hooks": { "$path": "../node_modules/@rbxts/pretty-react-hooks" },
+            "uiblox": { "$path": "../node_modules/@rbxts/uiblox" },
+            "log": { "$path": "../node_modules/@rbxts/log" },
+            "services": { "$path": "../node_modules/@rbxts/services" },
+            "message-templates": { "$path": "../node_modules/@rbxts/message-templates" },
+            "boat-tween": { "$path": "../node_modules/@rbxts/boat-tween" },
+            "reflex": { "$path": "../node_modules/@rbxts/reflex" },
+            "ripple": { "$path": "../node_modules/@rbxts/ripple" },
+            "set-timeout": { "$path": "../node_modules/@rbxts/set-timeout" },
+            "storyblox": { "$path": "../out" }
+          }
+        }
+      }
+    }
+  }
+}
