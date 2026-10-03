@@ -21,6 +21,13 @@ import { createStorySession } from "../storyRegistry";
 
 const DEFAULT_EXTENSION = ".stories";
 
+function loadStoryModule(moduleScript: ModuleScript): unknown {
+	const runtime = (_G as never as Record<string, { import: (context: Instance, module: ModuleScript) => unknown }>)[
+		script as never as string
+	];
+	return runtime.import(script, moduleScript);
+}
+
 function storyFromExport(normalized: NormalizedStory): Story | undefined {
 	if (normalized.kind === "reject") return undefined;
 	if (normalized.kind === "react") return normalized.story as Story;
@@ -135,6 +142,7 @@ function Storyblox(props: StorybloxProps) {
 				const { title } = story;
 
 				session.upsert(story);
+				setSelectedStory((current) => current ?? story);
 
 				logDebug(`Tracking story: ${title}`);
 			} catch (error) {
@@ -149,7 +157,7 @@ function Storyblox(props: StorybloxProps) {
 			task.spawn(() => {
 				if (root.IsA("ModuleScript") && root.Name.sub(-extension.size()) === extension) {
 					try {
-						const story = storyFromExport(normalizeExport(require(root), root.Name, extension));
+						const story = storyFromExport(normalizeExport(loadStoryModule(root), root.Name, extension));
 						if (story === undefined) {
 							logDebug(`Rejected story export ${root.GetFullName()}`);
 							return;
@@ -159,7 +167,7 @@ function Storyblox(props: StorybloxProps) {
 						const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
 							logDebug(`Story source updated: ${root.GetFullName()}`);
 
-							const updatedStory = storyFromExport(normalizeExport(require(root), root.Name, extension));
+							const updatedStory = storyFromExport(normalizeExport(loadStoryModule(root), root.Name, extension));
 							if (updatedStory === undefined) {
 								session.remove(story.title);
 								return;
