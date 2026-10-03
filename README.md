@@ -45,7 +45,8 @@ the optional props for further customization.
 Next, just start writing stories for your components! By default, it will look for
 ModuleScripts in `ReplicatedStorage` whose names end in `.stories`, but you can change
 this by passing in a `root?: Instance` prop to the `Storyblox` component. The loader
-reads the module `default` export.
+reads a `default` export with `title` and `template`, a function `(target) -> cleanup`,
+or a table `{ renderer = "native", title = "...", mount = fn }`. Other shapes are skipped.
 
 Here are some example stories:
 
