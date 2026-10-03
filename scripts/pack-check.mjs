@@ -4,6 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const root = process.cwd();
+const lock = readFileSync(join(root, "pnpm-lock.yaml"), "utf8");
+if (/artifactory/.test(lock) || /https:\/\/(?!registry\.npmjs\.org|eslint\.org)/.test(lock)) {
+	throw new Error("pnpm-lock.yaml is not registry.npmjs.org");
+}
 const { version } = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 execSync("pnpm build", { stdio: "inherit", cwd: root });
 
