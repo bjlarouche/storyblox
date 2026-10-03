@@ -1,5 +1,5 @@
 import Log from "@rbxts/log";
-import React, { useCallback, useEffect, useState } from "@rbxts/react";
+import React, { useCallback, useEffect, useMemo, useState } from "@rbxts/react";
 import { ReplicatedStorage } from "@rbxts/services";
 import {
 	createStyles,
@@ -16,6 +16,7 @@ import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story, StoryExport } from "../../../../interfaces";
 import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
+import { createStorySession } from "../storyRegistry";
 
 const DEFAULT_EXTENSION = ".stories";
 const VALID_ROOT_TYPES = [
@@ -79,6 +80,7 @@ function Storyblox(props: StorybloxProps) {
 
 	const [stories, setStories] = useState<Story[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
+	const session = useMemo(() => createStorySession<Story>(setStories), []);
 
 	const { theme, setTheme } = useTheme();
 
@@ -96,20 +98,14 @@ function Storyblox(props: StorybloxProps) {
 			try {
 				const { title } = story;
 
-				setStories((oldStories) => {
-					const filteredStories = oldStories.filter((s) => s.title !== title);
-
-					// We are effectively replacing the story if it already exists with the same title, this is to prevent duplicates, but ensure the latest version of the story is used
-					filteredStories.push(story);
-					return filteredStories;
-				});
+				session.upsert(story);
 
 				logDebug(`Tracking story: ${title}`);
 			} catch (error) {
 				logDebug(`Issue tracking story ${story.title}: ${error}`);
 			}
 		},
-		[setStories, logDebug],
+		[session, logDebug],
 	);
 
 	const findStories = useCallback(
@@ -132,10 +128,7 @@ function Storyblox(props: StorybloxProps) {
 								logDebug(`Story title changed from ${story.title} to ${updatedStory.title}`);
 
 								// Remove old story, if title changed, to prevent stale story from being displayed
-								setStories((oldStories) => {
-									const filteredStories = oldStories.filter((s) => s.title !== story.title);
-									return filteredStories;
-								});
+								session.remove(story.title);
 							}
 
 							// Add updated story
@@ -147,7 +140,7 @@ function Storyblox(props: StorybloxProps) {
 
 						// Remove story if root is being removed
 						root.Destroying.Connect(() => {
-							setStories((oldStories) => oldStories.filter((s) => s.title !== story.title));
+							session.remove(story.title);
 
 							// Disconnect signal
 							geChangedConnection.Disconnect();
