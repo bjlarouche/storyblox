@@ -1,6 +1,6 @@
 import Log from "@rbxts/log";
-import React, { useCallback, useEffect, useMemo, useState } from "@rbxts/react";
-import { ReplicatedStorage } from "@rbxts/services";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
+import { ReplicatedStorage, ServerStorage } from "@rbxts/services";
 import {
 	createStyles,
 	DarkTheme,
@@ -17,6 +17,7 @@ import { Story } from "../../../../interfaces";
 import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
+import { acceptGeneration, nextGeneration } from "../storyGeneration";
 import { createStorySession } from "../storyRegistry";
 
 const DEFAULT_EXTENSION = ".stories";
@@ -123,6 +124,9 @@ function Storyblox(props: StorybloxProps) {
 
 	const [stories, setStories] = useState<Story[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
+	const [previewKey, setPreviewKey] = useState(0);
+	const generation = useRef(0);
+	const failed = useRef(false);
 	const session = useMemo(() => createStorySession<Story>(setStories), []);
 
 	const { theme, setTheme } = useTheme();
@@ -142,7 +146,13 @@ function Storyblox(props: StorybloxProps) {
 				const { title } = story;
 
 				session.upsert(story);
-				setSelectedStory((current) => current ?? story);
+				const storiesFolder = ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
+				const preferred = storiesFolder?.GetAttribute("storyblox-select") as string | undefined;
+				if (preferred === story.title) {
+					setSelectedStory(story);
+				} else if (preferred === undefined) {
+					setSelectedStory((current) => current ?? story);
+				}
 
 				logDebug(`Tracking story: ${title}`);
 			} catch (error) {
@@ -154,7 +164,9 @@ function Storyblox(props: StorybloxProps) {
 
 	const findStories = useCallback(
 		(root: Instance): void => {
+			const token = generation.current;
 			task.spawn(() => {
+				if (generation.current !== token) return;
 				if (root.IsA("ModuleScript") && root.Name.sub(-extension.size()) === extension) {
 					try {
 						const story = storyFromExport(normalizeExport(loadStoryModule(root), root.Name, extension));
@@ -194,6 +206,10 @@ function Storyblox(props: StorybloxProps) {
 							logDebug(`Story removed: ${story.title} because ${root.GetFullName()} was destroyed`);
 						});
 					} catch (error) {
+						if (generation.current === token) {
+							failed.current = true;
+							setSelectedStory(undefined);
+						}
 						logDebug(`Issue loading story from ${root.GetFullName()}: ${error}`);
 					}
 				} else if (VALID_ROOT_TYPES.includes(root.ClassName)) {
@@ -210,17 +226,30 @@ function Storyblox(props: StorybloxProps) {
 
 	// Did mount
 	useEffect(() => {
-		const stories = root || ReplicatedStorage;
-
-		// Listen for descendants to be added
-		root?.DescendantAdded.Connect((descendant) => {
+		const token = nextGeneration(generation.current);
+		generation.current = token;
+		failed.current = false;
+		const storiesRoot = root || ReplicatedStorage;
+		const added = root?.DescendantAdded.Connect((descendant) => {
 			findStories(descendant);
 			logDebug(`Descendant added: ${descendant.GetFullName()} checking for stories`);
 		});
 
-		// Find existing stories
-		findStories(stories);
-		logDebug(`Finding stories in ${stories.GetFullName()}`);
+		findStories(storiesRoot);
+		logDebug(`Finding stories in ${storiesRoot.GetFullName()}`);
+		const pending = task.delay(0.3, () => {
+			if (!acceptGeneration(token, generation.current, failed.current)) return;
+			const pluginFolder = ServerStorage.FindFirstChild("StorybloxPlugin");
+			const markerRoot = pluginFolder?.FindFirstChild("stories") ?? storiesRoot;
+			const previous = (markerRoot.GetAttribute("storyblox-build") as number | undefined) ?? 0;
+			markerRoot.SetAttribute("storyblox-build", previous + 1);
+			setPreviewKey((key) => key + 1);
+		});
+
+		return () => {
+			task.cancel(pending);
+			added?.Disconnect();
+		};
 	}, [root, findStories, logDebug]);
 
 	return (
@@ -244,6 +273,7 @@ function Storyblox(props: StorybloxProps) {
 					}}
 				/>
 				<ErrorBoundary
+					key={`preview-${previewKey}`}
 					fallback={(e) => {
 						const errorComponnt = (
 							<frame key="Error" {...errorContainer}>
