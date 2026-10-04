@@ -9,7 +9,6 @@ import {
 	makeStyles,
 	Theme,
 	ThemeProvider,
-	useTheme,
 	WriteableStyle,
 } from "@rbxts/uiblox";
 import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
@@ -36,12 +35,12 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 	return {
 		title: normalized.title as Story["title"],
 		component: () => <frame />,
-		template: () => {
+		template: (_props: unknown, context?: unknown) => {
 			const target = new Instance("Frame");
 			target.Name = "NativeStory";
 			target.Size = new UDim2(1, 0, 1, 0);
 			target.BackgroundTransparency = 1;
-			const cleanup = mount(target);
+			const cleanup = mount(target, context);
 			const element = (
 				<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 					<frame
@@ -129,7 +128,7 @@ function Storyblox(props: StorybloxProps) {
 	const failed = useRef(false);
 	const session = useMemo(() => createStorySession<Story>(setStories), []);
 
-	const { theme, setTheme } = useTheme();
+	const [theme, setTheme] = useState(primaryTheme);
 
 	const logDebug = useCallback(
 		(message: string) => {
@@ -253,8 +252,8 @@ function Storyblox(props: StorybloxProps) {
 	}, [root, findStories, logDebug]);
 
 	return (
-		<ThemeProvider theme={primaryTheme}>
-			<frame key={`Storyblox-${theme}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+		<ThemeProvider theme={theme}>
+			<frame key="Storyblox" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 				<StoriesSidebar
 					stories={stories}
 					logoSrc={logoSrc}
@@ -265,10 +264,6 @@ function Storyblox(props: StorybloxProps) {
 					}}
 					primaryThemeEnabled={theme === primaryTheme}
 					onToggleTheme={() => {
-						if (!setTheme) {
-							throw error("Unable to set theme, set state action");
-						}
-
 						setTheme(theme === primaryTheme ? secondaryTheme : primaryTheme);
 					}}
 				/>

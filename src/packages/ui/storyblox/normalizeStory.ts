@@ -7,7 +7,7 @@ export interface ReactStoryShape {
 
 export type NormalizedStory =
 	| { kind: "react"; story: ReactStoryShape }
-	| { kind: "native"; title: string; mount: (target: unknown) => unknown }
+	| { kind: "native"; title: string; mount: (target: unknown, context: unknown) => unknown }
 	| { kind: "reject"; reason: string };
 
 export function matchesStoryName(name: string, suffix: string): boolean {
