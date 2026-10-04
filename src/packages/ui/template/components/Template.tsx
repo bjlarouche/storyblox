@@ -8,6 +8,7 @@ import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "../../../previewCamera";
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
+import { storyLabel } from "../storyLabel";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
 
@@ -236,7 +237,19 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 				<Shadow />
 
 				<frame key="NavBar" {...navBar}>
-					<textlabel key="Title" Text={story?.title ?? "Canvas"} {...title} />
+					<textlabel
+						key="Title"
+						Text={
+							story
+								? storyLabel(
+										story.title,
+										(story as { renderer?: string }).renderer,
+										(story as { language?: string }).language,
+									)
+								: "Canvas"
+						}
+						{...title}
+					/>
 					{onToggleTheme && (
 						<>
 							<IconButton
