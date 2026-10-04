@@ -28,6 +28,8 @@ const releaseModel = join(dir, "release.rbxlx");
 const needles = [
 	"Fixture/React",
 	"Fixture/Native",
+	"Inputs/Button/Native",
+	"ControlledButton",
 	"native fixture",
 	"Viewport React",
 	"Fixture/Styled",

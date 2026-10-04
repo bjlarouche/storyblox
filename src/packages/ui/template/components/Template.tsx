@@ -50,6 +50,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
 	const mountKey = `${storyKey}@${epoch}`;
 	const mounted = useRef("");
+	const themeMounted = useRef<Theme | undefined>(undefined);
 
 	useEffect(() => {
 		return () => gate.dispose();
@@ -60,12 +61,23 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			setTemplate(undefined);
 			gate.replace(undefined);
 			mounted.current = "";
+			themeMounted.current = undefined;
+			return;
+		}
+
+		const session = (story as { nativeSession?: { update?: (args: unknown) => void } }).nativeSession;
+		if (native && mounted.current === mountKey && themeMounted.current === theme && session?.update !== undefined) {
+			try {
+				session.update(args);
+			} catch (error) {
+				setFailure(error);
+			}
 			return;
 		}
 
 		try {
 			const render = story.template as (props: unknown, context: { theme: Theme }) => unknown;
-			const props = native ? (story as { props?: unknown }).props : args;
+			const props = args;
 			const [element, callback] = render(props, { theme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
@@ -81,7 +93,8 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 					{parsed.element as React.Element}
 				</frame>,
 			);
-			if (mounted.current !== mountKey) {
+			themeMounted.current = theme;
+			if (native || mounted.current !== mountKey) {
 				mounted.current = mountKey;
 				gate.replace(parsed.cleanup);
 			}
@@ -89,6 +102,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			setTemplate(undefined);
 			gate.replace(undefined);
 			mounted.current = "";
+			themeMounted.current = undefined;
 			setFailure(error);
 		}
 	}, [story, gate, theme, epoch, args, native, mountKey]);

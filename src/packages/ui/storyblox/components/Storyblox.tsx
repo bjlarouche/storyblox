@@ -15,6 +15,7 @@ import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "../../../../interfaces";
 import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
+import { mountNative } from "../nativeMount";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
 import { insideCanvas } from "../canvasReady";
@@ -73,16 +74,29 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 	if (normalized.kind === "reject") return undefined;
 	if (normalized.kind === "react") return normalized.story as Story;
 	const mount = normalized.mount;
+	const session: { update?: (args: unknown) => void } = {};
 	return {
 		title: normalized.title as Story["title"],
 		renderer: "native",
+		args: normalized.args,
+		argTypes: normalized.argTypes,
+		props: normalized.args,
+		nativeSession: session,
 		component: () => <frame />,
-		template: (_props: unknown, context?: unknown) => {
+		template: (props: unknown, context?: unknown) => {
 			const target = new Instance("Frame");
 			target.Name = "NativeStory";
 			target.Size = new UDim2(1, 0, 1, 0);
 			target.BackgroundTransparency = 1;
-			const cleanup = mount(target, context);
+			const theme = (context as { theme?: unknown } | undefined)?.theme;
+			let hosted: ReturnType<typeof mountNative>;
+			try {
+				hosted = mountNative(mount, target, props, theme);
+			} catch (error) {
+				pcall(() => target.Destroy());
+				throw error;
+			}
+			session.update = hosted.update;
 			const element = (
 				<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 					<frame
@@ -97,7 +111,7 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 			return [
 				element,
 				() => {
-					if (typeOf(cleanup) === "function") (cleanup as () => void)();
+					hosted.destroy();
 					pcall(() => target.Destroy());
 				},
 			] as LuaTuple<[ReturnType<Story["template"]>, () => void]>;

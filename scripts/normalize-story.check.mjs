@@ -1,4 +1,5 @@
 globalThis.typeOf = (value) => (typeof value === "object" && value !== null ? "table" : typeof value);
+globalThis.pairs = (record) => Object.keys(record).map((key) => [key, record[key]]);
 String.prototype.size = function size() {
 	return this.length;
 };
@@ -31,6 +32,37 @@ const descriptor = normalizeExport(
 	suffix,
 );
 if (descriptor.kind !== "native" || descriptor.mount !== mount) throw new Error("native descriptor");
+
+const onClick = () => {};
+const described = normalizeExport(
+	{
+		renderer: "native",
+		title: "Panel/Base",
+		mount,
+		args: { label: "Hi", enabled: true, count: 1, onClick },
+		argTypes: {
+			label: { type: "string" },
+			enabled: { type: "boolean" },
+			count: { type: "number" },
+		},
+	},
+	"Panel.stories",
+	suffix,
+);
+if (described.kind !== "native" || described.args.onClick !== onClick) throw new Error("native args");
+
+const badArgs = normalizeExport(
+	{
+		renderer: "native",
+		title: "Panel/Base",
+		mount,
+		args: { count: "nope" },
+		argTypes: { count: { type: "number" } },
+	},
+	"Panel.stories",
+	suffix,
+);
+if (badArgs.kind !== "reject" || badArgs.reason !== "args") throw new Error("native args should reject");
 
 const ambiguous = normalizeExport(
 	{ default: { title: "A/B", template: () => {} }, renderer: "native", mount },
