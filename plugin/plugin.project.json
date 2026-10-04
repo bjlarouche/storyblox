@@ -26,6 +26,9 @@
           "ViewportNative.stories": {
             "$path": "../fixtures/viewport"
           },
+          "NativeScene.stories": {
+            "$path": "../fixtures/scene"
+          },
           "Defined.stories": {
             "$path": "../fixtures/defined"
           }

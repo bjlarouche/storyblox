@@ -16,6 +16,8 @@ export interface NativeContext {
 	args: unknown;
 	target: unknown;
 	theme: unknown;
+	sceneRoot?: unknown;
+	camera?: unknown;
 	own: (instance: Owned) => void;
 	connect: (signal: Signal, handler: (...args: unknown[]) => void) => Connection;
 	onCleanup: (cleanup: Cleanup) => void;
@@ -63,6 +65,7 @@ export function mountNative(
 	target: unknown,
 	args: unknown,
 	theme: unknown,
+	scene?: { sceneRoot: unknown; camera: unknown },
 ): NativeHost {
 	const scope = createScope();
 	const owned: Array<Owned> = [];
@@ -75,6 +78,8 @@ export function mountNative(
 		args,
 		target,
 		theme,
+		sceneRoot: scene?.sceneRoot,
+		camera: scene?.camera,
 		own: (instance) => {
 			for (const item of owned) {
 				if (item === instance) return;

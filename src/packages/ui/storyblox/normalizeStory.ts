@@ -17,6 +17,7 @@ export type NormalizedStory =
 			mount: (target: unknown, context: unknown) => unknown;
 			args?: unknown;
 			argTypes?: unknown;
+			preview?: unknown;
 	  }
 	| { kind: "reject"; reason: string };
 
@@ -138,7 +139,7 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 	}
 	if (native) {
 		if (typeOf(exported.title) !== "string") return { kind: "reject", reason: "title" };
-		const described = exported as { args?: unknown; argTypes?: unknown };
+		const described = exported as { args?: unknown; argTypes?: unknown; preview?: unknown };
 		if (!argsMatch(described.args, described.argTypes)) return { kind: "reject", reason: "args" };
 		return {
 			kind: "native",
@@ -146,6 +147,7 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 			mount: exported.mount as (target: unknown) => unknown,
 			args: described.args,
 			argTypes: described.argTypes,
+			preview: described.preview,
 		};
 	}
 	return { kind: "reject", reason: "export" };
