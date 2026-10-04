@@ -1,0 +1,21 @@
+String.prototype.sub = function sub(start, finish) {
+	return this.slice(start - 1, finish);
+};
+String.prototype.find = function find(pattern, init, plain) {
+	const at = this.indexOf(pattern, init - 1);
+	return at < 0 ? [undefined] : [at + 1, at + pattern.length];
+};
+
+const { storyLabel, storyLanguage } = await import("../src/packages/ui/template/storyLabel.ts");
+
+if (storyLanguage("-- Compiled with roblox-ts v3.0.0\nlocal TS") !== "TS") throw new Error("ts header");
+if (storyLanguage("local function mount() end") !== "Luau") throw new Error("luau source");
+if (storyLabel("Inputs/Button/Primary", undefined, "TS") !== "Inputs › Button › Primary  ·  react · TS") {
+	throw new Error("react label");
+}
+if (storyLabel("Fixture/Native Scene", "native", "Luau") !== "Fixture › Native Scene  ·  native · Luau") {
+	throw new Error("native label");
+}
+if (storyLabel("Canvas") !== "Canvas  ·  react") throw new Error("no language");
+
+console.log("story label ok");

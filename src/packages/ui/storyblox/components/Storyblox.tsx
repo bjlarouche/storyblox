@@ -14,6 +14,7 @@ import {
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "../../../../interfaces";
 import { SplitPane, Template } from "../../template";
+import { storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { mountNative } from "../nativeMount";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
@@ -282,11 +283,11 @@ function Storyblox(props: StorybloxProps) {
 								session.remove(story.title);
 							}
 
-							trackStory(updatedStory);
+							trackStory({ ...updatedStory, language: storyLanguage(root.Source) } as Story);
 						});
 
 						// Start tracking story
-						trackStory(story);
+						trackStory({ ...story, language: storyLanguage(root.Source) } as Story);
 
 						// Remove story if root is being removed
 						root.Destroying.Connect(() => {
