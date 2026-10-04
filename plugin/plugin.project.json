@@ -29,6 +29,9 @@
           "NativeScene.stories": {
             "$path": "../fixtures/scene"
           },
+          "Adapter.stories": {
+            "$path": "../fixtures/adapter"
+          },
           "Defined.stories": {
             "$path": "../fixtures/defined"
           }
