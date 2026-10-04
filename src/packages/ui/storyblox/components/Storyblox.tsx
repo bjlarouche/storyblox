@@ -17,12 +17,48 @@ import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
+import { insideCanvas } from "../canvasReady";
 import { createStorySession, keepSelection } from "../storyRegistry";
 
 const DEFAULT_EXTENSION = ".stories";
 
 function pluginStories(): Instance | undefined {
 	return ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
+}
+
+function controlRoot(root?: Instance) {
+	return pluginStories() ?? root;
+}
+
+function findCanvasScroll(host?: Frame) {
+	if (!host) return undefined;
+	for (const child of host.GetDescendants()) {
+		if (child.Name === "Scrollable" && child.IsA("ScrollingFrame")) return child;
+	}
+	return undefined;
+}
+
+function storyInsideCanvas(scroll: ScrollingFrame) {
+	const origin = scroll.AbsolutePosition;
+	const bounds = scroll.AbsoluteSize;
+	for (const child of scroll.GetDescendants()) {
+		if (!child.IsA("GuiObject")) continue;
+		if (
+			insideCanvas(
+				origin.X,
+				origin.Y,
+				bounds.X,
+				bounds.Y,
+				child.AbsolutePosition.X,
+				child.AbsolutePosition.Y,
+				child.AbsoluteSize.X,
+				child.AbsoluteSize.Y,
+			)
+		) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function loadStoryModule(moduleScript: ModuleScript): unknown {
@@ -132,6 +168,11 @@ function Storyblox(props: StorybloxProps) {
 	const [previewKey, setPreviewKey] = useState(0);
 	const generation = useRef(0);
 	const failed = useRef(false);
+	const storiesRef = useRef(stories);
+	const hostRef = useRef<Frame>();
+	const renderError = useRef<unknown>();
+	storiesRef.current = stories;
+	renderError.current = undefined;
 	const session = useMemo(() => createStorySession<Story>(setStories), []);
 
 	const [theme, setTheme] = useState(themeName === "light" ? secondaryTheme : primaryTheme);
@@ -254,26 +295,92 @@ function Storyblox(props: StorybloxProps) {
 	const primaryThemeEnabled = theme === primaryTheme;
 	const toggleTheme = () => {
 		const chosen = primaryThemeEnabled ? secondaryTheme : primaryTheme;
+		const name = chosen === primaryTheme ? "dark" : "light";
 		setTheme(chosen);
-		if (onThemeChange) onThemeChange(chosen === primaryTheme ? "dark" : "light");
+		if (onThemeChange) onThemeChange(name);
+		controlRoot(root)?.SetAttribute("storyblox-theme", name);
 	};
+
+	useEffect(() => {
+		const marker = controlRoot(root);
+		if (!marker) return;
+		const onSelect = () => {
+			const title = marker.GetAttribute("storyblox-select");
+			if (typeOf(title) !== "string" || title === "") return;
+			let match: Story | undefined;
+			for (const story of storiesRef.current) {
+				if (story.title === title) match = story;
+			}
+			if (!match) return;
+			marker.SetAttribute("storyblox-ready", undefined);
+			marker.SetAttribute("storyblox-error", undefined);
+			setSelectedStory(match);
+		};
+		const onTheme = () => {
+			const name = marker.GetAttribute("storyblox-theme");
+			if (name !== "light" && name !== "dark") return;
+			setTheme(name === "light" ? secondaryTheme : primaryTheme);
+			if (onThemeChange) onThemeChange(name);
+		};
+		const selectConn = marker.GetAttributeChangedSignal("storyblox-select").Connect(onSelect);
+		const themeConn = marker.GetAttributeChangedSignal("storyblox-theme").Connect(onTheme);
+		onSelect();
+		return () => {
+			selectConn.Disconnect();
+			themeConn.Disconnect();
+		};
+	}, [root, primaryTheme, secondaryTheme, onThemeChange]);
+
+	// ponytail: poll until a sized descendant sits in the canvas; a layout signal if this shows up in profiles
+	useEffect(() => {
+		const marker = controlRoot(root);
+		if (!marker) return;
+		if (renderError.current === undefined) marker.SetAttribute("storyblox-error", undefined);
+		marker.SetAttribute("storyblox-ready", undefined);
+		if (!selectedStory) return;
+		let alive = true;
+		const title = selectedStory.title;
+		const tick = () => {
+			if (!alive) return;
+			const scroll = findCanvasScroll(hostRef.current);
+			if (scroll && storyInsideCanvas(scroll)) {
+				const build = (marker.GetAttribute("storyblox-build") as number | undefined) ?? 0;
+				marker.SetAttribute("storyblox-ready", `${title}@${build}`);
+				return;
+			}
+			task.delay(0.05, tick);
+		};
+		task.defer(tick);
+		return () => {
+			alive = false;
+		};
+	}, [selectedStory, previewKey, root]);
 
 	return (
 		<ThemeProvider theme={theme}>
-			<frame key="Storyblox" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+			<frame
+				key="Storyblox"
+				ref={(frame: Frame | undefined) => {
+					hostRef.current = frame;
+				}}
+				Size={new UDim2(1, 0, 1, 0)}
+				BackgroundTransparency={1}
+			>
 				<StoriesSidebar
 					stories={stories}
 					logoSrc={logoSrc}
 					version={version}
 					selected={selectedStory?.title}
 					onClick={(story: Story) => {
-						(pluginStories() ?? root)?.SetAttribute("storyblox-select", story.title);
+						controlRoot(root)?.SetAttribute("storyblox-select", story.title);
 						setSelectedStory(story);
 					}}
 				/>
 				<ErrorBoundary
 					key={`preview-${previewKey}`}
 					fallback={(e) => {
+						renderError.current = e;
+						controlRoot(root)?.SetAttribute("storyblox-error", `${e}`);
 						const errorComponnt = (
 							<frame key="Error" {...errorContainer}>
 								<textlabel
