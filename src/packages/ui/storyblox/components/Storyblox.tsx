@@ -24,6 +24,7 @@ import { insideCanvas } from "../canvasReady";
 import { createStorySession, keepSelection } from "../storyRegistry";
 import { ClaimedId, claimStoryId, releaseStoryId } from "../../../defineStory";
 import { checkRequest, PROTOCOL_VERSION } from "../../../bridgeProtocol";
+import { narrowShell } from "../shellLayout";
 
 const DEFAULT_EXTENSION = ".stories";
 const SIDEBAR_WIDTH = 180;
@@ -269,6 +270,8 @@ function Storyblox(props: StorybloxProps) {
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
 	const [previewKey, setPreviewKey] = useState(0);
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
+	const [shellWidth, setShellWidth] = useState(0);
+	const [pane, setPane] = useState("canvas");
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
 	const [caseRequest, setCaseRequest] = useState<{ name: string; id: number } | undefined>();
@@ -468,6 +471,11 @@ function Storyblox(props: StorybloxProps) {
 			marker.SetAttribute("storyblox-favorite", undefined);
 			toggleRef.current(title as string);
 		});
+		const paneConn = marker.GetAttributeChangedSignal("storyblox-pane").Connect(() => {
+			const name = marker.GetAttribute("storyblox-pane");
+			if (name !== "stories" && name !== "canvas") return;
+			setPane(name);
+		});
 		const focusConn = marker
 			.GetAttributeChangedSignal("storyblox-focus-search")
 			.Connect(() => setFocusSearch((current) => current + 1));
@@ -549,6 +557,7 @@ function Storyblox(props: StorybloxProps) {
 			selectConn.Disconnect();
 			themeConn.Disconnect();
 			favoriteConn.Disconnect();
+			paneConn.Disconnect();
 			focusConn.Disconnect();
 			remountConn.Disconnect();
 			caseConn.Disconnect();
@@ -595,36 +604,26 @@ function Storyblox(props: StorybloxProps) {
 		};
 	}, [selectedStory, previewKey, root]);
 
-	return (
-		<ThemeProvider theme={theme}>
-			<frame
-				key="Storyblox"
-				ref={(frame: Frame | undefined) => {
-					hostRef.current = frame;
-				}}
-				Size={new UDim2(1, 0, 1, 0)}
-				BackgroundTransparency={1}
-			>
-				<SplitPane
-					value={sidebarWidth}
-					min={SIDEBAR_MIN}
-					max={SIDEBAR_MAX}
-					onChange={setSidebarWidth}
-					first={
-						<StoriesSidebar
-							stories={stories}
-							logoSrc={logoSrc}
-							version={version}
-							selected={selectedStory?.title}
-							focusSearch={focusSearch}
-							favorites={favoriteList}
-							onClick={(story: Story) => {
-								controlRoot(root)?.SetAttribute("storyblox-select", story.title);
-								setSelectedStory(story);
-							}}
-						/>
-					}
-					second={
+	const rememberWidth = (rbx: Frame) => {
+		const x = rbx.AbsoluteSize.X;
+		setShellWidth((current) => (current === x ? current : x));
+	};
+	const sidebar = (
+		<StoriesSidebar
+			stories={stories}
+			logoSrc={logoSrc}
+			version={version}
+			selected={selectedStory?.title}
+			focusSearch={focusSearch}
+			favorites={favoriteList}
+			onClick={(story: Story) => {
+				controlRoot(root)?.SetAttribute("storyblox-select", story.title);
+				setSelectedStory(story);
+				setPane("canvas");
+			}}
+		/>
+	);
+	const canvas = (
 						<ErrorBoundary
 							key={`preview-${previewKey}-${boundaryKey}`}
 							fallback={(e) => {
@@ -679,8 +678,70 @@ function Storyblox(props: StorybloxProps) {
 								}
 							/>
 						</ErrorBoundary>
-					}
-				/>
+	);
+	const tab = (id: string, label: string, order: number) => (
+		<textbutton
+			key={`${label}Tab`}
+			Text={label}
+			LayoutOrder={order}
+			AutomaticSize={Enum.AutomaticSize.X}
+			Size={new UDim2(0, 0, 1, 0)}
+			BackgroundTransparency={1}
+			Font={theme.typography.fontFamilies.semibold}
+			TextSize={theme.typography.fontSizes.caption}
+			TextColor3={theme.palette.secondary.main}
+			TextTransparency={pane === id ? 0 : 0.45}
+			Event={{ MouseButton1Click: () => setPane(id) }}
+		/>
+	);
+	const narrow = narrowShell(shellWidth);
+
+	return (
+		<ThemeProvider theme={theme}>
+			<frame
+				key="Storyblox"
+				ref={(frame: Frame | undefined) => {
+					hostRef.current = frame;
+					if (frame) rememberWidth(frame);
+				}}
+				Size={new UDim2(1, 0, 1, 0)}
+				BackgroundTransparency={1}
+				Change={{ AbsoluteSize: rememberWidth }}
+			>
+				{narrow ? (
+					<frame key="Narrow" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+						<uilistlayout key="NarrowLayout" FillDirection={Enum.FillDirection.Vertical} SortOrder={Enum.SortOrder.LayoutOrder} />
+						<frame
+							key="PaneTabs"
+							LayoutOrder={1}
+							Size={new UDim2(1, 0, 0, theme.spacing.calc(2))}
+							BackgroundTransparency={1}
+						>
+							<uilistlayout
+								key="TabLayout"
+								FillDirection={Enum.FillDirection.Horizontal}
+								VerticalAlignment={Enum.VerticalAlignment.Center}
+								Padding={new UDim(0, theme.spacing.calc(1))}
+								SortOrder={Enum.SortOrder.LayoutOrder}
+							/>
+							<uipadding key="TabInset" PaddingLeft={new UDim(0, theme.padding.calc(1))} />
+							{tab("stories", "Stories", 1)}
+							{tab("canvas", "Canvas", 2)}
+						</frame>
+						<frame key="Pane" LayoutOrder={2} Size={new UDim2(1, 0, 1, -theme.spacing.calc(2))} BackgroundTransparency={1}>
+							{pane === "stories" ? sidebar : canvas}
+						</frame>
+					</frame>
+				) : (
+					<SplitPane
+						value={sidebarWidth}
+						min={SIDEBAR_MIN}
+						max={SIDEBAR_MAX}
+						onChange={setSidebarWidth}
+						first={sidebar}
+						second={canvas}
+					/>
+				)}
 			</frame>
 		</ThemeProvider>
 	);
