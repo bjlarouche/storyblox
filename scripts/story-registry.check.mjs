@@ -1,4 +1,13 @@
-const { createStorySession } = await import("../src/packages/ui/storyblox/storyRegistry.ts");
+const { createStorySession, keepSelection } = await import("../src/packages/ui/storyblox/storyRegistry.ts");
+
+const picked = { title: "Fixture/React", n: 1 };
+const reloaded = { title: "Fixture/React", n: 2 };
+if (keepSelection(picked, reloaded) !== reloaded) throw new Error("reload dropped the selected story");
+if (keepSelection(picked, { title: "Fixture/Native" }) !== picked) throw new Error("another story stole selection");
+if (keepSelection(undefined, reloaded, "Fixture/React") !== reloaded) throw new Error("persisted selection was ignored");
+if (keepSelection(undefined, { title: "Fixture/Native" }, "Fixture/React") !== undefined) {
+	throw new Error("non-persisted story was selected");
+}
 
 let stories = [];
 const session = createStorySession((apply) => {

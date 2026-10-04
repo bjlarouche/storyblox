@@ -17,9 +17,13 @@ import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
-import { createStorySession } from "../storyRegistry";
+import { createStorySession, keepSelection } from "../storyRegistry";
 
 const DEFAULT_EXTENSION = ".stories";
+
+function pluginStories(): Instance | undefined {
+	return ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
+}
 
 function loadStoryModule(moduleScript: ModuleScript): unknown {
 	const runtime = (_G as never as Record<string, { import: (context: Instance, module: ModuleScript) => unknown }>)[
@@ -145,13 +149,8 @@ function Storyblox(props: StorybloxProps) {
 				const { title } = story;
 
 				session.upsert(story);
-				const storiesFolder = ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
-				const preferred = storiesFolder?.GetAttribute("storyblox-select") as string | undefined;
-				if (preferred === story.title) {
-					setSelectedStory(story);
-				} else if (preferred === undefined) {
-					setSelectedStory((current) => current ?? story);
-				}
+				const preferred = pluginStories()?.GetAttribute("storyblox-select") as string | undefined;
+				setSelectedStory((current) => keepSelection(current, story, preferred));
 
 				logDebug(`Tracking story: ${title}`);
 			} catch (error) {
@@ -238,8 +237,7 @@ function Storyblox(props: StorybloxProps) {
 		logDebug(`Finding stories in ${storiesRoot.GetFullName()}`);
 		const pending = task.delay(0.3, () => {
 			if (!acceptGeneration(token, generation.current, failed.current)) return;
-			const pluginFolder = ServerStorage.FindFirstChild("StorybloxPlugin");
-			const markerRoot = pluginFolder?.FindFirstChild("stories") ?? storiesRoot;
+			const markerRoot = pluginStories() ?? storiesRoot;
 			const previous = (markerRoot.GetAttribute("storyblox-build") as number | undefined) ?? 0;
 			markerRoot.SetAttribute("storyblox-build", previous + 1);
 			setPreviewKey((key) => key + 1);
@@ -260,6 +258,7 @@ function Storyblox(props: StorybloxProps) {
 					version={version}
 					release={release}
 					onClick={(story: Story) => {
+						(pluginStories() ?? root)?.SetAttribute("storyblox-select", story.title);
 						setSelectedStory(story);
 					}}
 					primaryThemeEnabled={theme === primaryTheme}
