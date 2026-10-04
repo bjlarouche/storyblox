@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "@rbxts/react";
-import { Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, Input } from "@rbxts/uiblox";
+import { Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, TreeViewProps, Input } from "@rbxts/uiblox";
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
@@ -9,16 +9,12 @@ export interface StoriesSidebarProps {
 	stories: Story[];
 	logoSrc: string;
 	version?: string;
+	selected?: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onClick: (story: Story<any>) => void;
 }
 
-function StoriesSidebar({
-	stories,
-	logoSrc,
-	version = VERSION,
-	onClick,
-}: StoriesSidebarProps) {
+function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick }: StoriesSidebarProps) {
 	const { logo, filterInput, storiesTree, divider, versionLabel } = useStoriesSidebarStyles();
 
 	const [filter, setFilter] = useState<string>("");
@@ -82,7 +78,9 @@ function StoriesSidebar({
 			/>
 
 			<frame key="StoriesTree" {...storiesTree}>
-				{tree !== undefined && <TreeView tree={tree} icon={Icons.Book} filter={filter} />}
+				{tree !== undefined && (
+					<TreeView {...({ tree, icon: Icons.Book, filter, selected } as TreeViewProps)} />
+				)}
 			</frame>
 
 			<Divider className={divider} />

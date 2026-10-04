@@ -265,6 +265,7 @@ function Storyblox(props: StorybloxProps) {
 					stories={stories}
 					logoSrc={logoSrc}
 					version={version}
+					selected={selectedStory?.title}
 					onClick={(story: Story) => {
 						(pluginStories() ?? root)?.SetAttribute("storyblox-select", story.title);
 						setSelectedStory(story);
