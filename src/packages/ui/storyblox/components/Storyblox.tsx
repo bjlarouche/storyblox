@@ -19,6 +19,7 @@ import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
 import { insideCanvas } from "../canvasReady";
 import { createStorySession, keepSelection } from "../storyRegistry";
+import { ClaimedId, claimStoryId, releaseStoryId } from "../../../defineStory";
 
 const DEFAULT_EXTENSION = ".stories";
 
@@ -173,7 +174,21 @@ function Storyblox(props: StorybloxProps) {
 	const renderError = useRef<unknown>();
 	storiesRef.current = stories;
 	renderError.current = undefined;
-	const session = useMemo(() => createStorySession<Story>(setStories), []);
+	const storyIds = useRef<ClaimedId[]>([]);
+	const session = useMemo(() => {
+		const stories = createStorySession<Story>(setStories);
+		return {
+			upsert(story: Story) {
+				const id = (story as { id?: string }).id;
+				if (!claimStoryId(storyIds.current, id, story.title)) return;
+				stories.upsert(story);
+			},
+			remove(title: string) {
+				storyIds.current = releaseStoryId(storyIds.current, title);
+				stories.remove(title);
+			},
+		};
+	}, []);
 
 	const [theme, setTheme] = useState(themeName === "light" ? secondaryTheme : primaryTheme);
 
