@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "@rbxts/react";
-import { Icon, Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, Input } from "@rbxts/uiblox";
+import { Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, Input } from "@rbxts/uiblox";
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
@@ -12,8 +12,6 @@ export interface StoriesSidebarProps {
 	release?: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onClick: (story: Story<any>) => void;
-	primaryThemeEnabled: boolean;
-	onToggleTheme: () => void;
 }
 
 function StoriesSidebar({
@@ -22,11 +20,8 @@ function StoriesSidebar({
 	version = VERSION,
 	release = RELEASE,
 	onClick,
-	primaryThemeEnabled,
-	onToggleTheme,
 }: StoriesSidebarProps) {
-	const { themeButton, menuIcon, corner, logo, filterInput, storiesTree, divider, versionLabel, releaseLabel } =
-		useStoriesSidebarStyles();
+	const { logo, filterInput, storiesTree, divider, versionLabel, releaseLabel } = useStoriesSidebarStyles();
 
 	const [filter, setFilter] = useState<string>("");
 	const [tree, setTree] = useState<Tree | undefined>();
@@ -74,19 +69,6 @@ function StoriesSidebar({
 
 	return (
 		<Sidebar size="large">
-			<textbutton
-				key="ThemeButton"
-				{...themeButton}
-				Event={{
-					MouseButton1Click: () => {
-						onToggleTheme();
-					},
-				}}
-			>
-				<uicorner {...corner} />
-				<Icon icon={primaryThemeEnabled === true ? Icons.DarkTheme : Icons.LightTheme} className={menuIcon} />
-			</textbutton>
-
 			<imagelabel key="Logo" Image={logoSrc} {...logo} />
 
 			<Input

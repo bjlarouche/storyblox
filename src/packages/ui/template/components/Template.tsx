@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
-import { Button, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import { Button, IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
@@ -8,9 +8,11 @@ import useTemplateStyles from "./Template.styles";
 
 export interface TemplateProps {
 	story?: Story;
+	primaryThemeEnabled?: boolean;
+	onToggleTheme?: () => void;
 }
 
-function Template({ story }: TemplateProps) {
+function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) {
 	const { root, container, corner, navBar, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
 	const [gate] = useState(createCleanupGate);
@@ -56,17 +58,34 @@ function Template({ story }: TemplateProps) {
 				<frame key="NavBar" {...navBar}>
 					<Button
 						variant="text"
-						text="Canvas"
+						text={story?.title ?? "Canvas"}
 						size="small"
 						color="secondary"
 						className={
 							{
-								Size: new UDim2(0, theme.spacing.calc(5), 0, theme.spacing.calc(2)),
+								Size: new UDim2(1, -theme.spacing.calc(3), 0, theme.spacing.calc(2)),
+								Position: new UDim2(0, theme.spacing.calc(0.5), 0, 0),
+								TextXAlignment: Enum.TextXAlignment.Left,
+								TextTruncate: Enum.TextTruncate.AtEnd,
 								Font: theme.typography.fontFamilies.semibold,
 								TextColor3: theme.options.constants.colors.textMuted,
 							} as WriteableStyle<TextButton>
 						}
 					></Button>
+					{onToggleTheme && (
+						<IconButton
+							icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
+							tint={theme.options.constants.colors.textMuted}
+							onClick={onToggleTheme}
+							className={
+								{
+									Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+									AnchorPoint: new Vector2(1, 0.5),
+									Position: new UDim2(1, -theme.spacing.calc(0.5), 0.5, 0),
+								} as WriteableStyle<ImageButton>
+							}
+						/>
+					)}
 				</frame>
 
 				<Canvas className={canvas}>
