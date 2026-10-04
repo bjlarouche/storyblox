@@ -5,7 +5,7 @@ Array.prototype.size = function size() {
 	return this.length;
 };
 
-const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch } = await import("../src/packages/ui/storiesSidebar/storyTree.ts");
+const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch, adoptTree } = await import("../src/packages/ui/storiesSidebar/storyTree.ts");
 
 const click = () => {};
 const icons = { folder: "folder", component: "component", story: "story" };
@@ -48,5 +48,10 @@ if (fav?.title !== "Favorites" || fav.leaves[0]?.title !== "Inputs/Button/Primar
 if (favoriteBranch([{ title: "Fixture/Styled", onClick: click }], ["Missing/Story"], icons) !== undefined) {
 	throw new Error("missing favorite");
 }
+
+const held = { title: "STORIES", branches: [] };
+const adopted = adoptTree(held, { title: "STORIES", branches: fav ? [fav] : [] });
+if (adopted !== held || held.branches[0]?.title !== "Favorites") throw new Error("adopt tree");
+if (adoptTree(undefined, held) !== held) throw new Error("fresh tree");
 
 console.log("story tree ok");

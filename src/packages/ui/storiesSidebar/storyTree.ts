@@ -41,6 +41,13 @@ export function toggleFavorite(current: string[], title: string) {
 	return chosen;
 }
 
+export function adoptTree<T extends { title: string; branches: unknown[] }>(current: T | undefined, incoming: T): T {
+	if (current === undefined) return incoming;
+	current.title = incoming.title;
+	current.branches = incoming.branches;
+	return current;
+}
+
 export function favoriteBranch(stories: StoryNode[], titles: string[], icons: StoryIcons): StoryBranch | undefined {
 	const leaves: StoryLeaf[] = [];
 	for (const title of titles) {
