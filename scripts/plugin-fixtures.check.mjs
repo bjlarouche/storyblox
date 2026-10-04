@@ -37,6 +37,8 @@ const needles = [
 	"Components/Tabs",
 	"Components/SplitPane",
 	"Components/Tooltip",
+	"Fixture/Defined",
+	"defined story",
 ];
 
 try {

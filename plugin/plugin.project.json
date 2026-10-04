@@ -22,6 +22,9 @@
           },
           "ViewportNative.stories": {
             "$path": "../fixtures/viewport"
+          },
+          "Defined.stories": {
+            "$path": "../fixtures/defined"
           }
         },
         "node_modules": {
