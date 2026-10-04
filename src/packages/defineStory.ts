@@ -1,5 +1,23 @@
 export interface ControlSpec {
-	type: "string" | "boolean" | "number" | "enum" | "color" | "vector2" | "vector3" | "udim" | "udim2" | "EnumItem" | "asset" | "cframe";
+	type:
+		| "string"
+		| "boolean"
+		| "number"
+		| "enum"
+		| "color"
+		| "vector2"
+		| "vector3"
+		| "udim"
+		| "udim2"
+		| "EnumItem"
+		| "asset"
+		| "cframe"
+		| "object"
+		| "array"
+		| "dictionary"
+		| "union"
+		| "custom"
+		| "readonly";
 	options?: string[];
 	control?: "radio" | "slider";
 	min?: number;
@@ -7,6 +25,11 @@ export interface ControlSpec {
 	step?: number;
 	optional?: boolean;
 	enumType?: string;
+	fields?: { [key: string]: ControlSpec };
+	item?: ControlSpec;
+	tag?: string;
+	variants?: { [key: string]: { [key: string]: ControlSpec } };
+	editor?: string;
 }
 
 export const controls = {
@@ -30,6 +53,16 @@ export const controls = {
 	enumItem: (enumType: string, options: string[]): ControlSpec => ({ type: "EnumItem", enumType, options }),
 	asset: (): ControlSpec => ({ type: "asset" }),
 	cframe: (): ControlSpec => ({ type: "cframe" }),
+	object: (fields: { [key: string]: ControlSpec }): ControlSpec => ({ type: "object", fields }),
+	array: (item: ControlSpec): ControlSpec => ({ type: "array", item }),
+	dictionary: (item: ControlSpec): ControlSpec => ({ type: "dictionary", item }),
+	union: (tag: string, variants: { [key: string]: { [key: string]: ControlSpec } }): ControlSpec => ({
+		type: "union",
+		tag,
+		variants,
+	}),
+	custom: (editor: string): ControlSpec => ({ type: "custom", editor }),
+	readonly: (): ControlSpec => ({ type: "readonly" }),
 };
 
 export interface ModernStory<T> {
