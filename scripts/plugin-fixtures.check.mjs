@@ -40,6 +40,7 @@ const needles = [
 	"Components/SplitPane",
 	"Components/Tooltip",
 	"Fixture/Defined",
+	"Fixture/Controls",
 	"defined story",
 ];
 

@@ -74,6 +74,20 @@ const listed = normalizeExport(
 );
 if (listed.kind !== "react" || listed.story.template() !== "contained") throw new Error("enum arg");
 
+const ranged = normalizeExport(
+	{
+		default: {
+			title: "Fixture/Controls",
+			args: { tone: "low", amount: 20 },
+			argTypes: { tone: controls.radio(["low", "high"]), amount: controls.slider(0, 100, 5) },
+			render: (args) => `${args.tone}:${args.amount}`,
+		},
+	},
+	"Controls.stories",
+	".stories",
+);
+if (ranged.kind !== "react" || ranged.story.template() !== "low:20") throw new Error("radio and slider");
+
 const legacy = normalizeExport(
 	{ default: { title: "Button/Base", template: () => "el" } },
 	"Button.stories",

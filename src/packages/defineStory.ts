@@ -1,6 +1,11 @@
 export interface ControlSpec {
 	type: "string" | "boolean" | "number" | "enum";
 	options?: string[];
+	control?: "radio" | "slider";
+	min?: number;
+	max?: number;
+	step?: number;
+	optional?: boolean;
 }
 
 export const controls = {
@@ -8,6 +13,14 @@ export const controls = {
 	boolean: (): ControlSpec => ({ type: "boolean" }),
 	number: (): ControlSpec => ({ type: "number" }),
 	enum: (options: string[]): ControlSpec => ({ type: "enum", options }),
+	radio: (options: string[]): ControlSpec => ({ type: "enum", options, control: "radio" }),
+	slider: (min: number, max: number, step?: number): ControlSpec => ({
+		type: "number",
+		control: "slider",
+		min,
+		max,
+		step,
+	}),
 };
 
 export interface ModernStory<T> {

@@ -5,7 +5,7 @@ import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
-import { ArgValues, copyArgs, patchArg } from "../storyArgs";
+import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
 
@@ -170,7 +170,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 									theme={theme}
 									args={args}
 									argTypes={(story as { argTypes?: unknown } | undefined)?.argTypes}
-									onChange={(key, value) => setArgs((current) => patchArg(current, key, value))}
+									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
 									onReset={() => {
 										const described = story as { args?: unknown; props?: unknown } | undefined;
 										setArgs(copyArgs(described?.args ?? described?.props));
