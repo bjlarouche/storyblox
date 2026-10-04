@@ -3,7 +3,7 @@ local function mount(target, context)
 	local label = Instance.new("TextLabel")
 	label.Name = "NativeFixture"
 	label.Size = UDim2.fromScale(1, 1)
-	label.BackgroundColor3 = palette.background.paper
+	label.BackgroundTransparency = 1
 	label.TextColor3 = palette.text.primary
 	label.TextScaled = true
 	label.Text = "native fixture"
