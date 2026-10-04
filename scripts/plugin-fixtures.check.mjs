@@ -45,6 +45,9 @@ const needles = [
 	"Fixture/Nested",
 	"Fixture/Viewport Host",
 	"Fixture/Native Scene",
+	"SceneOverlay",
+	"Fixture/Adapter",
+	"hostColor",
 	"defined story",
 ];
 

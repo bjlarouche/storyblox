@@ -307,7 +307,7 @@ function Storyblox(props: StorybloxProps) {
 							failed.current = true;
 							setSelectedStory(undefined);
 						}
-						logDebug(`Issue loading story from ${root.GetFullName()}: ${error}`);
+						warn(`Storyblox could not load ${root.GetFullName()}: ${error}`);
 					}
 				} else if (VALID_ROOT_TYPES.includes(root.ClassName)) {
 					for (const child of root.GetDescendants()) {
