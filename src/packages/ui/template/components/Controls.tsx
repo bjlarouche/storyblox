@@ -1,7 +1,16 @@
-import React, { useState } from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Input, Theme } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { formatDatatype, parseDatatype } from "../../../argCodec";
+import {
+	insertItem,
+	mountControlEditor,
+	moveItem,
+	patchField,
+	readOnlyKind,
+	removeItem,
+	switchUnion,
+} from "../../../nestedArgs";
 import { ArgValues, commitNumberText } from "../storyArgs";
 
 interface Spec {
@@ -13,6 +22,11 @@ interface Spec {
 	step?: number;
 	optional?: boolean;
 	enumType?: string;
+	fields?: { [key: string]: Spec };
+	item?: Spec;
+	tag?: string;
+	variants?: { [key: string]: { [key: string]: Spec } };
+	editor?: string;
 }
 
 const kit = Uiblox as unknown as {
@@ -72,8 +86,26 @@ function datatype(kind?: string) {
 	);
 }
 
+let rowSerial = 0;
+
+function freshKey(name: string) {
+	rowSerial += 1;
+	return `${name}-${rowSerial}`;
+}
+
+function CustomEditor(props: { editor: string; value: unknown; onChange: (value: unknown) => void }) {
+	const host = useRef<Frame>();
+	const change = useRef(props.onChange);
+	change.current = props.onChange;
+	useEffect(() => {
+		return mountControlEditor(props.editor, props.value, (incoming) => change.current(incoming));
+	}, [props.editor, props.value]);
+	return <frame ref={host} Size={new UDim2(1, 0, 0, 24)} BackgroundTransparency={1} />;
+}
+
 function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
 	const [faults, setFaults] = useState<{ [key: string]: string }>({});
+	const [rowKeys, setRowKeys] = useState<{ [key: string]: Array<string> }>({});
 	const specs = typeOf(argTypes) === "table" ? (argTypes as { [key: string]: Spec }) : {};
 	const rows: React.Element[] = [];
 	let order = 1;
@@ -188,6 +220,152 @@ function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
 					/>
 				);
 			}
+		} else if (spec?.type === "readonly") {
+			editor = (
+				<textlabel
+					key={name}
+					Text={readOnlyKind(value) ?? "readonly"}
+					Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
+					BackgroundTransparency={1}
+					Font={theme.typography.fontFamilies.default}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={theme.options.constants.colors.textMuted}
+					TextXAlignment={Enum.TextXAlignment.Left}
+				/>
+			);
+		} else if (spec?.type === "custom") {
+			editor = <CustomEditor key={name} editor={spec.editor ?? ""} value={value} onChange={(incoming) => onChange(name, incoming)} />;
+		} else if (spec?.type === "array") {
+			const items = (
+				typeOf(value) === "table" && typeOf((value as { size?: unknown }).size) === "function" ? value : []
+			) as Array<defined>;
+			let keys = rowKeys[name];
+			if (keys === undefined || keys.size() !== items.size()) {
+				const aligned: Array<string> = [];
+				for (let index = 0; index < items.size(); index++) {
+					const existing = keys !== undefined ? keys[index] : undefined;
+					aligned.push(existing !== undefined ? existing : freshKey(name));
+				}
+				keys = aligned;
+				setRowKeys((current) => patchField(current, name, aligned) as { [key: string]: Array<string> });
+			}
+			const itemRows: Array<React.Element> = [];
+			for (let index = 0; index < items.size(); index++) {
+				const rowKey = keys[index];
+				itemRows.push(
+					<Input
+						key={rowKey}
+						{...({
+							variant: "standard",
+							width: new UDim(1, 0),
+							text: tostring(items[index] ?? ""),
+							onTextChanged: (text: string) => {
+								const written = spec.item?.type === "number" ? commitNumberText(text) : text;
+								if (written === undefined) return;
+								onChange(name, insertItem(removeItem(items, index), index, written as defined));
+							},
+						} as React.ComponentProps<typeof Input> & { onTextChanged?: (text: string) => void })}
+					/>,
+				);
+			}
+			editor = (
+				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
+					{itemRows}
+					<textbutton
+						key="Up"
+						Text="Up"
+						Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.secondary.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+						Event={{
+							MouseButton1Click: () => {
+								const last = items.size() - 1;
+								if (last < 1) return;
+								onChange(name, moveItem(items, last, last - 1));
+								setRowKeys((current) => patchField(current, name, moveItem(keys, last, last - 1)) as { [key: string]: Array<string> });
+							},
+						}}
+					/>
+					<textbutton
+						key="Delete"
+						Text="Delete"
+						Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.secondary.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+						Event={{
+							MouseButton1Click: () => {
+								const last = items.size() - 1;
+								if (last < 0) return;
+								onChange(name, removeItem(items, last));
+								setRowKeys((current) => patchField(current, name, removeItem(keys, last)) as { [key: string]: Array<string> });
+							},
+						}}
+					/>
+					<textbutton
+						key="Add"
+						Text="Add"
+						Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.secondary.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+						Event={{
+							MouseButton1Click: () => {
+								const blank = spec.item?.type === "number" ? 0 : "";
+								onChange(name, insertItem(items, items.size(), blank));
+								setRowKeys((current) => patchField(current, name, insertItem(keys, keys.size(), freshKey(name))) as { [key: string]: Array<string> });
+							},
+						}}
+					/>
+				</frame>
+			);
+		} else if (spec?.type === "union") {
+			const tag = spec.tag ?? "kind";
+			const record = typeOf(value) === "table" ? (value as { [key: string]: unknown }) : {};
+			const selected = tostring(record[tag] ?? "");
+			const variantNames: Array<{ label: string; value: string }> = [];
+			for (const [variant] of pairs(spec.variants ?? {})) variantNames.push({ label: variant as string, value: variant as string });
+			editor = (
+				<kit.Select
+					key={name}
+					value={selected}
+					options={variantNames}
+					onChange={(incoming) => onChange(name, switchUnion(tag, incoming, {}))}
+				/>
+			);
+		} else if (spec?.type === "object" || spec?.type === "dictionary") {
+			const record = typeOf(value) === "table" ? (value as { [key: string]: unknown }) : {};
+			const fieldRows: Array<React.Element> = [];
+			const entries = spec.type === "object" ? spec.fields ?? {} : record;
+			for (const [field] of pairs(entries)) {
+				const fieldName = field as string;
+				fieldRows.push(
+					<Input
+						key={fieldName}
+						{...({
+							variant: "standard",
+							width: new UDim(1, 0),
+							text: tostring(record[fieldName] ?? ""),
+							placeholder: fieldName,
+							onTextChanged: (text: string) => onChange(name, patchField(record, fieldName, text)),
+						} as React.ComponentProps<typeof Input> & { onTextChanged?: (text: string) => void })}
+					/>,
+				);
+			}
+			editor = (
+				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
+					{fieldRows}
+				</frame>
+			);
 		} else if (spec?.type === "string") {
 			editor = (
 				<Input
