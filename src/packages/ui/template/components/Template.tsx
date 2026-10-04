@@ -6,6 +6,8 @@ import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import useTemplateStyles from "./Template.styles";
 
+const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
+
 export interface TemplateProps {
 	story?: Story;
 	primaryThemeEnabled?: boolean;
@@ -18,14 +20,15 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 	const [gate] = useState(createCleanupGate);
 	const [template, setTemplate] = useState<React.Element | undefined>();
 	const [failure, setFailure] = useState<unknown>();
+	const [epoch, setEpoch] = useState(0);
 
 	useEffect(() => {
 		return () => gate.dispose();
 	}, [gate]);
 
 	useEffect(() => {
+		gate.replace(undefined);
 		if (story === undefined) {
-			gate.replace(undefined);
 			setTemplate(undefined);
 			return;
 		}
@@ -36,14 +39,18 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 				[StoryElement, StoryCallback | undefined]
 			>;
 			const parsed = readTemplateResult(element, callback);
-			setTemplate(parsed.element as React.Element);
+			setTemplate(
+				<frame key={`mount-${epoch}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+					{parsed.element as React.Element}
+				</frame>,
+			);
 			gate.replace(parsed.cleanup);
 		} catch (error) {
 			setTemplate(undefined);
 			gate.replace(undefined);
 			setFailure(error);
 		}
-	}, [story, gate, theme]);
+	}, [story, gate, theme, epoch]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -58,18 +65,34 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 				<frame key="NavBar" {...navBar}>
 					<textlabel key="Title" Text={story?.title ?? "Canvas"} {...title} />
 					{onToggleTheme && (
-						<IconButton
-							icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
-							tint={theme.options.constants.colors.textMuted}
-							onClick={onToggleTheme}
-							className={
-								{
-									Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
-									AnchorPoint: new Vector2(1, 0.5),
-									Position: new UDim2(1, -theme.spacing.calc(0.5), 0.5, 0),
-								} as WriteableStyle<ImageButton>
-							}
-						/>
+						<>
+							<IconButton
+								id="Remount"
+								icon={REMOUNT_ICON}
+								tint={theme.options.constants.colors.textMuted}
+								onClick={() => setEpoch((current) => current + 1)}
+								className={
+									{
+										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+										AnchorPoint: new Vector2(1, 0.5),
+										Position: new UDim2(1, -theme.spacing.calc(2.5), 0.5, 0),
+									} as WriteableStyle<ImageButton>
+								}
+							/>
+							<IconButton
+								id="Theme"
+								icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
+								tint={theme.options.constants.colors.textMuted}
+								onClick={onToggleTheme}
+								className={
+									{
+										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+										AnchorPoint: new Vector2(1, 0.5),
+										Position: new UDim2(1, -theme.spacing.calc(0.5), 0.5, 0),
+									} as WriteableStyle<ImageButton>
+								}
+							/>
+						</>
 					)}
 				</frame>
 
