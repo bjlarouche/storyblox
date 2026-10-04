@@ -30,6 +30,23 @@ export function applyArg(args: ArgValues, key: string, value: unknown): ArgValue
 	return patchArg(args, key, value);
 }
 
+export function choiceOptions(options: unknown): Array<{ label: string; value: string }> {
+	const chosen = new Array<{ label: string; value: string }>();
+	if (typeOf(options) !== "table") return chosen;
+	for (const option of options as Array<defined>) {
+		if (typeOf(option) === "string") {
+			chosen.push({ label: option as string, value: option as string });
+			continue;
+		}
+		if (typeOf(option) !== "table") continue;
+		const rec = option as { label?: unknown; value?: unknown };
+		const value = typeOf(rec.value) === "string" ? (rec.value as string) : typeOf(rec.label) === "string" ? (rec.label as string) : "";
+		const label = typeOf(rec.label) === "string" ? (rec.label as string) : value;
+		chosen.push({ label: label.size() > 0 ? label : value, value });
+	}
+	return chosen;
+}
+
 export function commitNumberText(text: string): number | undefined {
 	if (text.size() === 0) return undefined;
 	const value = tonumber(text);
