@@ -19,6 +19,9 @@
           "$path": "../out/fixtures/stories",
           "Native.stories": {
             "$path": "../fixtures/native"
+          },
+          "ViewportNative.stories": {
+            "$path": "../fixtures/viewport"
           }
         },
         "node_modules": {
