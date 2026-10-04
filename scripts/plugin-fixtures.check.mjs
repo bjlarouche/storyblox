@@ -43,6 +43,7 @@ const needles = [
 	"Fixture/Controls",
 	"Fixture/Datatypes",
 	"Fixture/Nested",
+	"Fixture/Viewport Host",
 	"defined story",
 ];
 

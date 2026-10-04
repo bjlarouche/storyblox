@@ -13,6 +13,28 @@ import useTemplateStyles from "./Template.styles";
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
 const CONTROLS_MIN = 120;
 const GRID_COLOR = new Color3(1, 1, 1);
+const SCENE_BACKDROP = new Color3(0.1, 0.1, 0.12);
+
+function HostScene(props: { children?: React.ReactNode }) {
+	const frame = useRef<ViewportFrame>();
+	const camera = useRef<Camera>();
+	useEffect(() => {
+		const current = frame.current;
+		const cam = camera.current;
+		if (current && cam) current.CurrentCamera = cam;
+	}, []);
+	return (
+		<viewportframe
+			key="HostViewport"
+			ref={frame}
+			Size={new UDim2(1, 0, 1, 0)}
+			BackgroundColor3={SCENE_BACKDROP}
+		>
+			<camera key="HostCamera" ref={camera} CFrame={CFrame.lookAt(new Vector3(0, 5, 10), Vector3.zero)} />
+			<worldmodel key="HostScene">{props.children}</worldmodel>
+		</viewportframe>
+	);
+}
 
 function gridLines(width: number, height: number) {
 	const lines = new Array<React.Element>();
@@ -126,7 +148,10 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 			const [element, callback] = render(props, { theme: previewTheme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
-			const logical = (story as { preview?: { width?: unknown; height?: unknown; background?: unknown } }).preview;
+			const logical = (
+				story as { preview?: { kind?: unknown; width?: unknown; height?: unknown; background?: unknown } }
+			).preview;
+			const viewport = logical?.kind === "viewport";
 			const logicalWidth = typeOf(logical?.width) === "number" ? (logical?.width as number) : undefined;
 			const logicalHeight = typeOf(logical?.height) === "number" ? (logical?.height as number) : undefined;
 			const background = typeOf(logical?.background) === "Color3" ? (logical?.background as Color3) : undefined;
@@ -151,7 +176,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 						PaddingLeft={new UDim(0, inset)}
 						PaddingRight={new UDim(0, inset)}
 					/>
-					{parsed.element as React.Element}
+					{viewport ? <HostScene>{parsed.element as React.Element}</HostScene> : (parsed.element as React.Element)}
 				</frame>,
 			);
 			themeMounted.current = previewTheme;
