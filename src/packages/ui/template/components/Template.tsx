@@ -9,6 +9,7 @@ import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from 
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import { storyLabel } from "../storyLabel";
+import { CaseResult, createCaseClock, createSeed, runCase } from "../../../storyCases";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
 
@@ -118,6 +119,8 @@ export interface TemplateProps {
 	storyOnPrimary?: boolean;
 	onToggleStoryTheme?: () => void;
 	remount?: number;
+	caseRequest?: { name: string; id: number };
+	onCaseResult?: (result: CaseResult) => void;
 }
 
 function Template({
@@ -128,6 +131,8 @@ function Template({
 	storyOnPrimary,
 	onToggleStoryTheme,
 	remount = 0,
+	caseRequest,
+	onCaseResult,
 }: TemplateProps) {
 	const { root, container, corner, navBar, title, preview, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
@@ -155,6 +160,9 @@ function Template({
 	const mountKey = `${storyKey}@${epoch}`;
 	const mounted = useRef("");
 	const themeMounted = useRef<Theme | undefined>(undefined);
+	const mountFrame = useRef<Frame>();
+	const argsRef = useRef(args);
+	argsRef.current = args;
 
 	useEffect(() => {
 		return () => gate.dispose();
@@ -163,6 +171,39 @@ function Template({
 	useEffect(() => {
 		if (remount > 0) setEpoch((current) => current + 1);
 	}, [remount]);
+
+	useEffect(() => {
+		if (caseRequest === undefined || story === undefined) return;
+		const name = caseRequest.name;
+		const cases = (story as { cases?: { [key: string]: unknown } }).cases;
+		const body = cases?.[name];
+		if (typeOf(body) !== "function") {
+			onCaseResult?.({ name, passed: false, failures: ["missing case"] });
+			return;
+		}
+		const described = story as { args?: unknown; props?: unknown };
+		setArgs(copyArgs(described.args ?? described.props));
+		const key = mounted.current;
+		const clock = createCaseClock();
+		task.spawn(() => {
+			task.wait();
+			const result = runCase(
+				name,
+				body as Parameters<typeof runCase>[1],
+				{
+					find: (target: string) => mountFrame.current?.FindFirstChild(target, true),
+					args: () => argsRef.current,
+					setArg: (arg: string, value: unknown) => setArgs((current) => applyArg(current, arg, value)),
+					wait: (seconds?: number) => task.wait(seconds),
+					clock,
+					random: createSeed(1),
+				},
+				() => mounted.current !== key,
+			);
+			clock.cancel();
+			onCaseResult?.(result);
+		});
+	}, [caseRequest]);
 
 	useEffect(() => {
 		if (story === undefined) {
@@ -204,6 +245,7 @@ function Template({
 			setTemplate(
 				<frame
 					key={`mount-${epoch}`}
+					ref={mountFrame}
 					Size={scaled ? new UDim2(0, logicalWidth, 0, logicalHeight) : new UDim2(1, 0, 1, 0)}
 					BackgroundColor3={background ?? new Color3(0, 0, 0)}
 					BackgroundTransparency={background !== undefined ? 0 : 1}

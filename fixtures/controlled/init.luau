@@ -35,4 +35,15 @@ return {
 		disabled = { type = "boolean" },
 	},
 	mount = mount,
+	cases = {
+		disable = function(env)
+			local button = env.find("ControlledButton")
+			env.expect(button ~= nil, "button")
+			env.expect(button and button.Active, "starts active")
+			env.setArg("disabled", true)
+			env.wait()
+			env.expect(button and not button.Active, "disabled turns Active off")
+			env.expect(button and env.find("ControlledButton") == button, "same button")
+		end,
+	},
 }

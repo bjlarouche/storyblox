@@ -7,6 +7,7 @@ export interface ReactStoryShape {
 	args?: unknown;
 	argTypes?: unknown;
 	preview?: unknown;
+	cases?: unknown;
 }
 
 export type NormalizedStory =
@@ -18,6 +19,7 @@ export type NormalizedStory =
 			args?: unknown;
 			argTypes?: unknown;
 			preview?: unknown;
+			cases?: unknown;
 	  }
 	| { kind: "reject"; reason: string };
 
@@ -81,6 +83,7 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		argTypes?: unknown;
 		render?: unknown;
 		preview?: unknown;
+		cases?: unknown;
 		component?: unknown;
 		template?: unknown;
 	};
@@ -95,6 +98,7 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		args,
 		argTypes: story.argTypes,
 		preview: story.preview,
+		cases: story.cases,
 		props: args,
 		component: story.component,
 		template: (props: unknown, context: unknown) => render(props !== undefined ? props : args, context),
@@ -139,7 +143,7 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 	}
 	if (native) {
 		if (typeOf(exported.title) !== "string") return { kind: "reject", reason: "title" };
-		const described = exported as { args?: unknown; argTypes?: unknown; preview?: unknown };
+		const described = exported as { args?: unknown; argTypes?: unknown; preview?: unknown; cases?: unknown };
 		if (!argsMatch(described.args, described.argTypes)) return { kind: "reject", reason: "args" };
 		return {
 			kind: "native",
@@ -148,6 +152,7 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 			args: described.args,
 			argTypes: described.argTypes,
 			preview: described.preview,
+			cases: described.cases,
 		};
 	}
 	return { kind: "reject", reason: "export" };
