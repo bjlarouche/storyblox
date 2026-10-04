@@ -14,7 +14,7 @@ import {
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "../../../../interfaces";
 import { SplitPane, Template } from "../../template";
-import { storyLanguage } from "../../template/storyLabel";
+import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { parseFavorites, toggleFavorite } from "../../storiesSidebar/storyTree";
 import { mountNative } from "../nativeMount";
@@ -271,6 +271,7 @@ function Storyblox(props: StorybloxProps) {
 	const [previewKey, setPreviewKey] = useState(0);
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
 	const [shellWidth, setShellWidth] = useState(0);
+	const [inspectorWidth, setInspectorWidth] = useState(10000);
 	const [pane, setPane] = useState("canvas");
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
@@ -372,11 +373,11 @@ function Storyblox(props: StorybloxProps) {
 								session.remove(story.title);
 							}
 
-							trackStory({ ...updatedStory, language: storyLanguage(root.Source) } as Story);
+							trackStory({ ...updatedStory, language: storyLanguage(root.Source), source: root.GetFullName() } as Story);
 						});
 
 						// Start tracking story
-						trackStory({ ...story, language: storyLanguage(root.Source) } as Story);
+						trackStory({ ...story, language: storyLanguage(root.Source), source: root.GetFullName() } as Story);
 
 						// Remove story if root is being removed
 						root.Destroying.Connect(() => {
@@ -473,7 +474,7 @@ function Storyblox(props: StorybloxProps) {
 		});
 		const paneConn = marker.GetAttributeChangedSignal("storyblox-pane").Connect(() => {
 			const name = marker.GetAttribute("storyblox-pane");
-			if (name !== "stories" && name !== "canvas") return;
+			if (name !== "stories" && name !== "canvas" && name !== "inspector") return;
 			setPane(name);
 		});
 		const focusConn = marker
@@ -679,6 +680,46 @@ function Storyblox(props: StorybloxProps) {
 							/>
 						</ErrorBoundary>
 	);
+	const inspector = (
+		<frame key="Inspector" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+			<uipadding
+				key="InspectorInset"
+				PaddingTop={new UDim(0, theme.padding.calc(2))}
+				PaddingLeft={new UDim(0, theme.padding.calc(2))}
+				PaddingRight={new UDim(0, theme.padding.calc(2))}
+			/>
+			<uilistlayout
+				key="InspectorLayout"
+				FillDirection={Enum.FillDirection.Vertical}
+				Padding={new UDim(0, theme.padding.calc(1))}
+				SortOrder={Enum.SortOrder.LayoutOrder}
+			/>
+			<textlabel
+				key="InspectorTitle"
+				Text="Inspector"
+				LayoutOrder={1}
+				Size={new UDim2(1, 0, 0, theme.spacing.calc(1.5))}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.semibold}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.options.constants.colors.textMuted}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>
+			<textlabel
+				key="InspectorBody"
+				Text={storyInspector(selectedStory as never)}
+				LayoutOrder={2}
+				Size={new UDim2(1, 0, 1, -theme.spacing.calc(2))}
+				TextWrapped={true}
+				TextYAlignment={Enum.TextYAlignment.Top}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.default}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.options.constants.colors.textMuted}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>
+		</frame>
+	);
 	const tab = (id: string, label: string, order: number) => (
 		<textbutton
 			key={`${label}Tab`}
@@ -727,9 +768,10 @@ function Storyblox(props: StorybloxProps) {
 							<uipadding key="TabInset" PaddingLeft={new UDim(0, theme.padding.calc(1))} />
 							{tab("stories", "Stories", 1)}
 							{tab("canvas", "Canvas", 2)}
+							{tab("inspector", "Inspector", 3)}
 						</frame>
 						<frame key="Pane" LayoutOrder={2} Size={new UDim2(1, 0, 1, -theme.spacing.calc(2))} BackgroundTransparency={1}>
-							{pane === "stories" ? sidebar : canvas}
+							{pane === "stories" ? sidebar : pane === "inspector" ? inspector : canvas}
 						</frame>
 					</frame>
 				) : (
@@ -739,7 +781,9 @@ function Storyblox(props: StorybloxProps) {
 						max={SIDEBAR_MAX}
 						onChange={setSidebarWidth}
 						first={sidebar}
-						second={canvas}
+						second={
+							<SplitPane value={inspectorWidth} min={160} onChange={setInspectorWidth} first={canvas} second={inspector} />
+						}
 					/>
 				)}
 			</frame>
