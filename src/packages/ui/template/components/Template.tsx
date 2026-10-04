@@ -29,8 +29,8 @@ function Template({ story }: TemplateProps) {
 		}
 
 		try {
-			const template = story.template as (props: unknown, context: { theme: Theme }) => unknown;
-			const [element, callback] = template(story.props, { theme }) as LuaTuple<
+			const render = story.template as (props: unknown, context: { theme: Theme }) => unknown;
+			const [element, callback] = render(story.props, { theme }) as LuaTuple<
 				[StoryElement, StoryCallback | undefined]
 			>;
 			const parsed = readTemplateResult(element, callback);
