@@ -5,6 +5,11 @@ globalThis.typeOf = (value) => {
 	return typeof value;
 };
 globalThis.math = { huge: Infinity };
+globalThis.tonumber = (text) => {
+	if (typeof text !== "string" || text.trim() === "") return undefined;
+	const value = Number(text);
+	return Number.isFinite(value) ? value : undefined;
+};
 globalThis.pairs = (record) => Object.keys(record).map((key) => [key, record[key]]);
 
 function asType(type, fields) {
@@ -75,7 +80,20 @@ globalThis.CFrame = CFrame;
 const font = asType("EnumItem", { Name: "SourceSans", EnumType: { Name: "Font" } });
 globalThis.Enum = { Font: { SourceSans: font } };
 
-const { encodeValue, encodeArgs, decodeValue } = await import("../src/packages/argCodec.ts");
+String.prototype.size = function size() {
+	return this.length;
+};
+String.prototype.sub = function sub(start, finish) {
+	const len = this.length;
+	const from = start < 0 ? len + start : start - 1;
+	const to = finish === undefined ? len : finish < 0 ? len + finish + 1 : finish;
+	return this.slice(from, to);
+};
+Array.prototype.size = function size() {
+	return this.length;
+};
+
+const { encodeValue, encodeArgs, decodeValue, formatDatatype, parseDatatype } = await import("../src/packages/argCodec.ts");
 
 function roundTrip(value, spec) {
 	const encoded = encodeValue(value, "field", spec);
@@ -127,5 +145,26 @@ const encoded = encodeArgs({ label: "Hi", onClick: () => {} });
 if (encoded.values.label !== "Hi" || encoded.errors.length !== 1 || encoded.errors[0].path !== "onClick" || encoded.errors[0].reason !== "unsupported") {
 	throw new Error("field error");
 }
+
+const painted = parseDatatype({ type: "color" }, formatDatatype(color));
+if (!painted.ok || painted.value.R !== 0.1) throw new Error("color editor");
+const tooBright = parseDatatype({ type: "color" }, "2, 0, 0");
+if (tooBright.ok || tooBright.reason !== "color") throw new Error("color editor reject");
+const placed = parseDatatype({ type: "vector3" }, "1, 2, 3");
+if (!placed.ok || placed.value.Z !== 3) throw new Error("vector editor");
+const gapped = parseDatatype({ type: "udim" }, "0.5, 8");
+if (!gapped.ok || gapped.value.Offset !== 8) throw new Error("udim editor");
+const spanned = parseDatatype({ type: "udim2" }, "0.5, 1, 1, -2");
+if (!spanned.ok || spanned.value.Y.Offset !== -2) throw new Error("udim2 editor");
+const picked = parseDatatype({ type: "EnumItem", enumType: "Font" }, "SourceSans");
+if (!picked.ok || picked.value !== font) throw new Error("enum editor");
+const missingFont = parseDatatype({ type: "EnumItem", enumType: "Font" }, "Nope");
+if (missingFont.ok || missingFont.reason !== "enum") throw new Error("enum editor reject");
+const icon = parseDatatype({ type: "asset" }, "123");
+if (!icon.ok || icon.value !== 123) throw new Error("asset editor");
+const badIcon = parseDatatype({ type: "asset" }, "-1");
+if (badIcon.ok || badIcon.reason !== "asset") throw new Error("asset editor reject");
+const moved = parseDatatype({ type: "cframe" }, "0, 1, 0");
+if (!moved.ok || moved.value.Y !== 1) throw new Error("cframe editor");
 
 console.log("arg codec ok");

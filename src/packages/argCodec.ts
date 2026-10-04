@@ -151,3 +151,93 @@ export function decodeValue(tagged: unknown): unknown {
 	}
 	return tagged;
 }
+
+function readNumber(text: string): number | undefined {
+	if (text.size() === 0) return undefined;
+	const value = tonumber(text);
+	if (!finite(value)) return undefined;
+	return value;
+}
+
+function readList(text: string): Array<number> | undefined {
+	const numbers: Array<number> = [];
+	let token = "";
+	const push = () => {
+		if (token.size() === 0) return false;
+		const value = readNumber(token);
+		token = "";
+		if (value === undefined) return false;
+		numbers.push(value);
+		return true;
+	};
+	for (let index = 1; index <= text.size(); index++) {
+		const char = text.sub(index, index);
+		if (char === ",") {
+			if (!push()) return undefined;
+		} else if (char !== " ") {
+			token += char;
+		}
+	}
+	if (token.size() > 0 && !push()) return undefined;
+	return numbers;
+}
+
+export function formatDatatype(value: unknown): string {
+	const encoded = encodeValue(value, "");
+	if (!encoded.ok) return "";
+	const tagged = encoded.value;
+	if (typeOf(tagged) !== "table") return tostring(tagged);
+	const record = tagged as Tagged;
+	if (record.kind === "color") return `${record.r}, ${record.g}, ${record.b}`;
+	if (record.kind === "vector2") return `${record.x}, ${record.y}`;
+	if (record.kind === "vector3") return `${record.x}, ${record.y}, ${record.z}`;
+	if (record.kind === "udim") return `${record.scale}, ${record.offset}`;
+	if (record.kind === "udim2") return `${record.xScale}, ${record.xOffset}, ${record.yScale}, ${record.yOffset}`;
+	if (record.kind === "enum") return tostring(record.name);
+	if (record.kind === "asset") return tostring(record.id);
+	if (record.kind === "cframe") {
+		let text = `${record.x}, ${record.y}, ${record.z}`;
+		if (record.lookX !== undefined) text += `, ${record.lookX}, ${record.lookY}, ${record.lookZ}`;
+		if (record.upX !== undefined) text += `, ${record.upX}, ${record.upY}, ${record.upZ}`;
+		return text;
+	}
+	return "";
+}
+
+export function parseDatatype(
+	spec: { type?: string; enumType?: string },
+	text: string,
+): { ok: true; value: unknown } | { ok: false; reason: string } {
+	const kind = spec.type;
+	if (kind === "EnumItem") {
+		if (typeOf(spec.enumType) !== "string") return { ok: false, reason: "enum" };
+		const enumName = spec.enumType as string;
+		const enumType = (Enum as unknown as { [key: string]: { [key: string]: unknown } })[enumName];
+		const item = enumType?.[text];
+		if (item === undefined || typeOf(item) !== "EnumItem") return { ok: false, reason: "enum" };
+		return { ok: true, value: item };
+	}
+	if (kind === "asset") {
+		const encoded = encodeValue(readNumber(text), "value", { type: "asset" });
+		if (!encoded.ok) return { ok: false, reason: encoded.error.reason };
+		return { ok: true, value: decodeValue(encoded.value) };
+	}
+	const numbers = readList(text);
+	if (numbers === undefined) return { ok: false, reason: kind ?? "unsupported" };
+	let value: unknown;
+	if (kind === "color" && numbers.size() === 3) value = new Color3(numbers[0], numbers[1], numbers[2]);
+	else if (kind === "vector2" && numbers.size() === 2) value = new Vector2(numbers[0], numbers[1]);
+	else if (kind === "vector3" && numbers.size() === 3) value = new Vector3(numbers[0], numbers[1], numbers[2]);
+	else if (kind === "udim" && numbers.size() === 2) value = new UDim(numbers[0], numbers[1]);
+	else if (kind === "udim2" && numbers.size() === 4) value = new UDim2(numbers[0], numbers[1], numbers[2], numbers[3]);
+	else if (kind === "cframe" && numbers.size() === 3) value = new CFrame(numbers[0], numbers[1], numbers[2]);
+	else if (kind === "cframe" && (numbers.size() === 6 || numbers.size() === 9)) {
+		const at = new Vector3(numbers[0], numbers[1], numbers[2]);
+		const target = new Vector3(numbers[0] + numbers[3], numbers[1] + numbers[4], numbers[2] + numbers[5]);
+		const up = numbers.size() === 9 ? new Vector3(numbers[6], numbers[7], numbers[8]) : undefined;
+		value = CFrame.lookAt(at, target, up);
+	} else return { ok: false, reason: kind ?? "unsupported" };
+	const encoded = encodeValue(value, "value");
+	if (!encoded.ok) return { ok: false, reason: encoded.error.reason };
+	return { ok: true, value };
+}

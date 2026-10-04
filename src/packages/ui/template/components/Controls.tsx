@@ -1,6 +1,7 @@
-import React from "@rbxts/react";
+import React, { useState } from "@rbxts/react";
 import { Input, Theme } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
+import { formatDatatype, parseDatatype } from "../../../argCodec";
 import { ArgValues, commitNumberText } from "../storyArgs";
 
 interface Spec {
@@ -11,6 +12,7 @@ interface Spec {
 	max?: number;
 	step?: number;
 	optional?: boolean;
+	enumType?: string;
 }
 
 const kit = Uiblox as unknown as {
@@ -48,7 +50,30 @@ export interface ControlsProps {
 	onReset: () => void;
 }
 
+function writeFault(current: { [key: string]: string }, key: string, reason: string) {
+	const updated: { [key: string]: string } = {};
+	for (const [name, value] of pairs(current)) {
+		if (name !== key) updated[name as string] = value;
+	}
+	if (reason.size() > 0) updated[key] = reason;
+	return updated;
+}
+
+function datatype(kind?: string) {
+	return (
+		kind === "color" ||
+		kind === "vector2" ||
+		kind === "vector3" ||
+		kind === "udim" ||
+		kind === "udim2" ||
+		kind === "EnumItem" ||
+		kind === "asset" ||
+		kind === "cframe"
+	);
+}
+
 function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
+	const [faults, setFaults] = useState<{ [key: string]: string }>({});
 	const specs = typeOf(argTypes) === "table" ? (argTypes as { [key: string]: Spec }) : {};
 	const rows: React.Element[] = [];
 	let order = 1;
@@ -133,6 +158,36 @@ function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
+		} else if (datatype(spec?.type)) {
+			const commitText = (text: string) => {
+				const parsed = parseDatatype(spec ?? {}, text);
+				if (!parsed.ok) {
+					setFaults((current) => writeFault(current, name, parsed.reason));
+					return;
+				}
+				setFaults((current) => writeFault(current, name, ""));
+				onChange(name, parsed.value);
+			};
+			if (spec?.type === "EnumItem" && options.size() > 0) {
+				const selected = typeOf(value) === "EnumItem" ? (value as { Name: string }).Name : "";
+				editor = (
+					<kit.Select key={name} value={selected} options={options} onChange={(incoming) => commitText(incoming)} />
+				);
+			} else {
+				editor = (
+					<Input
+						key={name}
+						{...({
+							variant: "standard",
+							width: new UDim(1, 0),
+							text: formatDatatype(value),
+							placeholder: spec?.type,
+							onInput: commitText,
+							onTextChanged: commitText,
+						} as React.ComponentProps<typeof Input> & { onInput?: (text: string) => void })}
+					/>
+				);
+			}
 		} else if (spec?.type === "string") {
 			editor = (
 				<Input
@@ -158,6 +213,18 @@ function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
 				>
 					<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, theme.padding.calc(1))} />
 					{editor}
+					{faults[name] !== undefined && faults[name].size() > 0 && (
+						<textlabel
+							key="Fault"
+							Text={faults[name]}
+							Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
+							BackgroundTransparency={1}
+							Font={theme.typography.fontFamilies.default}
+							TextSize={theme.typography.fontSizes.caption}
+							TextColor3={theme.palette.error.main}
+							TextXAlignment={Enum.TextXAlignment.Left}
+						/>
+					)}
 					{spec?.optional === true && value !== undefined && (
 						<textbutton
 							key="Clear"
