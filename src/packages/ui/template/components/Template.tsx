@@ -120,6 +120,7 @@ export interface TemplateProps {
 	onToggleStoryTheme?: () => void;
 	remount?: number;
 	caseRequest?: { name: string; id: number };
+	argsRequest?: { args?: { [key: string]: unknown }; id: number };
 	onCaseResult?: (result: CaseResult) => void;
 }
 
@@ -132,6 +133,7 @@ function Template({
 	onToggleStoryTheme,
 	remount = 0,
 	caseRequest,
+	argsRequest,
 	onCaseResult,
 }: TemplateProps) {
 	const { root, container, corner, navBar, title, preview, canvas } = useTemplateStyles();
@@ -204,6 +206,21 @@ function Template({
 			onCaseResult?.(result);
 		});
 	}, [caseRequest]);
+
+	useEffect(() => {
+		if (argsRequest === undefined || story === undefined) return;
+		const incoming = argsRequest.args;
+		if (incoming === undefined) {
+			const described = story as { args?: unknown; props?: unknown };
+			setArgs(copyArgs(described.args ?? described.props));
+			return;
+		}
+		setArgs((current) => {
+			let updated = current;
+			for (const [key, value] of pairs(incoming)) updated = applyArg(updated, key as string, value);
+			return updated;
+		});
+	}, [argsRequest]);
 
 	useEffect(() => {
 		if (story === undefined) {
