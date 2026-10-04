@@ -39,8 +39,16 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 				[StoryElement, StoryCallback | undefined]
 			>;
 			const parsed = readTemplateResult(element, callback);
+			const inset = theme.padding.calc(2);
 			setTemplate(
 				<frame key={`mount-${epoch}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+					<uipadding
+						key="Inset"
+						PaddingTop={new UDim(0, inset)}
+						PaddingBottom={new UDim(0, inset)}
+						PaddingLeft={new UDim(0, inset)}
+						PaddingRight={new UDim(0, inset)}
+					/>
 					{parsed.element as React.Element}
 				</frame>,
 			);
