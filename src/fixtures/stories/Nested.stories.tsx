@@ -1,8 +1,8 @@
 import React from "@rbxts/react";
-import { Label } from "./Label";
+import { Button } from "@rbxts/uiblox";
 
 export default {
 	title: "Inputs/Button/Primary",
-	component: Label,
-	template: () => <Label />,
+	component: Button,
+	template: () => <Button text="Primary" color="primary" variant="contained" />,
 };
