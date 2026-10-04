@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
-import { Button, IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import { IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
@@ -13,7 +13,7 @@ export interface TemplateProps {
 }
 
 function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) {
-	const { root, container, corner, navBar, canvas } = useTemplateStyles();
+	const { root, container, corner, navBar, title, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
 	const [gate] = useState(createCleanupGate);
 	const [template, setTemplate] = useState<React.Element | undefined>();
@@ -56,22 +56,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 				<Shadow />
 
 				<frame key="NavBar" {...navBar}>
-					<Button
-						variant="text"
-						text={story?.title ?? "Canvas"}
-						size="small"
-						color="secondary"
-						className={
-							{
-								Size: new UDim2(1, -theme.spacing.calc(3), 0, theme.spacing.calc(2)),
-								Position: new UDim2(0, theme.spacing.calc(0.5), 0, 0),
-								TextXAlignment: Enum.TextXAlignment.Left,
-								TextTruncate: Enum.TextTruncate.AtEnd,
-								Font: theme.typography.fontFamilies.semibold,
-								TextColor3: theme.options.constants.colors.textMuted,
-							} as WriteableStyle<TextButton>
-						}
-					></Button>
+					<textlabel key="Title" Text={story?.title ?? "Canvas"} {...title} />
 					{onToggleTheme && (
 						<IconButton
 							icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
@@ -88,9 +73,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 					)}
 				</frame>
 
-				<Canvas className={canvas}>
-					{template}
-				</Canvas>
+				<Canvas className={canvas}>{template}</Canvas>
 			</frame>
 		</frame>
 	);

@@ -36,6 +36,17 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			ClipsDescendants: true,
 			ZIndex: 300,
 		} as WriteableStyle<Frame>,
+		title: {
+			Size: new UDim2(1, -theme.spacing.calc(3), 1, 0),
+			Position: new UDim2(0, theme.spacing.calc(0.5), 0, 0),
+			BackgroundTransparency: 1,
+			TextXAlignment: Enum.TextXAlignment.Left,
+			TextTruncate: Enum.TextTruncate.AtEnd,
+			Font: theme.typography.fontFamilies.semibold,
+			TextSize: theme.typography.fontSizes.caption,
+			TextColor3: theme.options.constants.colors.textMuted,
+			ZIndex: 300,
+		} as WriteableStyle<TextLabel>,
 		canvas: {
 			Size: new UDim2(1, -theme.spacing.calc(2), 1, -(theme.padding.calc(2) + theme.spacing.calc(2))),
 			Position: new UDim2(0.5, 0, 0.5, theme.spacing.calc(2)),
