@@ -71,7 +71,13 @@ export interface ModernStory<T> {
 	args?: T;
 	argTypes?: { [key: string]: ControlSpec };
 	render: (args: T) => unknown;
-	preview?: { kind: string; width: number; height: number; background?: Color3 };
+	preview?: {
+		kind: string;
+		preset?: "phone" | "tablet" | "desktop" | "console";
+		width?: number;
+		height?: number;
+		background?: Color3;
+	};
 	component?: unknown;
 }
 

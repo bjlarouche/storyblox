@@ -12,6 +12,23 @@ export function previewScale(
 	return scale;
 }
 
+const PRESETS: { [name: string]: { width: number; height: number } } = {
+	phone: { width: 390, height: 844 },
+	tablet: { width: 1024, height: 768 },
+	desktop: { width: 1920, height: 1080 },
+	console: { width: 1920, height: 1080 },
+};
+
+export function previewSize(preview: unknown) {
+	if (typeOf(preview) !== "table") return undefined;
+	const described = preview as { preset?: unknown; width?: unknown; height?: unknown };
+	if (typeOf(described.width) === "number" && typeOf(described.height) === "number") {
+		return { width: described.width as number, height: described.height as number };
+	}
+	if (typeOf(described.preset) === "string") return PRESETS[described.preset as string];
+	return undefined;
+}
+
 export const ZOOM_STEPS = [0.5, 1, 2];
 
 export function stepZoom(current: number, direction: number) {
