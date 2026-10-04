@@ -117,9 +117,18 @@ export interface TemplateProps {
 	storyTheme?: Theme;
 	storyOnPrimary?: boolean;
 	onToggleStoryTheme?: () => void;
+	remount?: number;
 }
 
-function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, storyOnPrimary, onToggleStoryTheme }: TemplateProps) {
+function Template({
+	story,
+	primaryThemeEnabled,
+	onToggleTheme,
+	storyTheme,
+	storyOnPrimary,
+	onToggleStoryTheme,
+	remount = 0,
+}: TemplateProps) {
 	const { root, container, corner, navBar, title, preview, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
 	const [gate] = useState(createCleanupGate);
@@ -150,6 +159,10 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 	useEffect(() => {
 		return () => gate.dispose();
 	}, [gate]);
+
+	useEffect(() => {
+		if (remount > 0) setEpoch((current) => current + 1);
+	}, [remount]);
 
 	useEffect(() => {
 		if (story === undefined) {
