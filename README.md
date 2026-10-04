@@ -15,6 +15,8 @@ Storyblox is a [Storybook](https://storybook.js.org)-like plugin that developers
 can use to preview their UI. It works similaer to
 [hoarcekat](https://github.com/Kampfkarren/hoarcekat) by Kampfkarren.
 
+Release checks and the stop before npm or the Roblox Store are in `RELEASING.md`.
+
 # How to use
 
 ### Installation
