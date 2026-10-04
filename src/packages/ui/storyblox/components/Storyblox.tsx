@@ -13,7 +13,7 @@ import {
 } from "@rbxts/uiblox";
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "../../../../interfaces";
-import { Template } from "../../template";
+import { SplitPane, Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { mountNative } from "../nativeMount";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
@@ -23,6 +23,9 @@ import { createStorySession, keepSelection } from "../storyRegistry";
 import { ClaimedId, claimStoryId, releaseStoryId } from "../../../defineStory";
 
 const DEFAULT_EXTENSION = ".stories";
+const SIDEBAR_WIDTH = 180;
+const SIDEBAR_MIN = 140;
+const SIDEBAR_MAX = 360;
 
 function pluginStories(): Instance | undefined {
 	return ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
@@ -199,6 +202,7 @@ function Storyblox(props: StorybloxProps) {
 	const [stories, setStories] = useState<Story[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
 	const [previewKey, setPreviewKey] = useState(0);
+	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
 	const generation = useRef(0);
 	const failed = useRef(false);
 	const storiesRef = useRef(stories);
@@ -416,56 +420,66 @@ function Storyblox(props: StorybloxProps) {
 				Size={new UDim2(1, 0, 1, 0)}
 				BackgroundTransparency={1}
 			>
-				<StoriesSidebar
-					stories={stories}
-					logoSrc={logoSrc}
-					version={version}
-					selected={selectedStory?.title}
-					onClick={(story: Story) => {
-						controlRoot(root)?.SetAttribute("storyblox-select", story.title);
-						setSelectedStory(story);
-					}}
-				/>
-				<ErrorBoundary
-					key={`preview-${previewKey}`}
-					fallback={(e) => {
-						renderError.current = e;
-						controlRoot(root)?.SetAttribute("storyblox-error", `${e}`);
-						const errorComponnt = (
-							<frame key="Error" {...errorContainer}>
-								<textlabel
-									key="Message"
-									{...errorMessage}
-									Text={`<u>Unable to render <b>${selectedStory?.title}</b>...</u>\n\n${e}`}
-								></textlabel>
-							</frame>
-						);
+				<SplitPane
+					value={sidebarWidth}
+					min={SIDEBAR_MIN}
+					max={SIDEBAR_MAX}
+					onChange={setSidebarWidth}
+					first={
+						<StoriesSidebar
+							stories={stories}
+							logoSrc={logoSrc}
+							version={version}
+							selected={selectedStory?.title}
+							onClick={(story: Story) => {
+								controlRoot(root)?.SetAttribute("storyblox-select", story.title);
+								setSelectedStory(story);
+							}}
+						/>
+					}
+					second={
+						<ErrorBoundary
+							key={`preview-${previewKey}`}
+							fallback={(e) => {
+								renderError.current = e;
+								controlRoot(root)?.SetAttribute("storyblox-error", `${e}`);
+								const errorComponnt = (
+									<frame key="Error" {...errorContainer}>
+										<textlabel
+											key="Message"
+											{...errorMessage}
+											Text={`<u>Unable to render <b>${selectedStory?.title}</b>...</u>\n\n${e}`}
+										></textlabel>
+									</frame>
+								);
 
-						return (
+								return (
+									<Template
+										story={{
+											title: selectedStory?.title ?? "Error/Rendering",
+											component: () => errorComponnt,
+											template: () => errorComponnt,
+										}}
+										primaryThemeEnabled={primaryThemeEnabled}
+										onToggleTheme={toggleTheme}
+										storyTheme={storyTheme}
+										storyOnPrimary={storyOnPrimary}
+										onToggleStoryTheme={toggleStoryTheme}
+									/>
+								);
+							}}
+						>
 							<Template
-								story={{
-									title: selectedStory?.title ?? "Error/Rendering",
-									component: () => errorComponnt,
-									template: () => errorComponnt,
-								}}
+								story={selectedStory}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
 								storyTheme={storyTheme}
 								storyOnPrimary={storyOnPrimary}
 								onToggleStoryTheme={toggleStoryTheme}
 							/>
-						);
-					}}
-				>
-					<Template
-						story={selectedStory}
-						primaryThemeEnabled={primaryThemeEnabled}
-						onToggleTheme={toggleTheme}
-						storyTheme={storyTheme}
-						storyOnPrimary={storyOnPrimary}
-						onToggleStoryTheme={toggleStoryTheme}
-					/>
-				</ErrorBoundary>
+						</ErrorBoundary>
+					}
+				/>
 			</frame>
 		</ThemeProvider>
 	);
