@@ -23,12 +23,13 @@ export interface ControlsProps {
 	args: ArgValues;
 	argTypes?: unknown;
 	onChange: (key: string, value: unknown) => void;
+	onReset: () => void;
 }
 
-function Controls({ theme, args, argTypes, onChange }: ControlsProps) {
+function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
 	const specs = typeOf(argTypes) === "table" ? (argTypes as { [key: string]: Spec }) : {};
 	const rows: React.Element[] = [];
-	let order = 0;
+	let order = 1;
 	for (const [key, spec] of pairs(specs)) {
 		const name = key as string;
 		const value = args[name];
@@ -103,6 +104,18 @@ function Controls({ theme, args, argTypes, onChange }: ControlsProps) {
 			ScrollBarThickness={theme.spacing.calc(0.5)}
 		>
 			<uilistlayout Padding={new UDim(0, theme.padding.calc(1))} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<textbutton
+				key="Reset"
+				Text="Reset"
+				LayoutOrder={0}
+				Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.semibold}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.palette.secondary.main}
+				TextXAlignment={Enum.TextXAlignment.Left}
+				Event={{ MouseButton1Click: onReset }}
+			/>
 			<textlabel
 				key="ControlsTitle"
 				Text="Controls"
