@@ -1,6 +1,6 @@
-import React, { FunctionComponent, useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
-import { Button, DEFAULT_THEME, Shadow, WriteableStyle } from "@rbxts/uiblox";
+import { Button, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
@@ -12,13 +12,10 @@ export interface TemplateProps {
 
 function Template({ story }: TemplateProps) {
 	const { root, container, corner, navBar, canvas } = useTemplateStyles();
+	const { theme } = useTheme();
 	const [gate] = useState(createCleanupGate);
 	const [template, setTemplate] = useState<React.Element | undefined>();
 	const [failure, setFailure] = useState<unknown>();
-
-	const Wrap: FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => (
-		<React.Fragment>{children}</React.Fragment>
-	);
 
 	useEffect(() => {
 		return () => gate.dispose();
@@ -32,7 +29,8 @@ function Template({ story }: TemplateProps) {
 		}
 
 		try {
-			const [element, callback] = story.template(story.props as never) as LuaTuple<
+			const render = story.template as (props: unknown, context: { theme: Theme }) => unknown;
+			const [element, callback] = render(story.props, { theme }) as LuaTuple<
 				[StoryElement, StoryCallback | undefined]
 			>;
 			const parsed = readTemplateResult(element, callback);
@@ -43,7 +41,7 @@ function Template({ story }: TemplateProps) {
 			gate.replace(undefined);
 			setFailure(error);
 		}
-	}, [story, gate]);
+	}, [story, gate, theme]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -63,16 +61,16 @@ function Template({ story }: TemplateProps) {
 						color="secondary"
 						className={
 							{
-								Size: new UDim2(0, DEFAULT_THEME.spacing.calc(5), 0, DEFAULT_THEME.spacing.calc(2)),
-								Font: DEFAULT_THEME.typography.fontFamilies.semibold,
-								TextColor3: DEFAULT_THEME.options.constants.extendedPalette.Gray[50],
+								Size: new UDim2(0, theme.spacing.calc(5), 0, theme.spacing.calc(2)),
+								Font: theme.typography.fontFamilies.semibold,
+								TextColor3: theme.options.constants.colors.textMuted,
 							} as WriteableStyle<TextButton>
 						}
 					></Button>
 				</frame>
 
 				<Canvas className={canvas}>
-					<Wrap>{template}</Wrap>
+					{template}
 				</Canvas>
 			</frame>
 		</frame>

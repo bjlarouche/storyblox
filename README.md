@@ -45,8 +45,9 @@ the optional props for further customization.
 Next, just start writing stories for your components! By default, it will look for
 ModuleScripts in `ReplicatedStorage` whose names end in `.stories`, but you can change
 this by passing in a `root?: Instance` prop to the `Storyblox` component. The loader
-reads a `default` export with `title` and `template`, a function `(target) -> cleanup`,
+reads a `default` export with `title` and `template`, a function `(target, context) -> cleanup`,
 or a table `{ renderer = "native", title = "...", mount = fn }`. Other shapes are skipped.
+Native mounts get `context.theme`, the active Uiblox theme table, and remount when it changes.
 
 Here are some example stories:
 
