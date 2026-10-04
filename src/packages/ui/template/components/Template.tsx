@@ -66,9 +66,12 @@ export interface TemplateProps {
 	story?: Story;
 	primaryThemeEnabled?: boolean;
 	onToggleTheme?: () => void;
+	storyTheme?: Theme;
+	storyOnPrimary?: boolean;
+	onToggleStoryTheme?: () => void;
 }
 
-function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) {
+function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, storyOnPrimary, onToggleStoryTheme }: TemplateProps) {
 	const { root, container, corner, navBar, title, preview, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
 	const [gate] = useState(createCleanupGate);
@@ -88,6 +91,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 		const described = story as { args?: unknown; props?: unknown } | undefined;
 		setArgs(copyArgs(described?.args ?? described?.props));
 	}
+	const previewTheme = storyTheme ?? theme;
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
 	const mountKey = `${storyKey}@${epoch}`;
 	const mounted = useRef("");
@@ -107,7 +111,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 		}
 
 		const session = (story as { nativeSession?: { update?: (args: unknown) => void } }).nativeSession;
-		if (native && mounted.current === mountKey && themeMounted.current === theme && session?.update !== undefined) {
+		if (native && mounted.current === mountKey && themeMounted.current === previewTheme && session?.update !== undefined) {
 			try {
 				session.update(args);
 			} catch (error) {
@@ -119,7 +123,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 		try {
 			const render = story.template as (props: unknown, context: { theme: Theme }) => unknown;
 			const props = args;
-			const [element, callback] = render(props, { theme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
+			const [element, callback] = render(props, { theme: previewTheme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
 			const logical = (story as { preview?: { width?: unknown; height?: unknown; background?: unknown } }).preview;
@@ -150,7 +154,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 					{parsed.element as React.Element}
 				</frame>,
 			);
-			themeMounted.current = theme;
+			themeMounted.current = previewTheme;
 			if (native || mounted.current !== mountKey) {
 				mounted.current = mountKey;
 				gate.replace(parsed.cleanup);
@@ -162,7 +166,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			themeMounted.current = undefined;
 			setFailure(error);
 		}
-	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, zoom]);
+	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, zoom, previewTheme]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -191,6 +195,20 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 									} as WriteableStyle<ImageButton>
 								}
 							/>
+							{onToggleStoryTheme && (
+								<textbutton
+									key="StoryTheme"
+									Text={storyOnPrimary === false ? "Story light" : "Story dark"}
+									Size={new UDim2(0, theme.spacing.calc(5), 0, theme.spacing.calc(1.5))}
+									AnchorPoint={new Vector2(1, 0.5)}
+									Position={new UDim2(1, -theme.spacing.calc(21), 0.5, 0)}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.palette.secondary.main}
+									Event={{ MouseButton1Click: onToggleStoryTheme }}
+								/>
+							)}
 							<textbutton
 								key="ZoomOut"
 								Text="-"

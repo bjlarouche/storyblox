@@ -86,7 +86,7 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 	if (typeOf(story.title) !== "string" || typeOf(story.render) !== "function") return undefined;
 	if (typeOf(story.template) === "function") return undefined;
 	if (!argsMatch(story.args, story.argTypes)) return undefined;
-	const render = story.render as (args: unknown) => unknown;
+	const render = story.render as (args: unknown, context?: unknown) => unknown;
 	const args = story.args;
 	return {
 		id: typeOf(story.id) === "string" ? (story.id as string) : undefined,
@@ -96,7 +96,7 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		preview: story.preview,
 		props: args,
 		component: story.component,
-		template: (props: unknown) => render(props !== undefined ? props : args),
+		template: (props: unknown, context: unknown) => render(props !== undefined ? props : args, context),
 	};
 }
 
