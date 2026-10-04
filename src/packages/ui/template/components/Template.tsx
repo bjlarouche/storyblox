@@ -5,6 +5,7 @@ import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
+import { CAMERA_DISTANCE, CAMERA_PITCH, ORBIT_STEP, orbitOffset } from "../../../previewCamera";
 import { GRID_CELL, gridLineCount, previewScale, stepZoom } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import Controls from "./Controls";
@@ -15,14 +16,15 @@ const CONTROLS_MIN = 120;
 const GRID_COLOR = new Color3(1, 1, 1);
 const SCENE_BACKDROP = new Color3(0.1, 0.1, 0.12);
 
-function HostScene(props: { children?: React.ReactNode }) {
+function HostScene(props: { yaw: number; children?: React.ReactNode }) {
 	const frame = useRef<ViewportFrame>();
 	const camera = useRef<Camera>();
+	const offset = orbitOffset(props.yaw, CAMERA_PITCH, CAMERA_DISTANCE);
 	useEffect(() => {
 		const current = frame.current;
 		const cam = camera.current;
 		if (current && cam) current.CurrentCamera = cam;
-	}, []);
+	}, [props.yaw]);
 	return (
 		<viewportframe
 			key="HostViewport"
@@ -30,7 +32,11 @@ function HostScene(props: { children?: React.ReactNode }) {
 			Size={new UDim2(1, 0, 1, 0)}
 			BackgroundColor3={SCENE_BACKDROP}
 		>
-			<camera key="HostCamera" ref={camera} CFrame={CFrame.lookAt(new Vector3(0, 5, 10), Vector3.zero)} />
+			<camera
+				key="HostCamera"
+				ref={camera}
+				CFrame={CFrame.lookAt(new Vector3(offset.x, offset.y, offset.z), Vector3.zero)}
+			/>
 			<worldmodel key="HostScene">{props.children}</worldmodel>
 		</viewportframe>
 	);
@@ -104,6 +110,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 	const [fit, setFit] = useState(true);
 	const [grid, setGrid] = useState(false);
 	const [zoom, setZoom] = useState(1);
+	const [yaw, setYaw] = useState(0);
 	const [dock, setDock] = useState({ x: 0, y: 0 });
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
@@ -112,6 +119,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 		setArgsStory(storyKey);
 		const described = story as { args?: unknown; props?: unknown } | undefined;
 		setArgs(copyArgs(described?.args ?? described?.props));
+		setYaw(0);
 	}
 	const previewTheme = storyTheme ?? theme;
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
@@ -176,7 +184,11 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 						PaddingLeft={new UDim(0, inset)}
 						PaddingRight={new UDim(0, inset)}
 					/>
-					{viewport ? <HostScene>{parsed.element as React.Element}</HostScene> : (parsed.element as React.Element)}
+					{viewport ? (
+						<HostScene yaw={yaw}>{parsed.element as React.Element}</HostScene>
+					) : (
+						(parsed.element as React.Element)
+					)}
 				</frame>,
 			);
 			themeMounted.current = previewTheme;
@@ -191,7 +203,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 			themeMounted.current = undefined;
 			setFailure(error);
 		}
-	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, zoom, previewTheme]);
+	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, zoom, previewTheme, yaw]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -220,6 +232,34 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 									} as WriteableStyle<ImageButton>
 								}
 							/>
+							{((story as { preview?: { kind?: unknown } } | undefined)?.preview?.kind === "viewport") && (
+								<>
+									<textbutton
+										key="Orbit"
+										Text="Orbit"
+										Size={new UDim2(0, theme.spacing.calc(3), 0, theme.spacing.calc(1.5))}
+										AnchorPoint={new Vector2(1, 0.5)}
+										Position={new UDim2(1, -theme.spacing.calc(30), 0.5, 0)}
+										BackgroundTransparency={1}
+										Font={theme.typography.fontFamilies.semibold}
+										TextSize={theme.typography.fontSizes.caption}
+										TextColor3={theme.palette.secondary.main}
+										Event={{ MouseButton1Click: () => setYaw((current) => current + ORBIT_STEP) }}
+									/>
+									<textbutton
+										key="CameraReset"
+										Text="Cam reset"
+										Size={new UDim2(0, theme.spacing.calc(4.5), 0, theme.spacing.calc(1.5))}
+										AnchorPoint={new Vector2(1, 0.5)}
+										Position={new UDim2(1, -theme.spacing.calc(25), 0.5, 0)}
+										BackgroundTransparency={1}
+										Font={theme.typography.fontFamilies.semibold}
+										TextSize={theme.typography.fontSizes.caption}
+										TextColor3={theme.palette.secondary.main}
+										Event={{ MouseButton1Click: () => setYaw(0) }}
+									/>
+								</>
+							)}
 							{onToggleStoryTheme && (
 								<textbutton
 									key="StoryTheme"
