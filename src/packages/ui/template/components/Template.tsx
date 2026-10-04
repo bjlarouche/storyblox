@@ -15,7 +15,6 @@ import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
 const CONTROLS_MIN = 120;
-const GRID_COLOR = new Color3(1, 1, 1);
 const SCENE_BACKDROP = new Color3(0.1, 0.1, 0.12);
 
 function HostScene(props: { yaw: number; onOrbit: (dx: number) => void; children?: React.ReactNode }) {
@@ -62,7 +61,7 @@ function HostScene(props: { yaw: number; onOrbit: (dx: number) => void; children
 	);
 }
 
-function gridLines(width: number, height: number) {
+function gridLines(width: number, height: number, color: Color3) {
 	const lines = new Array<React.Element>();
 	const vertical = gridLineCount(width, GRID_CELL);
 	for (let i = 1; i <= vertical; i++) {
@@ -70,12 +69,12 @@ function gridLines(width: number, height: number) {
 		lines.push(
 			<frame
 				key={`gx-${at}`}
-				BackgroundColor3={GRID_COLOR}
-				BackgroundTransparency={0.8}
+				BackgroundColor3={color}
+				BackgroundTransparency={0.9}
 				BorderSizePixel={0}
 				Size={new UDim2(0, 1, 1, 0)}
 				Position={new UDim2(0, at, 0, 0)}
-				ZIndex={2}
+				ZIndex={1}
 			/>,
 		);
 	}
@@ -85,16 +84,20 @@ function gridLines(width: number, height: number) {
 		lines.push(
 			<frame
 				key={`gy-${at}`}
-				BackgroundColor3={GRID_COLOR}
-				BackgroundTransparency={0.8}
+				BackgroundColor3={color}
+				BackgroundTransparency={0.9}
 				BorderSizePixel={0}
 				Size={new UDim2(1, 0, 0, 1)}
 				Position={new UDim2(0, 0, 0, at)}
-				ZIndex={2}
+				ZIndex={1}
 			/>,
 		);
 	}
-	return lines;
+	return (
+		<frame key="Grid" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} ZIndex={0}>
+			{lines}
+		</frame>
+	);
 }
 
 export const SplitPane = (
@@ -115,9 +118,6 @@ export interface TemplateProps {
 	story?: Story;
 	primaryThemeEnabled?: boolean;
 	onToggleTheme?: () => void;
-	storyTheme?: Theme;
-	storyOnPrimary?: boolean;
-	onToggleStoryTheme?: () => void;
 	remount?: number;
 	caseRequest?: { name: string; id: number };
 	argsRequest?: { args?: { [key: string]: unknown }; id: number };
@@ -128,9 +128,6 @@ function Template({
 	story,
 	primaryThemeEnabled,
 	onToggleTheme,
-	storyTheme,
-	storyOnPrimary,
-	onToggleStoryTheme,
 	remount = 0,
 	caseRequest,
 	argsRequest,
@@ -157,7 +154,7 @@ function Template({
 		setArgs(copyArgs(described?.args ?? described?.props));
 		setYaw(0);
 	}
-	const previewTheme = storyTheme ?? theme;
+	const previewTheme = theme;
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
 	const mountKey = `${storyKey}@${epoch}`;
 	const mounted = useRef("");
@@ -252,24 +249,26 @@ function Template({
 			).preview;
 			const viewport = logical?.kind === "viewport" && !native;
 			const size = previewSize(logical);
-			const logicalWidth = size?.width;
-			const logicalHeight = size?.height;
+			const declared = size !== undefined;
+			const logicalWidth = size?.width ?? dock.x;
+			const logicalHeight = size?.height ?? dock.y;
 			const background = typeOf(logical?.background) === "Color3" ? (logical?.background as Color3) : undefined;
-			const scaled = logicalWidth !== undefined && logicalHeight !== undefined;
-			const scale = scaled
-				? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y) * zoom
+			const fitScale = declared
+				? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y)
 				: 1;
+			const scale = fitScale * zoom;
+			const gridColor = theme.options.constants.colors.textMuted;
 			setTemplate(
 				<frame
 					key={`mount-${epoch}`}
 					ref={mountFrame}
-					Size={scaled ? new UDim2(0, logicalWidth, 0, logicalHeight) : new UDim2(1, 0, 1, 0)}
+					Size={declared ? new UDim2(0, logicalWidth, 0, logicalHeight) : new UDim2(1, 0, 1, 0)}
 					BackgroundColor3={background ?? new Color3(0, 0, 0)}
 					BackgroundTransparency={background !== undefined ? 0 : 1}
 				>
-					{scaled && <uiscale key="Scale" Scale={scale} />}
-					{scaled && <uistroke key="Bounds" Thickness={1} Color={GRID_COLOR} Transparency={0.45} />}
-					{scaled && grid && gridLines(logicalWidth, logicalHeight)}
+					<uiscale key="Scale" Scale={scale} />
+					{declared ? <uistroke key="Bounds" Thickness={1} Color={gridColor} Transparency={0.45} /> : undefined}
+					{grid ? gridLines(logicalWidth, logicalHeight, gridColor) : undefined}
 					<uipadding
 						key="Inset"
 						PaddingTop={new UDim(0, inset)}
@@ -323,28 +322,30 @@ function Template({
 						{...title}
 					/>
 					{onToggleTheme && (
-						<>
-							<IconButton
-								id="Remount"
-								icon={REMOUNT_ICON}
-								tint={theme.options.constants.colors.textMuted}
-								onClick={() => setEpoch((current) => current + 1)}
-								className={
-									{
-										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
-										AnchorPoint: new Vector2(1, 0.5),
-										Position: new UDim2(1, -theme.spacing.calc(2.5), 0.5, 0),
-									} as WriteableStyle<ImageButton>
-								}
+						<frame
+							key="Tools"
+							Size={new UDim2(0, 0, 1, 0)}
+							AutomaticSize={Enum.AutomaticSize.X}
+							AnchorPoint={new Vector2(1, 0.5)}
+							Position={new UDim2(1, -theme.spacing.calc(0.5), 0.5, 0)}
+							BackgroundTransparency={1}
+						>
+							<uilistlayout
+								key="ToolsLayout"
+								FillDirection={Enum.FillDirection.Horizontal}
+								VerticalAlignment={Enum.VerticalAlignment.Center}
+								HorizontalAlignment={Enum.HorizontalAlignment.Right}
+								Padding={new UDim(0, theme.spacing.calc(1))}
+								SortOrder={Enum.SortOrder.LayoutOrder}
 							/>
 							{!native && (story as { preview?: { kind?: unknown } } | undefined)?.preview?.kind === "viewport" && (
 								<>
 									<textbutton
 										key="Orbit"
 										Text="Orbit"
-										Size={new UDim2(0, theme.spacing.calc(3), 0, theme.spacing.calc(1.5))}
-										AnchorPoint={new Vector2(1, 0.5)}
-										Position={new UDim2(1, -theme.spacing.calc(30), 0.5, 0)}
+										LayoutOrder={1}
+										AutomaticSize={Enum.AutomaticSize.X}
+										Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 										BackgroundTransparency={1}
 										Font={theme.typography.fontFamilies.semibold}
 										TextSize={theme.typography.fontSizes.caption}
@@ -354,9 +355,9 @@ function Template({
 									<textbutton
 										key="CameraReset"
 										Text="Cam reset"
-										Size={new UDim2(0, theme.spacing.calc(4.5), 0, theme.spacing.calc(1.5))}
-										AnchorPoint={new Vector2(1, 0.5)}
-										Position={new UDim2(1, -theme.spacing.calc(25), 0.5, 0)}
+										LayoutOrder={2}
+										AutomaticSize={Enum.AutomaticSize.X}
+										Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 										BackgroundTransparency={1}
 										Font={theme.typography.fontFamilies.semibold}
 										TextSize={theme.typography.fontSizes.caption}
@@ -365,26 +366,12 @@ function Template({
 									/>
 								</>
 							)}
-							{onToggleStoryTheme && (
-								<textbutton
-									key="StoryTheme"
-									Text={storyOnPrimary === false ? "Story light" : "Story dark"}
-									Size={new UDim2(0, theme.spacing.calc(5), 0, theme.spacing.calc(1.5))}
-									AnchorPoint={new Vector2(1, 0.5)}
-									Position={new UDim2(1, -theme.spacing.calc(21), 0.5, 0)}
-									BackgroundTransparency={1}
-									Font={theme.typography.fontFamilies.semibold}
-									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.palette.secondary.main}
-									Event={{ MouseButton1Click: onToggleStoryTheme }}
-								/>
-							)}
 							<textbutton
 								key="ZoomOut"
 								Text="-"
-								Size={new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5))}
-								AnchorPoint={new Vector2(1, 0.5)}
-								Position={new UDim2(1, -theme.spacing.calc(16), 0.5, 0)}
+								LayoutOrder={3}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -394,9 +381,9 @@ function Template({
 							<textlabel
 								key="Zoom"
 								Text={`${math.floor(zoom * 100)}%`}
-								Size={new UDim2(0, theme.spacing.calc(2.5), 0, theme.spacing.calc(1.5))}
-								AnchorPoint={new Vector2(1, 0.5)}
-								Position={new UDim2(1, -theme.spacing.calc(13.5), 0.5, 0)}
+								LayoutOrder={4}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -405,9 +392,9 @@ function Template({
 							<textbutton
 								key="ZoomIn"
 								Text="+"
-								Size={new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5))}
-								AnchorPoint={new Vector2(1, 0.5)}
-								Position={new UDim2(1, -theme.spacing.calc(12), 0.5, 0)}
+								LayoutOrder={5}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -417,9 +404,9 @@ function Template({
 							<textbutton
 								key="Grid"
 								Text={grid ? "Grid on" : "Grid"}
-								Size={new UDim2(0, theme.spacing.calc(3.5), 0, theme.spacing.calc(1.5))}
-								AnchorPoint={new Vector2(1, 0.5)}
-								Position={new UDim2(1, -theme.spacing.calc(8), 0.5, 0)}
+								LayoutOrder={6}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -430,14 +417,26 @@ function Template({
 							<textbutton
 								key="Fit"
 								Text={fit ? "Fit" : "100%"}
-								Size={new UDim2(0, theme.spacing.calc(3), 0, theme.spacing.calc(1.5))}
-								AnchorPoint={new Vector2(1, 0.5)}
-								Position={new UDim2(1, -theme.spacing.calc(4.5), 0.5, 0)}
+								LayoutOrder={7}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
 								TextColor3={theme.palette.secondary.main}
 								Event={{ MouseButton1Click: () => setFit((current) => !current) }}
+							/>
+							<IconButton
+								id="Remount"
+								icon={REMOUNT_ICON}
+								tint={theme.options.constants.colors.textMuted}
+								onClick={() => setEpoch((current) => current + 1)}
+								className={
+									{
+										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+										LayoutOrder: 8,
+									} as WriteableStyle<ImageButton>
+								}
 							/>
 							<IconButton
 								id="Theme"
@@ -447,18 +446,23 @@ function Template({
 								className={
 									{
 										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
-										AnchorPoint: new Vector2(1, 0.5),
-										Position: new UDim2(1, -theme.spacing.calc(0.5), 0.5, 0),
+										LayoutOrder: 9,
 									} as WriteableStyle<ImageButton>
 								}
 							/>
-						</>
+						</frame>
 					)}
 				</frame>
 
 				<frame
 					key="Preview"
 					{...preview}
+					ref={(rbx: Frame | undefined) => {
+						if (!rbx) return;
+						const x = rbx.AbsoluteSize.X;
+						const y = rbx.AbsoluteSize.Y;
+						setDock((current) => (current.x === x && current.y === y ? current : { x, y }));
+					}}
 					Change={{
 						AbsoluteSize: (rbx) => {
 							const x = rbx.AbsoluteSize.X;
