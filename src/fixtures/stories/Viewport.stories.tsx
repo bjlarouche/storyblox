@@ -6,8 +6,7 @@ const useViewportStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		viewport: {
 			Size: new UDim2(1, 0, 1, 0),
-			BackgroundColor3: theme.palette.background.paper,
-			BorderSizePixel: 0,
+			BackgroundTransparency: 1,
 		} as WriteableStyle<ViewportFrame>,
 		part: {
 			Size: new Vector3(4, 4, 4),

@@ -5,8 +5,7 @@ local function mount(target, context)
 	local viewport = Instance.new("ViewportFrame")
 	viewport.Name = "ViewportFixture"
 	viewport.Size = UDim2.fromScale(1, 1)
-	viewport.BackgroundColor3 = palette.background.paper
-	viewport.BorderSizePixel = 0
+	viewport.BackgroundTransparency = 1
 
 	local world = Instance.new("WorldModel")
 	world.Parent = viewport
