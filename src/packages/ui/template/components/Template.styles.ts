@@ -37,7 +37,7 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			ZIndex: 300,
 		} as WriteableStyle<Frame>,
 		title: {
-			Size: new UDim2(1, -theme.spacing.calc(3), 1, 0),
+			Size: new UDim2(1, -theme.spacing.calc(5), 1, 0),
 			Position: new UDim2(0, theme.spacing.calc(0.5), 0, 0),
 			BackgroundTransparency: 1,
 			TextXAlignment: Enum.TextXAlignment.Left,
