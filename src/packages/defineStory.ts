@@ -1,11 +1,13 @@
 export interface ControlSpec {
-	type: "string" | "boolean" | "number";
+	type: "string" | "boolean" | "number" | "enum";
+	options?: string[];
 }
 
 export const controls = {
 	string: (): ControlSpec => ({ type: "string" }),
 	boolean: (): ControlSpec => ({ type: "boolean" }),
 	number: (): ControlSpec => ({ type: "number" }),
+	enum: (options: string[]): ControlSpec => ({ type: "enum", options }),
 };
 
 export interface ModernStory<T> {

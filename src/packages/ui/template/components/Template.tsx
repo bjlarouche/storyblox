@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
 import { IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
+import { ArgValues, copyArgs, patchArg } from "../storyArgs";
+import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
@@ -37,23 +39,34 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 	const [failure, setFailure] = useState<unknown>();
 	const [epoch, setEpoch] = useState(0);
 	const [split, setSplit] = useState(10000);
+	const storyKey = story?.title ?? "";
+	const [argsStory, setArgsStory] = useState("");
+	const [args, setArgs] = useState<ArgValues>({});
+	if (storyKey !== argsStory) {
+		setArgsStory(storyKey);
+		const described = story as { args?: unknown; props?: unknown } | undefined;
+		setArgs(copyArgs(described?.args ?? described?.props));
+	}
+	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
+	const mountKey = `${storyKey}@${epoch}`;
+	const mounted = useRef("");
 
 	useEffect(() => {
 		return () => gate.dispose();
 	}, [gate]);
 
 	useEffect(() => {
-		gate.replace(undefined);
 		if (story === undefined) {
 			setTemplate(undefined);
+			gate.replace(undefined);
+			mounted.current = "";
 			return;
 		}
 
 		try {
 			const render = story.template as (props: unknown, context: { theme: Theme }) => unknown;
-			const [element, callback] = render(story.props, { theme }) as LuaTuple<
-				[StoryElement, StoryCallback | undefined]
-			>;
+			const props = native ? (story as { props?: unknown }).props : args;
+			const [element, callback] = render(props, { theme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
 			setTemplate(
@@ -68,13 +81,17 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 					{parsed.element as React.Element}
 				</frame>,
 			);
-			gate.replace(parsed.cleanup);
+			if (mounted.current !== mountKey) {
+				mounted.current = mountKey;
+				gate.replace(parsed.cleanup);
+			}
 		} catch (error) {
 			setTemplate(undefined);
 			gate.replace(undefined);
+			mounted.current = "";
 			setFailure(error);
 		}
-	}, [story, gate, theme, epoch]);
+	}, [story, gate, theme, epoch, args, native, mountKey]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -135,15 +152,11 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 									PaddingLeft={new UDim(0, theme.padding.calc(2))}
 									PaddingRight={new UDim(0, theme.padding.calc(2))}
 								/>
-								<textlabel
-									key="ControlsTitle"
-									Text="Controls"
-									Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
-									BackgroundTransparency={1}
-									Font={theme.typography.fontFamilies.semibold}
-									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.options.constants.colors.textMuted}
-									TextXAlignment={Enum.TextXAlignment.Left}
+								<Controls
+									theme={theme}
+									args={args}
+									argTypes={(story as { argTypes?: unknown } | undefined)?.argTypes}
+									onChange={(key, value) => setArgs((current) => patchArg(current, key, value))}
 								/>
 							</frame>
 						}

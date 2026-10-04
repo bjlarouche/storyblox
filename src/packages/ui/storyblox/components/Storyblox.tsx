@@ -75,6 +75,7 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 	const mount = normalized.mount;
 	return {
 		title: normalized.title as Story["title"],
+		renderer: "native",
 		component: () => <frame />,
 		template: (_props: unknown, context?: unknown) => {
 			const target = new Instance("Frame");
