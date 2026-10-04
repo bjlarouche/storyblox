@@ -1,12 +1,27 @@
 import React, { useEffect, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
 import { IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
+const CONTROLS_MIN = 120;
+
+const SplitPane = (
+	Uiblox as unknown as {
+		SplitPane: (props: {
+			vertical?: boolean;
+			value: number;
+			onChange: (value: number) => void;
+			min?: number;
+			first?: React.ReactNode;
+			second?: React.ReactNode;
+		}) => React.Element;
+	}
+).SplitPane;
 
 export interface TemplateProps {
 	story?: Story;
@@ -15,12 +30,13 @@ export interface TemplateProps {
 }
 
 function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) {
-	const { root, container, corner, navBar, title, canvas } = useTemplateStyles();
+	const { root, container, corner, navBar, title, preview, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
 	const [gate] = useState(createCleanupGate);
 	const [template, setTemplate] = useState<React.Element | undefined>();
 	const [failure, setFailure] = useState<unknown>();
 	const [epoch, setEpoch] = useState(0);
+	const [split, setSplit] = useState(10000);
 
 	useEffect(() => {
 		return () => gate.dispose();
@@ -104,7 +120,35 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 					)}
 				</frame>
 
-				<Canvas className={canvas}>{template}</Canvas>
+				<frame key="Preview" {...preview}>
+					<SplitPane
+						vertical
+						value={split}
+						min={CONTROLS_MIN}
+						onChange={setSplit}
+						first={<Canvas className={canvas}>{template}</Canvas>}
+						second={
+							<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+								<uipadding
+									key="ControlsInset"
+									PaddingTop={new UDim(0, theme.padding.calc(2))}
+									PaddingLeft={new UDim(0, theme.padding.calc(2))}
+									PaddingRight={new UDim(0, theme.padding.calc(2))}
+								/>
+								<textlabel
+									key="ControlsTitle"
+									Text="Controls"
+									Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.options.constants.colors.textMuted}
+									TextXAlignment={Enum.TextXAlignment.Left}
+								/>
+							</frame>
+						}
+					/>
+				</frame>
 			</frame>
 		</frame>
 	);
