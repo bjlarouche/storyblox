@@ -3,13 +3,12 @@ import { Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, Input } from "@r
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
-import { RELEASE, VERSION } from "constants/AppConstants";
+import { VERSION } from "constants/AppConstants";
 
 export interface StoriesSidebarProps {
 	stories: Story[];
 	logoSrc: string;
 	version?: string;
-	release?: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onClick: (story: Story<any>) => void;
 }
@@ -18,10 +17,9 @@ function StoriesSidebar({
 	stories,
 	logoSrc,
 	version = VERSION,
-	release = RELEASE,
 	onClick,
 }: StoriesSidebarProps) {
-	const { logo, filterInput, storiesTree, divider, versionLabel, releaseLabel } = useStoriesSidebarStyles();
+	const { logo, filterInput, storiesTree, divider, versionLabel } = useStoriesSidebarStyles();
 
 	const [filter, setFilter] = useState<string>("");
 	const [tree, setTree] = useState<Tree | undefined>();
@@ -89,8 +87,7 @@ function StoriesSidebar({
 
 			<Divider className={divider} />
 
-			<textlabel {...versionLabel} Text={`Version ${version}`}></textlabel>
-			<textlabel {...releaseLabel} Text={`${release}`}></textlabel>
+			<textlabel {...versionLabel} Text={`@rbxts/storyblox ${version}`}></textlabel>
 		</Sidebar>
 	);
 }
