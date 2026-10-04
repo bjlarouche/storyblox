@@ -1,17 +1,25 @@
-import React, { useState } from "@rbxts/react";
-import { RadioGroup } from "./kit";
+import React from "@rbxts/react";
+import { RadioGroup, useArg } from "./kit";
 
-const options = [
-	{ label: "Alpha", value: "alpha" },
-	{ label: "Beta", value: "beta" },
-];
+interface Args {
+	options: string[];
+	value: string;
+	disabled: boolean;
+}
 
-function RadioStory() {
-	const [value, setValue] = useState("alpha");
-	return <RadioGroup value={value} options={options} onChange={setValue} />;
+function RadioStory(args: Args) {
+	const [value, setValue] = useArg(args.value);
+	const options = args.options.map((option) => ({ label: option, value: option }));
+	return <RadioGroup value={value} options={options} disabled={args.disabled} onChange={setValue} />;
 }
 
 export default {
 	title: "Components/RadioGroup",
-	template: () => <RadioStory />,
+	args: { options: ["alpha", "beta"], value: "alpha", disabled: false },
+	argTypes: {
+		options: { type: "array", item: { type: "string" } },
+		value: { type: "string" },
+		disabled: { type: "boolean" },
+	},
+	render: (args: Args) => <RadioStory {...args} />,
 };

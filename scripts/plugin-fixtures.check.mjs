@@ -39,6 +39,7 @@ const needles = [
 	"Components/Tabs",
 	"Components/SplitPane",
 	"Components/Tooltip",
+	"Components/Button",
 	"Fixture/Defined",
 	"Fixture/Controls",
 	"Fixture/Datatypes",

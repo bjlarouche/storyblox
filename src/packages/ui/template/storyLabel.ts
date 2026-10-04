@@ -17,7 +17,8 @@ export function argDoc(
 	const parts = [name, spec?.control ?? spec?.type ?? "unknown"];
 	if (spec?.optional === true) parts.push("optional");
 	if (fallback === undefined) parts.push("no default");
-	else parts.push(`default ${typeOf(fallback) === "string" ? `"${fallback}"` : tostring(fallback)}`);
+	else if (typeOf(fallback) !== "table")
+		parts.push(`default ${typeOf(fallback) === "string" ? `"${fallback}"` : tostring(fallback)}`);
 	const line = parts.join(" · ");
 	return spec?.description !== undefined ? `${line}\n${spec.description}` : line;
 }
