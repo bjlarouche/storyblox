@@ -1,6 +1,6 @@
 import Log from "@rbxts/log";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
-import { ReplicatedStorage, ServerStorage } from "@rbxts/services";
+import { HttpService, ReplicatedStorage, ServerStorage } from "@rbxts/services";
 import {
 	createStyles,
 	DarkTheme,
@@ -86,6 +86,7 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 		argTypes: normalized.argTypes,
 		props: normalized.args,
 		preview: normalized.preview,
+		cases: normalized.cases,
 		nativeSession: session,
 		component: () => <frame />,
 		template: (props: unknown, context?: unknown) => {
@@ -206,6 +207,7 @@ function Storyblox(props: StorybloxProps) {
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
+	const [caseRequest, setCaseRequest] = useState<{ name: string; id: number } | undefined>();
 	const generation = useRef(0);
 	const failed = useRef(false);
 	const storiesRef = useRef(stories);
@@ -387,12 +389,19 @@ function Storyblox(props: StorybloxProps) {
 		const remountConn = marker
 			.GetAttributeChangedSignal("storyblox-remount")
 			.Connect(() => setRemount((current) => current + 1));
+		const caseConn = marker.GetAttributeChangedSignal("storyblox-case").Connect(() => {
+			const name = marker.GetAttribute("storyblox-case");
+			if (typeOf(name) !== "string" || name === "") return;
+			marker.SetAttribute("storyblox-case-result", undefined);
+			setCaseRequest((current) => ({ name: name as string, id: (current?.id ?? 0) + 1 }));
+		});
 		onSelect();
 		return () => {
 			selectConn.Disconnect();
 			themeConn.Disconnect();
 			focusConn.Disconnect();
 			remountConn.Disconnect();
+			caseConn.Disconnect();
 		};
 	}, [root, primaryTheme, secondaryTheme, onThemeChange]);
 
@@ -484,6 +493,10 @@ function Storyblox(props: StorybloxProps) {
 							<Template
 								story={selectedStory}
 								remount={remount}
+								caseRequest={caseRequest}
+								onCaseResult={(result) =>
+									controlRoot(root)?.SetAttribute("storyblox-case-result", HttpService.JSONEncode(result))
+								}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
 								storyTheme={storyTheme}
