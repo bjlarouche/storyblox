@@ -28,5 +28,6 @@ if (argDoc("count", { type: "number", control: "slider", optional: true }, undef
 }
 if (argDoc("disabled", { type: "boolean" }, false) !== "disabled · boolean · default false") throw new Error("false default");
 if (argDoc("mystery", undefined, 3) !== "mystery · unknown · default 3") throw new Error("missing spec");
+if (argDoc("items", { type: "array" }, ["a"]) !== "items · array") throw new Error("table default");
 
 console.log("story label ok");

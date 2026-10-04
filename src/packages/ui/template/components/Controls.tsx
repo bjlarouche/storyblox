@@ -260,9 +260,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 		} else if (spec?.type === "custom") {
 			editor = <CustomEditor key={name} editor={spec.editor ?? ""} value={value} onChange={(incoming) => onChange(name, incoming)} />;
 		} else if (spec?.type === "array") {
-			const items = (
-				typeOf(value) === "table" && typeOf((value as { size?: unknown }).size) === "function" ? value : []
-			) as Array<defined>;
+			const items = (typeOf(value) === "table" ? value : []) as Array<defined>;
 			let keys = rowKeys[name];
 			if (keys === undefined || keys.size() !== items.size()) {
 				const aligned: Array<string> = [];
@@ -445,18 +443,8 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 		}
 		order += 1;
 	}
-
-	return (
-		<scrollingframe
-			key="ControlsList"
-			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundTransparency={1}
-			BorderSizePixel={0}
-			CanvasSize={new UDim2(0, 0, 0, 0)}
-			AutomaticCanvasSize={Enum.AutomaticSize.Y}
-			ScrollBarThickness={theme.spacing.calc(0.5)}
-		>
-			<uilistlayout Padding={new UDim(0, theme.padding.calc(1))} SortOrder={Enum.SortOrder.LayoutOrder} />
+	rows.push(
+		order > 1 ? (
 			<textbutton
 				key="Reset"
 				Text="Reset"
@@ -469,6 +457,32 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 				TextXAlignment={Enum.TextXAlignment.Left}
 				Event={{ MouseButton1Click: onReset }}
 			/>
+		) : (
+			<textlabel
+				key="NoControls"
+				Text="No controls for this story"
+				LayoutOrder={0}
+				Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.default}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.options.constants.colors.textMuted}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>
+		),
+	);
+
+	return (
+		<scrollingframe
+			key="ControlsList"
+			Size={new UDim2(1, 0, 1, 0)}
+			BackgroundTransparency={1}
+			BorderSizePixel={0}
+			CanvasSize={new UDim2(0, 0, 0, 0)}
+			AutomaticCanvasSize={Enum.AutomaticSize.Y}
+			ScrollBarThickness={theme.spacing.calc(0.5)}
+		>
+			<uilistlayout Padding={new UDim(0, theme.padding.calc(1))} SortOrder={Enum.SortOrder.LayoutOrder} />
 			<textlabel
 				key="ControlsTitle"
 				Text="Controls"

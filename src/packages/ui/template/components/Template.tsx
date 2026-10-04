@@ -155,6 +155,11 @@ function Template({
 		setYaw(0);
 	}
 	const previewTheme = theme;
+	const argTypes = (story as { argTypes?: unknown } | undefined)?.argTypes;
+	let controlled = false;
+	if (typeOf(argTypes) === "table") {
+		for (const _ of pairs(argTypes as object)) controlled = true;
+	}
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
 	const mountKey = `${storyKey}@${epoch}`;
 	const mounted = useRef("");
@@ -474,7 +479,7 @@ function Template({
 					<SplitPane
 						vertical
 						value={split}
-						min={CONTROLS_MIN}
+						min={controlled ? CONTROLS_MIN : theme.spacing.calc(5)}
 						onChange={setSplit}
 						first={<Canvas className={canvas}>{template}</Canvas>}
 						second={
@@ -488,7 +493,7 @@ function Template({
 								<Controls
 									theme={theme}
 									args={args}
-									argTypes={(story as { argTypes?: unknown } | undefined)?.argTypes}
+									argTypes={argTypes}
 									defaults={(story as { args?: unknown; props?: unknown } | undefined)?.args ?? (story as { props?: unknown } | undefined)?.props}
 									description={(story as { description?: unknown } | undefined)?.description}
 									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
