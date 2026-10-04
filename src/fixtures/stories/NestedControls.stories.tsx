@@ -4,6 +4,7 @@ const onClick = () => {};
 
 export default {
 	title: "Fixture/Nested",
+	preview: { kind: "gui", width: 320, height: 48 },
 	args: {
 		items: ["a", "b"],
 		shape: { kind: "circle" },

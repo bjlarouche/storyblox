@@ -5,6 +5,7 @@ import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
+import { previewScale } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
@@ -39,6 +40,8 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 	const [failure, setFailure] = useState<unknown>();
 	const [epoch, setEpoch] = useState(0);
 	const [split, setSplit] = useState(10000);
+	const [fit, setFit] = useState(true);
+	const [dock, setDock] = useState({ x: 0, y: 0 });
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
 	const [args, setArgs] = useState<ArgValues>({});
@@ -81,8 +84,18 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			const [element, callback] = render(props, { theme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
+			const logical = (story as { preview?: { width?: unknown; height?: unknown } }).preview;
+			const logicalWidth = typeOf(logical?.width) === "number" ? (logical?.width as number) : undefined;
+			const logicalHeight = typeOf(logical?.height) === "number" ? (logical?.height as number) : undefined;
+			const scaled = logicalWidth !== undefined && logicalHeight !== undefined;
+			const scale = scaled ? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y) : 1;
 			setTemplate(
-				<frame key={`mount-${epoch}`} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+				<frame
+					key={`mount-${epoch}`}
+					Size={scaled ? new UDim2(0, logicalWidth, 0, logicalHeight) : new UDim2(1, 0, 1, 0)}
+					BackgroundTransparency={1}
+				>
+					{scaled && <uiscale key="Scale" Scale={scale} />}
 					<uipadding
 						key="Inset"
 						PaddingTop={new UDim(0, inset)}
@@ -105,7 +118,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			themeMounted.current = undefined;
 			setFailure(error);
 		}
-	}, [story, gate, theme, epoch, args, native, mountKey]);
+	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -134,6 +147,18 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 									} as WriteableStyle<ImageButton>
 								}
 							/>
+							<textbutton
+								key="Fit"
+								Text={fit ? "Fit" : "100%"}
+								Size={new UDim2(0, theme.spacing.calc(3), 0, theme.spacing.calc(1.5))}
+								AnchorPoint={new Vector2(1, 0.5)}
+								Position={new UDim2(1, -theme.spacing.calc(4.5), 0.5, 0)}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.secondary.main}
+								Event={{ MouseButton1Click: () => setFit((current) => !current) }}
+							/>
 							<IconButton
 								id="Theme"
 								icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
@@ -151,7 +176,17 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 					)}
 				</frame>
 
-				<frame key="Preview" {...preview}>
+				<frame
+					key="Preview"
+					{...preview}
+					Change={{
+						AbsoluteSize: (rbx) => {
+							const x = rbx.AbsoluteSize.X;
+							const y = rbx.AbsoluteSize.Y;
+							setDock((current) => (current.x === x && current.y === y ? current : { x, y }));
+						},
+					}}
+				>
 					<SplitPane
 						vertical
 						value={split}
