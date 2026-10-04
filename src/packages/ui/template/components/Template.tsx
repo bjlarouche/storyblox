@@ -5,13 +5,49 @@ import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
-import { previewScale } from "../../../previewScale";
+import { GRID_CELL, gridLineCount, previewScale } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
 const CONTROLS_MIN = 120;
+const GRID_COLOR = new Color3(1, 1, 1);
+
+function gridLines(width: number, height: number) {
+	const lines = new Array<React.Element>();
+	const vertical = gridLineCount(width, GRID_CELL);
+	for (let i = 1; i <= vertical; i++) {
+		const at = i * GRID_CELL;
+		lines.push(
+			<frame
+				key={`gx-${at}`}
+				BackgroundColor3={GRID_COLOR}
+				BackgroundTransparency={0.8}
+				BorderSizePixel={0}
+				Size={new UDim2(0, 1, 1, 0)}
+				Position={new UDim2(0, at, 0, 0)}
+				ZIndex={2}
+			/>,
+		);
+	}
+	const horizontal = gridLineCount(height, GRID_CELL);
+	for (let i = 1; i <= horizontal; i++) {
+		const at = i * GRID_CELL;
+		lines.push(
+			<frame
+				key={`gy-${at}`}
+				BackgroundColor3={GRID_COLOR}
+				BackgroundTransparency={0.8}
+				BorderSizePixel={0}
+				Size={new UDim2(1, 0, 0, 1)}
+				Position={new UDim2(0, 0, 0, at)}
+				ZIndex={2}
+			/>,
+		);
+	}
+	return lines;
+}
 
 const SplitPane = (
 	Uiblox as unknown as {
@@ -41,6 +77,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 	const [epoch, setEpoch] = useState(0);
 	const [split, setSplit] = useState(10000);
 	const [fit, setFit] = useState(true);
+	const [grid, setGrid] = useState(false);
 	const [dock, setDock] = useState({ x: 0, y: 0 });
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
@@ -84,18 +121,22 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			const [element, callback] = render(props, { theme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
-			const logical = (story as { preview?: { width?: unknown; height?: unknown } }).preview;
+			const logical = (story as { preview?: { width?: unknown; height?: unknown; background?: unknown } }).preview;
 			const logicalWidth = typeOf(logical?.width) === "number" ? (logical?.width as number) : undefined;
 			const logicalHeight = typeOf(logical?.height) === "number" ? (logical?.height as number) : undefined;
+			const background = typeOf(logical?.background) === "Color3" ? (logical?.background as Color3) : undefined;
 			const scaled = logicalWidth !== undefined && logicalHeight !== undefined;
 			const scale = scaled ? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y) : 1;
 			setTemplate(
 				<frame
 					key={`mount-${epoch}`}
 					Size={scaled ? new UDim2(0, logicalWidth, 0, logicalHeight) : new UDim2(1, 0, 1, 0)}
-					BackgroundTransparency={1}
+					BackgroundColor3={background ?? new Color3(0, 0, 0)}
+					BackgroundTransparency={background !== undefined ? 0 : 1}
 				>
 					{scaled && <uiscale key="Scale" Scale={scale} />}
+					{scaled && <uistroke key="Bounds" Thickness={1} Color={GRID_COLOR} Transparency={0.45} />}
+					{scaled && grid && gridLines(logicalWidth, logicalHeight)}
 					<uipadding
 						key="Inset"
 						PaddingTop={new UDim(0, inset)}
@@ -118,7 +159,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			themeMounted.current = undefined;
 			setFailure(error);
 		}
-	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock]);
+	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -146,6 +187,19 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 										Position: new UDim2(1, -theme.spacing.calc(2.5), 0.5, 0),
 									} as WriteableStyle<ImageButton>
 								}
+							/>
+							<textbutton
+								key="Grid"
+								Text={grid ? "Grid on" : "Grid"}
+								Size={new UDim2(0, theme.spacing.calc(3.5), 0, theme.spacing.calc(1.5))}
+								AnchorPoint={new Vector2(1, 0.5)}
+								Position={new UDim2(1, -theme.spacing.calc(8), 0.5, 0)}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.secondary.main}
+								TextTransparency={grid ? 0 : 0.45}
+								Event={{ MouseButton1Click: () => setGrid((current) => !current) }}
 							/>
 							<textbutton
 								key="Fit"
