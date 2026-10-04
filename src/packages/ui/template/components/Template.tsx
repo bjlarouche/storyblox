@@ -118,6 +118,8 @@ export interface TemplateProps {
 	story?: Story;
 	primaryThemeEnabled?: boolean;
 	onToggleTheme?: () => void;
+	starred?: boolean;
+	onToggleFavorite?: () => void;
 	remount?: number;
 	caseRequest?: { name: string; id: number };
 	argsRequest?: { args?: { [key: string]: unknown }; id: number };
@@ -128,6 +130,8 @@ function Template({
 	story,
 	primaryThemeEnabled,
 	onToggleTheme,
+	starred,
+	onToggleFavorite,
 	remount = 0,
 	caseRequest,
 	argsRequest,
@@ -343,6 +347,21 @@ function Template({
 								Padding={new UDim(0, theme.spacing.calc(1))}
 								SortOrder={Enum.SortOrder.LayoutOrder}
 							/>
+							{onToggleFavorite !== undefined && story !== undefined ? (
+								<textbutton
+									key="Star"
+									Text={starred ? "Starred" : "Star"}
+									LayoutOrder={0}
+									AutomaticSize={Enum.AutomaticSize.X}
+									Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.palette.secondary.main}
+									TextTransparency={starred ? 0 : 0.45}
+									Event={{ MouseButton1Click: onToggleFavorite }}
+								/>
+							) : undefined}
 							{!native && (story as { preview?: { kind?: unknown } } | undefined)?.preview?.kind === "viewport" && (
 								<>
 									<textbutton

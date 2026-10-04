@@ -30,6 +30,27 @@ function ensureBranch(branches: StoryBranch[], title: string): StoryBranch {
 	return created;
 }
 
+export function parseFavorites(saved: string | undefined) {
+	if (saved === undefined || saved.size() === 0) return new Array<string>();
+	return saved.split(",").filter((title) => title.size() > 0);
+}
+
+export function toggleFavorite(current: string[], title: string) {
+	const chosen = current.filter((item) => item !== title);
+	if (chosen.size() === current.size()) chosen.push(title);
+	return chosen;
+}
+
+export function favoriteBranch(stories: StoryNode[], titles: string[], icons: StoryIcons): StoryBranch | undefined {
+	const leaves: StoryLeaf[] = [];
+	for (const title of titles) {
+		const story = stories.find((item) => item.title === title);
+		if (story !== undefined) leaves.push({ title, onClick: story.onClick, icon: icons.story });
+	}
+	if (leaves.size() === 0) return undefined;
+	return { title: "Favorites", leaves, icon: icons.folder };
+}
+
 export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBranch[] {
 	const roots: StoryBranch[] = [];
 

@@ -16,6 +16,7 @@ import { Story } from "../../../../interfaces";
 import { SplitPane, Template } from "../../template";
 import { storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
+import { parseFavorites, toggleFavorite } from "../../storiesSidebar/storyTree";
 import { mountNative } from "../nativeMount";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
@@ -243,6 +244,8 @@ export interface StorybloxProps {
 	debugEnabled?: boolean;
 	themeName?: "dark" | "light";
 	onThemeChange?: (themeName: "dark" | "light") => void;
+	favorites?: string;
+	onFavoritesChange?: (favorites: string) => void;
 }
 
 function Storyblox(props: StorybloxProps) {
@@ -256,6 +259,8 @@ function Storyblox(props: StorybloxProps) {
 		debugEnabled,
 		themeName,
 		onThemeChange,
+		favorites,
+		onFavoritesChange,
 	} = props;
 
 	const { errorContainer, errorMessage } = useStorybloxStyles();
@@ -298,6 +303,17 @@ function Storyblox(props: StorybloxProps) {
 	}, []);
 
 	const [theme, setTheme] = useState(themeName === "light" ? secondaryTheme : primaryTheme);
+	const [favoriteList, setFavoriteList] = useState(parseFavorites(favorites));
+	const favoritesRef = useRef(favoriteList);
+	favoritesRef.current = favoriteList;
+	const toggleFavoriteStory = (title: string) => {
+		const chosen = toggleFavorite(favoritesRef.current, title);
+		favoritesRef.current = chosen;
+		setFavoriteList(chosen);
+		if (onFavoritesChange) onFavoritesChange(chosen.join(","));
+	};
+	const toggleRef = useRef(toggleFavoriteStory);
+	toggleRef.current = toggleFavoriteStory;
 
 	const logDebug = useCallback(
 		(message: string) => {
@@ -446,6 +462,12 @@ function Storyblox(props: StorybloxProps) {
 		};
 		const selectConn = marker.GetAttributeChangedSignal("storyblox-select").Connect(onSelect);
 		const themeConn = marker.GetAttributeChangedSignal("storyblox-theme").Connect(onTheme);
+		const favoriteConn = marker.GetAttributeChangedSignal("storyblox-favorite").Connect(() => {
+			const title = marker.GetAttribute("storyblox-favorite");
+			if (typeOf(title) !== "string" || (title as string).size() === 0) return;
+			marker.SetAttribute("storyblox-favorite", undefined);
+			toggleRef.current(title as string);
+		});
 		const focusConn = marker
 			.GetAttributeChangedSignal("storyblox-focus-search")
 			.Connect(() => setFocusSearch((current) => current + 1));
@@ -526,6 +548,7 @@ function Storyblox(props: StorybloxProps) {
 			requestConn.Disconnect();
 			selectConn.Disconnect();
 			themeConn.Disconnect();
+			favoriteConn.Disconnect();
 			focusConn.Disconnect();
 			remountConn.Disconnect();
 			caseConn.Disconnect();
@@ -594,6 +617,7 @@ function Storyblox(props: StorybloxProps) {
 							version={version}
 							selected={selectedStory?.title}
 							focusSearch={focusSearch}
+							favorites={favoriteList}
 							onClick={(story: Story) => {
 								controlRoot(root)?.SetAttribute("storyblox-select", story.title);
 								setSelectedStory(story);
@@ -626,6 +650,10 @@ function Storyblox(props: StorybloxProps) {
 										}}
 										primaryThemeEnabled={primaryThemeEnabled}
 										onToggleTheme={toggleTheme}
+										starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
+										onToggleFavorite={
+											selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined
+										}
 									/>
 								);
 							}}
@@ -645,6 +673,10 @@ function Storyblox(props: StorybloxProps) {
 								}}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
+								starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
+								onToggleFavorite={
+									selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined
+								}
 							/>
 						</ErrorBoundary>
 					}
