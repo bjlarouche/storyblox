@@ -62,20 +62,20 @@ function StoriesSidebar({
 			return;
 		}
 
-		const next: Tree = {
+		const built: Tree = {
 			title: "STORIES", // TODO: Allow this to be customized
 			branches: [],
 		};
 
 		if (query.size() > 0) {
 			matches.forEach((story) => {
-				next.branches.push({
+				built.branches.push({
 					title: story.title,
 					leaves: [],
 					onClick: () => onClick(story),
 				});
 			});
-			treeRef.current = adoptTree(treeRef.current, next);
+			treeRef.current = adoptTree(treeRef.current, built);
 			setTreeRev((n) => n + 1);
 			return;
 		}
@@ -90,11 +90,11 @@ function StoriesSidebar({
 			onClick: () => onClick(story),
 		}));
 		const icons = { folder: Icons.OpenBox, component: Icons.ListPrimary, story: Icons.Book };
-		next.branches = storyBranches(nodes, icons) as Branch[];
+		built.branches = storyBranches(nodes, icons) as Branch[];
 		const favoritesBranch = favoriteBranch(nodes, favorites, icons);
-		if (favoritesBranch !== undefined) next.branches.unshift(favoritesBranch as Branch);
+		if (favoritesBranch !== undefined) built.branches.unshift(favoritesBranch as Branch);
 
-		treeRef.current = adoptTree(treeRef.current, next);
+		treeRef.current = adoptTree(treeRef.current, built);
 		setTreeRev((n) => n + 1);
 	}, [stories, query, favorites]);
 	const tree = treeRef.current;

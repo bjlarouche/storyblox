@@ -41,15 +41,10 @@ export function toggleFavorite(current: string[], title: string) {
 	return chosen;
 }
 
-export interface StoryTree {
-	title: string;
-	branches: StoryBranch[];
-}
-
-export function adoptTree(current: StoryTree | undefined, next: StoryTree): StoryTree {
-	if (current === undefined) return next;
-	current.title = next.title;
-	current.branches = next.branches;
+export function adoptTree<T extends { title: string; branches: unknown[] }>(current: T | undefined, incoming: T): T {
+	if (current === undefined) return incoming;
+	current.title = incoming.title;
+	current.branches = incoming.branches;
 	return current;
 }
 
