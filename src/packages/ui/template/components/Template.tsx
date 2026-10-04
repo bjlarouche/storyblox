@@ -468,6 +468,8 @@ function Template({
 									theme={theme}
 									args={args}
 									argTypes={(story as { argTypes?: unknown } | undefined)?.argTypes}
+									defaults={(story as { args?: unknown; props?: unknown } | undefined)?.args ?? (story as { props?: unknown } | undefined)?.props}
+									description={(story as { description?: unknown } | undefined)?.description}
 									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
 									onReset={() => {
 										const described = story as { args?: unknown; props?: unknown } | undefined;

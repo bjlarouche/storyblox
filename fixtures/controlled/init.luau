@@ -26,12 +26,13 @@ end
 return {
 	renderer = "native",
 	title = "Inputs/Button/Native",
+	description = "A native button that applies args through update.",
 	args = {
 		label = "Native",
 		disabled = false,
 	},
 	argTypes = {
-		label = { type = "string" },
+		label = { type = "string", description = "Button text" },
 		disabled = { type = "boolean" },
 	},
 	mount = mount,

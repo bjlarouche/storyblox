@@ -87,6 +87,7 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 		props: normalized.args,
 		preview: normalized.preview,
 		cases: normalized.cases,
+		description: normalized.description,
 		nativeSession: session,
 		component: () => <frame />,
 		template: (props: unknown, context?: unknown) => {
