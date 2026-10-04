@@ -1,3 +1,9 @@
+String.prototype.size = function size() {
+	return this.length;
+};
+Array.prototype.size = function size() {
+	return this.length;
+};
 String.prototype.sub = function sub(start, finish) {
 	return this.slice(start - 1, finish);
 };
@@ -8,8 +14,9 @@ String.prototype.find = function find(pattern, init, plain) {
 
 globalThis.typeOf = (value) => (value !== null && typeof value === "object" ? "table" : typeof value);
 globalThis.tostring = (value) => String(value);
+globalThis.pairs = (value) => Object.entries(value);
 
-const { argDoc, storyLabel, storyLanguage } = await import("../src/packages/ui/template/storyLabel.ts");
+const { argDoc, storyLabel, storyLanguage, storyInspector } = await import("../src/packages/ui/template/storyLabel.ts");
 
 if (storyLanguage("-- Compiled with roblox-ts v3.0.0\nlocal TS") !== "TS") throw new Error("ts header");
 if (storyLanguage("local function mount() end") !== "Luau") throw new Error("luau source");
@@ -29,5 +36,17 @@ if (argDoc("count", { type: "number", control: "slider", optional: true }, undef
 if (argDoc("disabled", { type: "boolean" }, false) !== "disabled · boolean · default false") throw new Error("false default");
 if (argDoc("mystery", undefined, 3) !== "mystery · unknown · default 3") throw new Error("missing spec");
 if (argDoc("items", { type: "array" }, ["a"]) !== "items · array") throw new Error("table default");
+if (storyInspector(undefined) !== "No story selected") throw new Error("empty inspector");
+if (
+	storyInspector({
+		title: "Components/Button",
+		language: "TS",
+		source: "ServerStorage.stories.Button",
+		description: "A button",
+		argTypes: { text: {}, disabled: {} },
+	}) !== "Components/Button\nreact · TS\nServerStorage.stories.Button\nA button\ndisabled, text"
+) {
+	throw new Error("inspector lines");
+}
 
 console.log("story label ok");
