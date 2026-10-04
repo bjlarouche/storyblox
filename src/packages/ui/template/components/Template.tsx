@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Story } from "../../../../interfaces";
-import { IconButton, Icons, Shadow, Theme, Tooltip, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import { IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
@@ -113,6 +113,11 @@ export const SplitPane = (
 		}) => React.Element;
 	}
 ).SplitPane;
+
+const stars = Uiblox as unknown as {
+	Tooltip: (props: { text: string; className?: WriteableStyle<Frame>; children?: React.ReactNode }) => React.Element;
+	Icons: { Star: Icons; StarFilled: Icons };
+};
 
 export interface TemplateProps {
 	story?: Story;
@@ -321,7 +326,7 @@ function Template({
 
 				<frame key="NavBar" {...navBar}>
 					{favoriteShown && (
-						<Tooltip
+						<stars.Tooltip
 							text={starred ? "Remove from favorites" : "Add to favorites"}
 							className={
 								{
@@ -335,7 +340,7 @@ function Template({
 						>
 							<IconButton
 								id="Favorite"
-								icon={starred ? Icons.StarFilled : Icons.Star}
+								icon={starred ? stars.Icons.StarFilled : stars.Icons.Star}
 								tint={theme.options.constants.colors.textMuted}
 								onClick={onToggleFavorite}
 								className={
@@ -345,7 +350,7 @@ function Template({
 									} as WriteableStyle<ImageButton>
 								}
 							/>
-						</Tooltip>
+						</stars.Tooltip>
 					)}
 					<textlabel
 						key="Title"
