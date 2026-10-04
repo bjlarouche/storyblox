@@ -25,7 +25,7 @@ const devProject = join(pluginDir, ".fixtures-dev.project.json");
 const releaseProject = join(pluginDir, ".fixtures-release.project.json");
 const devModel = join(dir, "dev.rbxlx");
 const releaseModel = join(dir, "release.rbxlx");
-const needles = ["Fixture/React", "Fixture/Native", "native fixture", "Viewport React", "Fixture/Styled"];
+const needles = ["Fixture/React", "Fixture/Native", "native fixture", "Viewport React", "Fixture/Styled", "Inputs/Button/Primary"];
 
 try {
 	writeFileSync(

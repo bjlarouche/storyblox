@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "@rbxts/react";
-import { Icons, Sidebar, Divider, Branch, Leaf, Tree, TreeView, TreeViewProps, Input } from "@rbxts/uiblox";
+import { Branch, Icons, Sidebar, Divider, Tree, TreeView, TreeViewProps, Input } from "@rbxts/uiblox";
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
 import { storyMatches } from "../storySearch";
+import { storyBranches } from "../storyTree";
 
 const SEARCH_DELAY = 0.2;
 
@@ -59,32 +60,17 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick
 		}
 
 		matches.forEach((story) => {
-			const paths = story.title.split("/");
-			const componentName = paths[0];
-			const storyName = paths[1];
-
-			if (componentName === undefined) {
+			if (story.title.split("/").size() < 2) {
 				Log.Error("Story title is empty should follow the pattern '<componentName>/<storyName>'");
-				return;
-			}
-
-			const newleaf: Leaf = {
-				title: storyName,
-				onClick: () => onClick(story),
-			};
-
-			const branch = tree.branches.find((branch: Branch) => branch.title === componentName);
-			if (branch === undefined) {
-				const newBranch: Branch = {
-					title: componentName,
-					leaves: [newleaf],
-				};
-
-				tree.branches.push(newBranch);
-			} else {
-				branch.leaves?.push(newleaf);
 			}
 		});
+		tree.branches = storyBranches(
+			matches.map((story) => ({
+				title: story.title,
+				onClick: () => onClick(story),
+			})),
+			{ folder: Icons.OpenBox, component: Icons.ListPrimary, story: Icons.Book },
+		) as Branch[];
 
 		setTree(tree);
 	}, [stories, query]);
