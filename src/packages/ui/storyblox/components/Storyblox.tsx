@@ -249,6 +249,9 @@ function Storyblox(props: StorybloxProps) {
 		};
 	}, [root, findStories, logDebug]);
 
+	const primaryThemeEnabled = theme === primaryTheme;
+	const toggleTheme = () => setTheme(primaryThemeEnabled ? secondaryTheme : primaryTheme);
+
 	return (
 		<ThemeProvider theme={theme}>
 			<frame key="Storyblox" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
@@ -260,10 +263,6 @@ function Storyblox(props: StorybloxProps) {
 					onClick={(story: Story) => {
 						(pluginStories() ?? root)?.SetAttribute("storyblox-select", story.title);
 						setSelectedStory(story);
-					}}
-					primaryThemeEnabled={theme === primaryTheme}
-					onToggleTheme={() => {
-						setTheme(theme === primaryTheme ? secondaryTheme : primaryTheme);
 					}}
 				/>
 				<ErrorBoundary
@@ -286,11 +285,17 @@ function Storyblox(props: StorybloxProps) {
 									component: () => errorComponnt,
 									template: () => errorComponnt,
 								}}
+								primaryThemeEnabled={primaryThemeEnabled}
+								onToggleTheme={toggleTheme}
 							/>
 						);
 					}}
 				>
-					<Template story={selectedStory} />
+					<Template
+						story={selectedStory}
+						primaryThemeEnabled={primaryThemeEnabled}
+						onToggleTheme={toggleTheme}
+					/>
 				</ErrorBoundary>
 			</frame>
 		</ThemeProvider>

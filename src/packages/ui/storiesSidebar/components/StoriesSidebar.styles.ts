@@ -1,42 +1,12 @@
-import { createStyles, makeStyles, ROBLOX_UI_OFFSET, Theme, WriteableStyle } from "@rbxts/uiblox";
+import { createStyles, makeStyles, Theme, WriteableStyle } from "@rbxts/uiblox";
 
 const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
-	const logoOffset = theme.spacing.calc(2);
+	const logoOffset = 0;
 	const filterOffset = logoOffset + theme.spacing.calc(3) + theme.padding.calc(2);
 	const storiesOffset = filterOffset + theme.spacing.calc(2) + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(4) + theme.padding.calc(2);
 
 	return createStyles({
-		themeButton: {
-			Size: new UDim2(
-				0,
-				theme.options.constants.iconSizes.medium + theme.padding.calc(2),
-				0,
-				theme.options.constants.iconSizes.medium + theme.padding.calc(2),
-			),
-			Position: new UDim2(
-				0,
-				theme.spacing.calc(9) + theme.padding.calc(2.5),
-				0,
-				theme.padding.calc(1) - ROBLOX_UI_OFFSET,
-			),
-			AnchorPoint: new Vector2(0, 0),
-			BackgroundColor3: Color3.fromRGB(0, 0, 0),
-			BackgroundTransparency: 0.3,
-			BorderSizePixel: 0,
-			Text: "",
-			ClipsDescendants: true,
-			ZIndex: 5100,
-		} as WriteableStyle<TextButton>,
-		menuIcon: {
-			Position: new UDim2(0.5, 0, 0.5, 0),
-			AnchorPoint: new Vector2(0.5, 0.5),
-			ImageColor3: theme.options.constants.extendedPalette.Common.White,
-			ZIndex: 5100,
-		} as WriteableStyle<ImageLabel>,
-		corner: {
-			CornerRadius: new UDim(theme.options.constants.iconSizes.medium + theme.padding.calc(2)),
-		} as WriteableStyle<UICorner>,
 		logo: {
 			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(2)),
 			Position: new UDim2(0.5, 0, 0, logoOffset),
