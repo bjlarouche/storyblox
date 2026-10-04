@@ -6,7 +6,7 @@ import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import { CAMERA_DISTANCE, CAMERA_PITCH, ORBIT_STEP, orbitOffset } from "../../../previewCamera";
-import { GRID_CELL, gridLineCount, previewScale, stepZoom } from "../../../previewScale";
+import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
@@ -160,8 +160,9 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 				story as { preview?: { kind?: unknown; width?: unknown; height?: unknown; background?: unknown } }
 			).preview;
 			const viewport = logical?.kind === "viewport";
-			const logicalWidth = typeOf(logical?.width) === "number" ? (logical?.width as number) : undefined;
-			const logicalHeight = typeOf(logical?.height) === "number" ? (logical?.height as number) : undefined;
+			const size = previewSize(logical);
+			const logicalWidth = size?.width;
+			const logicalHeight = size?.height;
 			const background = typeOf(logical?.background) === "Color3" ? (logical?.background as Color3) : undefined;
 			const scaled = logicalWidth !== undefined && logicalHeight !== undefined;
 			const scale = scaled
