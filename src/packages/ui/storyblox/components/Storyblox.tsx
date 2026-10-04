@@ -22,11 +22,13 @@ import { acceptGeneration, nextGeneration } from "../storyGeneration";
 import { insideCanvas } from "../canvasReady";
 import { createStorySession, keepSelection } from "../storyRegistry";
 import { ClaimedId, claimStoryId, releaseStoryId } from "../../../defineStory";
+import { checkRequest, PROTOCOL_VERSION } from "../../../bridgeProtocol";
 
 const DEFAULT_EXTENSION = ".stories";
 const SIDEBAR_WIDTH = 180;
 const SIDEBAR_MIN = 140;
 const SIDEBAR_MAX = 360;
+const CASE_DEADLINE = 10;
 
 function pluginStories(): Instance | undefined {
 	return ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
@@ -34,6 +36,18 @@ function pluginStories(): Instance | undefined {
 
 function controlRoot(root?: Instance) {
 	return pluginStories() ?? root;
+}
+
+function respond(marker: Instance, body: object) {
+	marker.SetAttribute("storyblox-response", HttpService.JSONEncode({ protocolVersion: PROTOCOL_VERSION, ...body }));
+}
+
+function findMountFrame(host?: Frame) {
+	if (!host) return undefined;
+	for (const child of host.GetDescendants()) {
+		if (child.IsA("Frame") && child.Name.sub(1, 6) === "mount-") return child;
+	}
+	return undefined;
 }
 
 function findCanvasScroll(host?: Frame) {
@@ -209,12 +223,17 @@ function Storyblox(props: StorybloxProps) {
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
 	const [caseRequest, setCaseRequest] = useState<{ name: string; id: number } | undefined>();
+	const [argsRequest, setArgsRequest] = useState<{ args?: { [key: string]: unknown }; id: number } | undefined>();
+	const bridgeGeneration = useRef(0);
+	const pendingCase = useRef<string>();
+	const selectedRef = useRef<Story>();
 	const generation = useRef(0);
 	const failed = useRef(false);
 	const storiesRef = useRef(stories);
 	const hostRef = useRef<Frame>();
 	const renderError = useRef<unknown>();
 	storiesRef.current = stories;
+	selectedRef.current = selectedStory;
 	renderError.current = undefined;
 	const storyIds = useRef<ClaimedId[]>([]);
 	const session = useMemo(() => {
@@ -396,8 +415,72 @@ function Storyblox(props: StorybloxProps) {
 			marker.SetAttribute("storyblox-case-result", undefined);
 			setCaseRequest((current) => ({ name: name as string, id: (current?.id ?? 0) + 1 }));
 		});
+		const requestConn = marker.GetAttributeChangedSignal("storyblox-request").Connect(() => {
+			const raw = marker.GetAttribute("storyblox-request");
+			if (typeOf(raw) !== "string" || raw === "") return;
+			const [decoded, value] = pcall(() => HttpService.JSONDecode(raw as string));
+			const current = selectedRef.current?.title;
+			const checked = checkRequest(decoded ? value : undefined, bridgeGeneration.current, current);
+			if (!checked.ok) {
+				respond(marker, { requestId: checked.requestId, ok: false, error: checked.error });
+				return;
+			}
+			const { requestId, command } = checked.request;
+			const payload = checked.request.payload ?? {};
+			const build = (marker.GetAttribute("storyblox-build") as number | undefined) ?? 0;
+			const status = {
+				requestId,
+				ok: true,
+				actualStoryId: current,
+				generation: bridgeGeneration.current,
+				buildId: build,
+				ready: marker.GetAttribute("storyblox-ready") === `${current}@${build}`,
+			};
+			if (command === "listStories") {
+				respond(marker, { ...status, stories: storiesRef.current.map((story) => story.title) });
+			} else if (command === "selectStory") {
+				const storyId = payload.storyId as string;
+				if (!storiesRef.current.some((story) => story.title === storyId)) {
+					respond(marker, { requestId, ok: false, error: "unknown story" });
+					return;
+				}
+				marker.SetAttribute("storyblox-select", storyId);
+				respond(marker, { ...status, pending: storyId !== current });
+			} else if (command === "setArgs" || command === "resetArgs") {
+				const args = command === "setArgs" ? (payload.args as { [key: string]: unknown }) : undefined;
+				setArgsRequest((previous) => ({ args, id: (previous?.id ?? 0) + 1 }));
+				respond(marker, status);
+			} else if (command === "runCase") {
+				pendingCase.current = requestId;
+				setCaseRequest((previous) => ({ name: payload.name as string, id: (previous?.id ?? 0) + 1 }));
+				task.delay(CASE_DEADLINE, () => {
+					if (pendingCase.current !== requestId) return;
+					pendingCase.current = undefined;
+					respond(marker, { requestId, ok: false, error: "timeout" });
+				});
+			} else if (command === "getCaptureBounds") {
+				const mount = findMountFrame(hostRef.current);
+				if (!mount) {
+					respond(marker, { requestId, ok: false, error: "not mounted" });
+					return;
+				}
+				respond(marker, {
+					...status,
+					surface: "dock",
+					bounds: {
+						x: mount.AbsolutePosition.X,
+						y: mount.AbsolutePosition.Y,
+						width: mount.AbsoluteSize.X,
+						height: mount.AbsoluteSize.Y,
+					},
+				});
+			} else {
+				respond(marker, status);
+			}
+		});
 		onSelect();
 		return () => {
+			requestConn.Disconnect();
 			selectConn.Disconnect();
 			themeConn.Disconnect();
 			focusConn.Disconnect();
@@ -405,6 +488,15 @@ function Storyblox(props: StorybloxProps) {
 			caseConn.Disconnect();
 		};
 	}, [root, primaryTheme, secondaryTheme, onThemeChange]);
+
+	useEffect(() => {
+		bridgeGeneration.current += 1;
+		const requestId = pendingCase.current;
+		const marker = controlRoot(root);
+		if (requestId === undefined || marker === undefined) return;
+		pendingCase.current = undefined;
+		respond(marker, { requestId, ok: false, error: "cancelled" });
+	}, [selectedStory, previewKey, remount]);
 
 	// ponytail: poll until a sized descendant sits in the canvas; a layout signal if this shows up in profiles
 	useEffect(() => {
@@ -495,9 +587,15 @@ function Storyblox(props: StorybloxProps) {
 								story={selectedStory}
 								remount={remount}
 								caseRequest={caseRequest}
-								onCaseResult={(result) =>
-									controlRoot(root)?.SetAttribute("storyblox-case-result", HttpService.JSONEncode(result))
-								}
+								argsRequest={argsRequest}
+								onCaseResult={(result) => {
+									const marker = controlRoot(root);
+									marker?.SetAttribute("storyblox-case-result", HttpService.JSONEncode(result));
+									const requestId = pendingCase.current;
+									if (marker === undefined || requestId === undefined) return;
+									pendingCase.current = undefined;
+									respond(marker, { requestId, ok: result.passed, generation: bridgeGeneration.current, result });
+								}}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
 								storyTheme={storyTheme}
