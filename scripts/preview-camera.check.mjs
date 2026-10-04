@@ -6,7 +6,12 @@ globalThis.math = {
 	sqrt: Math.sqrt,
 };
 
-const { orbitOffset, ORBIT_STEP, CAMERA_PITCH, CAMERA_DISTANCE } = await import("../src/packages/previewCamera.ts");
+const { orbitOffset, ORBIT_STEP, CAMERA_PITCH, CAMERA_DISTANCE, dragYaw } = await import(
+	"../src/packages/previewCamera.ts"
+);
+
+if (!near(dragYaw(0, 100), -1)) throw new Error("drag right turns left");
+if (dragYaw(0.5, 0 / 0) !== 0.5) throw new Error("bad drag");
 
 function near(actual, expected) {
 	return Math.abs(actual - expected) < 1e-6;

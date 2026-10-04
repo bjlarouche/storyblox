@@ -5,7 +5,7 @@ import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
-import { CAMERA_DISTANCE, CAMERA_PITCH, ORBIT_STEP, orbitOffset } from "../../../previewCamera";
+import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "../../../previewCamera";
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import Controls from "./Controls";
@@ -16,9 +16,10 @@ const CONTROLS_MIN = 120;
 const GRID_COLOR = new Color3(1, 1, 1);
 const SCENE_BACKDROP = new Color3(0.1, 0.1, 0.12);
 
-function HostScene(props: { yaw: number; children?: React.ReactNode }) {
+function HostScene(props: { yaw: number; onOrbit: (dx: number) => void; children?: React.ReactNode }) {
 	const frame = useRef<ViewportFrame>();
 	const camera = useRef<Camera>();
+	const drag = useRef<number | undefined>(undefined);
 	const offset = orbitOffset(props.yaw, CAMERA_PITCH, CAMERA_DISTANCE);
 	useEffect(() => {
 		const current = frame.current;
@@ -31,6 +32,23 @@ function HostScene(props: { yaw: number; children?: React.ReactNode }) {
 			ref={frame}
 			Size={new UDim2(1, 0, 1, 0)}
 			BackgroundColor3={SCENE_BACKDROP}
+			Event={{
+				InputBegan: (_, input) => {
+					if (input.UserInputType === Enum.UserInputType.MouseButton1) drag.current = input.Position.X;
+				},
+				InputChanged: (_, input) => {
+					if (drag.current === undefined || input.UserInputType !== Enum.UserInputType.MouseMovement) return;
+					const dx = input.Position.X - drag.current;
+					drag.current = input.Position.X;
+					if (dx !== 0) props.onOrbit(dx);
+				},
+				InputEnded: (_, input) => {
+					if (input.UserInputType === Enum.UserInputType.MouseButton1) drag.current = undefined;
+				},
+				MouseLeave: () => {
+					drag.current = undefined;
+				},
+			}}
 		>
 			<camera
 				key="HostCamera"
@@ -186,7 +204,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 						PaddingRight={new UDim(0, inset)}
 					/>
 					{viewport ? (
-						<HostScene yaw={yaw}>{parsed.element as React.Element}</HostScene>
+						<HostScene yaw={yaw} onOrbit={(dx) => setYaw((current) => dragYaw(current, dx))}>{parsed.element as React.Element}</HostScene>
 					) : (
 						(parsed.element as React.Element)
 					)}
