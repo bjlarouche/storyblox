@@ -161,4 +161,17 @@ mountNative(
 ).update({ label: "B" });
 if (absent.seen !== undefined) throw new Error("optional absence");
 
+const scene = { sceneRoot: instance("scene"), camera: instance("camera") };
+let seenScene;
+mountNative(
+	(_target, context) => {
+		seenScene = context;
+	},
+	instance("target"),
+	{},
+	{},
+	scene,
+);
+if (seenScene.sceneRoot !== scene.sceneRoot || seenScene.camera !== scene.camera) throw new Error("scene context");
+
 console.log("native mount ok");

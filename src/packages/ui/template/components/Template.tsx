@@ -177,7 +177,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 			const logical = (
 				story as { preview?: { kind?: unknown; width?: unknown; height?: unknown; background?: unknown } }
 			).preview;
-			const viewport = logical?.kind === "viewport";
+			const viewport = logical?.kind === "viewport" && !native;
 			const size = previewSize(logical);
 			const logicalWidth = size?.width;
 			const logicalHeight = size?.height;
@@ -251,7 +251,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme, storyTheme, story
 									} as WriteableStyle<ImageButton>
 								}
 							/>
-							{((story as { preview?: { kind?: unknown } } | undefined)?.preview?.kind === "viewport") && (
+							{!native && (story as { preview?: { kind?: unknown } } | undefined)?.preview?.kind === "viewport" && (
 								<>
 									<textbutton
 										key="Orbit"

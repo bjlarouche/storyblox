@@ -81,6 +81,7 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 		args: normalized.args,
 		argTypes: normalized.argTypes,
 		props: normalized.args,
+		preview: normalized.preview,
 		nativeSession: session,
 		component: () => <frame />,
 		template: (props: unknown, context?: unknown) => {
@@ -89,9 +90,25 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 			target.Size = new UDim2(1, 0, 1, 0);
 			target.BackgroundTransparency = 1;
 			const theme = (context as { theme?: unknown } | undefined)?.theme;
+			let scene: { sceneRoot: WorldModel; camera: Camera } | undefined;
+			if ((normalized.preview as { kind?: unknown } | undefined)?.kind === "viewport") {
+				const viewport = new Instance("ViewportFrame");
+				viewport.Name = "NativeViewport";
+				viewport.Size = new UDim2(1, 0, 1, 0);
+				viewport.BackgroundTransparency = 1;
+				const camera = new Instance("Camera");
+				camera.CFrame = CFrame.lookAt(new Vector3(0, 5, 10), Vector3.zero);
+				camera.Parent = viewport;
+				viewport.CurrentCamera = camera;
+				const sceneRoot = new Instance("WorldModel");
+				sceneRoot.Name = "NativeScene";
+				sceneRoot.Parent = viewport;
+				viewport.Parent = target;
+				scene = { sceneRoot, camera };
+			}
 			let hosted: ReturnType<typeof mountNative>;
 			try {
-				hosted = mountNative(mount, target, props, theme);
+				hosted = mountNative(mount, target, props, theme, scene);
 			} catch (error) {
 				pcall(() => target.Destroy());
 				throw error;

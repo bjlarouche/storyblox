@@ -44,6 +44,7 @@ const needles = [
 	"Fixture/Datatypes",
 	"Fixture/Nested",
 	"Fixture/Viewport Host",
+	"Fixture/Native Scene",
 	"defined story",
 ];
 
