@@ -5,7 +5,7 @@ import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
 import { storyMatches } from "../storySearch";
-import { favoriteBranch, storyBranches } from "../storyTree";
+import { adoptTree, favoriteBranch, storyBranches } from "../storyTree";
 
 const SEARCH_DELAY = 0.2;
 
@@ -40,7 +40,8 @@ function StoriesSidebar({
 
 	const [draft, setDraft] = useState("");
 	const [query, setQuery] = useState("");
-	const [tree, setTree] = useState<Tree | undefined>();
+	const treeRef = useRef<Tree>();
+	const [, setTreeRev] = useState(0);
 
 	useEffect(() => {
 		const pending = task.delay(SEARCH_DELAY, () => setQuery(draft));
@@ -49,30 +50,33 @@ function StoriesSidebar({
 
 	useEffect(() => {
 		if (stories.size() === 0) {
-			setTree(undefined);
+			treeRef.current = undefined;
+			setTreeRev((n) => n + 1);
 			return;
 		}
 
 		const matches = stories.filter((story) => storyMatches(story.title, query));
 		if (matches.size() === 0) {
-			setTree(undefined);
+			treeRef.current = undefined;
+			setTreeRev((n) => n + 1);
 			return;
 		}
 
-		const tree: Tree = {
+		const next: Tree = {
 			title: "STORIES", // TODO: Allow this to be customized
 			branches: [],
 		};
 
 		if (query.size() > 0) {
 			matches.forEach((story) => {
-				tree.branches.push({
+				next.branches.push({
 					title: story.title,
 					leaves: [],
 					onClick: () => onClick(story),
 				});
 			});
-			setTree(tree);
+			treeRef.current = adoptTree(treeRef.current, next);
+			setTreeRev((n) => n + 1);
 			return;
 		}
 
@@ -86,12 +90,14 @@ function StoriesSidebar({
 			onClick: () => onClick(story),
 		}));
 		const icons = { folder: Icons.OpenBox, component: Icons.ListPrimary, story: Icons.Book };
-		tree.branches = storyBranches(nodes, icons) as Branch[];
+		next.branches = storyBranches(nodes, icons) as Branch[];
 		const favoritesBranch = favoriteBranch(nodes, favorites, icons);
-		if (favoritesBranch !== undefined) tree.branches.unshift(favoritesBranch as Branch);
+		if (favoritesBranch !== undefined) next.branches.unshift(favoritesBranch as Branch);
 
-		setTree(tree);
+		treeRef.current = adoptTree(treeRef.current, next);
+		setTreeRev((n) => n + 1);
 	}, [stories, query, favorites]);
+	const tree = treeRef.current;
 
 	return (
 		<Sidebar size="large" className={{ Size: new UDim2(1, 0, 1, 0) } as WriteableStyle<Frame>}>
