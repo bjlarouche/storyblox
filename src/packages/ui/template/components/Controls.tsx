@@ -12,6 +12,7 @@ import {
 	switchUnion,
 } from "../../../nestedArgs";
 import { ArgValues, commitNumberText } from "../storyArgs";
+import { argDoc } from "../storyLabel";
 
 interface Spec {
 	type?: string;
@@ -27,6 +28,7 @@ interface Spec {
 	tag?: string;
 	variants?: { [key: string]: { [key: string]: Spec } };
 	editor?: string;
+	description?: string;
 }
 
 const kit = Uiblox as unknown as {
@@ -60,6 +62,8 @@ export interface ControlsProps {
 	theme: Theme;
 	args: ArgValues;
 	argTypes?: unknown;
+	defaults?: unknown;
+	description?: unknown;
 	onChange: (key: string, value: unknown) => void;
 	onReset: () => void;
 }
@@ -103,11 +107,29 @@ function CustomEditor(props: { editor: string; value: unknown; onChange: (value:
 	return <frame ref={host} Size={new UDim2(1, 0, 0, 24)} BackgroundTransparency={1} />;
 }
 
-function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
+function Controls({ theme, args, argTypes, defaults, description, onChange, onReset }: ControlsProps) {
 	const [faults, setFaults] = useState<{ [key: string]: string }>({});
 	const [rowKeys, setRowKeys] = useState<{ [key: string]: Array<string> }>({});
 	const specs = typeOf(argTypes) === "table" ? (argTypes as { [key: string]: Spec }) : {};
+	const fallbacks = typeOf(defaults) === "table" ? (defaults as ArgValues) : {};
 	const rows: React.Element[] = [];
+	if (typeOf(description) === "string") {
+		rows.push(
+			<textlabel
+				key="StoryDescription"
+				Text={description as string}
+				LayoutOrder={-1}
+				Size={new UDim2(1, 0, 0, 0)}
+				AutomaticSize={Enum.AutomaticSize.Y}
+				TextWrapped={true}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.default}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.options.constants.colors.textMuted}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>,
+		);
+	}
 	let order = 1;
 	for (const [key, spec] of pairs(specs)) {
 		const name = key as string;
@@ -115,9 +137,11 @@ function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
 		const label = (
 			<textlabel
 				key={`${name}-label`}
-				Text={name}
+				Text={argDoc(name, spec, fallbacks[name])}
 				LayoutOrder={order}
 				Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
+				AutomaticSize={Enum.AutomaticSize.Y}
+				TextWrapped={true}
 				BackgroundTransparency={1}
 				Font={theme.typography.fontFamilies.default}
 				TextSize={theme.typography.fontSizes.caption}
@@ -448,7 +472,7 @@ function Controls({ theme, args, argTypes, onChange, onReset }: ControlsProps) {
 			<textlabel
 				key="ControlsTitle"
 				Text="Controls"
-				LayoutOrder={-1}
+				LayoutOrder={-2}
 				Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
 				BackgroundTransparency={1}
 				Font={theme.typography.fontFamilies.semibold}

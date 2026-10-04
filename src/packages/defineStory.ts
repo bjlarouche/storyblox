@@ -30,6 +30,7 @@ export interface ControlSpec {
 	tag?: string;
 	variants?: { [key: string]: { [key: string]: ControlSpec } };
 	editor?: string;
+	description?: string;
 }
 
 export const controls = {
@@ -68,6 +69,7 @@ export const controls = {
 export interface ModernStory<T> {
 	id?: string;
 	title: string;
+	description?: string;
 	args?: T;
 	argTypes?: { [key: string]: ControlSpec };
 	render: (args: T) => unknown;
