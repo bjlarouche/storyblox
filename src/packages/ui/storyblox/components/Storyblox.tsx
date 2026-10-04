@@ -108,6 +108,8 @@ export interface StorybloxProps {
 	logoSrc?: string;
 	version?: string;
 	debugEnabled?: boolean;
+	themeName?: "dark" | "light";
+	onThemeChange?: (themeName: "dark" | "light") => void;
 }
 
 function Storyblox(props: StorybloxProps) {
@@ -119,6 +121,8 @@ function Storyblox(props: StorybloxProps) {
 		logoSrc = STORYBLOX_LOGO,
 		version = VERSION,
 		debugEnabled,
+		themeName,
+		onThemeChange,
 	} = props;
 
 	const { errorContainer, errorMessage } = useStorybloxStyles();
@@ -130,7 +134,7 @@ function Storyblox(props: StorybloxProps) {
 	const failed = useRef(false);
 	const session = useMemo(() => createStorySession<Story>(setStories), []);
 
-	const [theme, setTheme] = useState(primaryTheme);
+	const [theme, setTheme] = useState(themeName === "light" ? secondaryTheme : primaryTheme);
 
 	const logDebug = useCallback(
 		(message: string) => {
@@ -248,7 +252,11 @@ function Storyblox(props: StorybloxProps) {
 	}, [root, findStories, logDebug]);
 
 	const primaryThemeEnabled = theme === primaryTheme;
-	const toggleTheme = () => setTheme(primaryThemeEnabled ? secondaryTheme : primaryTheme);
+	const toggleTheme = () => {
+		const chosen = primaryThemeEnabled ? secondaryTheme : primaryTheme;
+		setTheme(chosen);
+		if (onThemeChange) onThemeChange(chosen === primaryTheme ? "dark" : "light");
+	};
 
 	return (
 		<ThemeProvider theme={theme}>
