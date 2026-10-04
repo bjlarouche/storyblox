@@ -60,6 +60,20 @@ const bad = normalizeExport(
 );
 if (bad.kind !== "reject" || bad.reason !== "args") throw new Error("type failure");
 
+const listed = normalizeExport(
+	{
+		default: {
+			title: "Inputs/Button/Primary",
+			args: { variant: "contained" },
+			argTypes: { variant: controls.enum(["contained", "outlined", "text"]) },
+			render: (args) => args.variant,
+		},
+	},
+	"Button.stories",
+	".stories",
+);
+if (listed.kind !== "react" || listed.story.template() !== "contained") throw new Error("enum arg");
+
 const legacy = normalizeExport(
 	{ default: { title: "Button/Base", template: () => "el" } },
 	"Button.stories",

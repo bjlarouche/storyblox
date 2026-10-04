@@ -32,6 +32,7 @@ function argValueMatches(value: unknown, kind: unknown): boolean {
 	if (kind === "string") return typeOf(value) === "string";
 	if (kind === "boolean") return typeOf(value) === "boolean";
 	if (kind === "number") return typeOf(value) === "number";
+	if (kind === "enum") return typeOf(value) === "string";
 	return false;
 }
 
