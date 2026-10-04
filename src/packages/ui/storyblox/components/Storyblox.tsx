@@ -11,7 +11,7 @@ import {
 	ThemeProvider,
 	WriteableStyle,
 } from "@rbxts/uiblox";
-import { RELEASE, STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
+import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "../../../../interfaces";
 import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
@@ -107,7 +107,6 @@ export interface StorybloxProps {
 	secondaryTheme?: Theme;
 	logoSrc?: string;
 	version?: string;
-	release?: string;
 	debugEnabled?: boolean;
 }
 
@@ -119,7 +118,6 @@ function Storyblox(props: StorybloxProps) {
 		secondaryTheme = LightTheme,
 		logoSrc = STORYBLOX_LOGO,
 		version = VERSION,
-		release = RELEASE,
 		debugEnabled,
 	} = props;
 
@@ -259,7 +257,6 @@ function Storyblox(props: StorybloxProps) {
 					stories={stories}
 					logoSrc={logoSrc}
 					version={version}
-					release={release}
 					onClick={(story: Story) => {
 						(pluginStories() ?? root)?.SetAttribute("storyblox-select", story.title);
 						setSelectedStory(story);

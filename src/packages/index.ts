@@ -9,4 +9,3 @@ export { StoryExport } from "../interfaces";
 
 export { STORYBLOX_LOGO } from "../constants";
 export { VERSION } from "../constants";
-export { RELEASE } from "../constants";
