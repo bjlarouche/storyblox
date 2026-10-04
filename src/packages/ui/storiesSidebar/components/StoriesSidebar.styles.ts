@@ -4,6 +4,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 	const filterOffset = theme.spacing.calc(3) + theme.padding.calc(2);
 	const storiesOffset = filterOffset + theme.spacing.calc(2) + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(4) + theme.padding.calc(2);
+	const light = theme.type === "Light";
 
 	return createStyles({
 		logo: {
@@ -12,6 +13,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			AnchorPoint: new Vector2(0.5, 0),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
+			ImageColor3: theme.palette.text.primary,
 			ScaleType: Enum.ScaleType.Fit,
 			ClipsDescendants: true,
 			ZIndex: 5100,
@@ -41,7 +43,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			AnchorPoint: new Vector2(0, 1),
 			FontSize: theme.typography.fontSizes.caption,
 			Font: theme.typography.fontFamilies.light,
-			TextColor3: theme.options.constants.colors.textMuted,
+			TextColor3: light ? theme.palette.text.primary : theme.options.constants.colors.textMuted,
 			TextScaled: true,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
@@ -53,7 +55,9 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			AnchorPoint: new Vector2(0, 1),
 			FontSize: theme.typography.fontSizes.caption,
 			Font: theme.typography.fontFamilies.italics,
-			TextColor3: theme.options.constants.extendedPalette.Orange[50],
+			TextColor3: light
+				? theme.options.constants.extendedPalette.Orange[100]
+				: theme.options.constants.extendedPalette.Orange[50],
 			TextScaled: true,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
