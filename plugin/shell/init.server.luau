@@ -107,7 +107,12 @@ end
 local focusAction = plugin:CreatePluginAction("StorybloxFocusSearch", "Storyblox: Focus search", "Focus the story filter", "", true)
 local remountAction = plugin:CreatePluginAction("StorybloxRemount", "Storyblox: Remount story", "Remount the selected story", "", true)
 table.insert(lifetime, focusAction.Triggered:Connect(function() command("storyblox-focus-search") end))
+local workspaceAction = plugin:CreatePluginAction("StorybloxWorkspace", "Storyblox: Allow workspace preview", "Let workspace stories mount into Workspace this session", "", true)
 table.insert(lifetime, remountAction.Triggered:Connect(function() command("storyblox-remount") end))
+table.insert(lifetime, workspaceAction.Triggered:Connect(function()
+	command("storyblox-workspace")
+	command("storyblox-remount")
+end))
 
 toggle.Click:Connect(function() widget.Enabled = not widget.Enabled end)
 reloadBtn.Click:Connect(load)

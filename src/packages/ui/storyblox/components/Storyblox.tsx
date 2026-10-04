@@ -1,6 +1,6 @@
 import Log from "@rbxts/log";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
-import { HttpService, ReplicatedStorage, ServerStorage } from "@rbxts/services";
+import { HttpService, ReplicatedStorage, ServerStorage, Workspace } from "@rbxts/services";
 import {
 	createStyles,
 	DarkTheme,
@@ -110,8 +110,39 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 			target.Size = new UDim2(1, 0, 1, 0);
 			target.BackgroundTransparency = 1;
 			const theme = (context as { theme?: unknown } | undefined)?.theme;
-			let scene: { sceneRoot: WorldModel; camera: Camera } | undefined;
-			if ((normalized.preview as { kind?: unknown } | undefined)?.kind === "viewport") {
+			const kind = (normalized.preview as { kind?: unknown } | undefined)?.kind;
+			let scene: { sceneRoot: Instance; camera: Camera } | undefined;
+			let restore: (() => void) | undefined;
+			if (kind === "workspace" && ((pluginStories()?.GetAttribute("storyblox-workspace") as number | undefined) ?? 0) <= 0) {
+				target.Destroy();
+				return [
+					<textlabel
+						key="WorkspaceNotice"
+						Text={`Workspace preview is off. Run "Storyblox: Allow workspace preview" to mount this story into Workspace.`}
+						Size={new UDim2(1, 0, 0, 48)}
+						TextWrapped={true}
+						BackgroundTransparency={1}
+						TextColor3={new Color3(1, 0.7, 0.3)}
+					/>,
+					() => {},
+				] as LuaTuple<[ReturnType<Story["template"]>, () => void]>;
+			}
+			if (kind === "workspace") {
+				const sceneRoot = new Instance("Folder");
+				sceneRoot.Name = "StorybloxPreview";
+				sceneRoot.SetAttribute("storyblox-owned", true);
+				sceneRoot.Parent = Workspace;
+				const camera = Workspace.CurrentCamera!;
+				const [cframe, focus, cameraType, fieldOfView] = [camera.CFrame, camera.Focus, camera.CameraType, camera.FieldOfView];
+				scene = { sceneRoot, camera };
+				restore = () => {
+					pcall(() => sceneRoot.Destroy());
+					camera.CameraType = cameraType;
+					camera.CFrame = cframe;
+					camera.Focus = focus;
+					camera.FieldOfView = fieldOfView;
+				};
+			} else if (kind === "viewport") {
 				const viewport = new Instance("ViewportFrame");
 				viewport.Name = "NativeViewport";
 				viewport.Size = new UDim2(1, 0, 1, 0);
@@ -130,6 +161,7 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 			try {
 				hosted = mountNative(mount, target, props, theme, scene);
 			} catch (error) {
+				restore?.();
 				pcall(() => target.Destroy());
 				throw error;
 			}
@@ -143,12 +175,24 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 							if (parent) target.Parent = parent;
 						}}
 					/>
+					{restore !== undefined ? (
+						<textlabel
+							key="WorkspaceDirty"
+							Text="StorybloxPreview is in Workspace and the camera is borrowed. The place shows as changed until you leave this story."
+							Size={new UDim2(1, 0, 0, 32)}
+							Position={new UDim2(0, 0, 1, -32)}
+							TextWrapped={true}
+							BackgroundTransparency={1}
+							TextColor3={new Color3(1, 0.7, 0.3)}
+						/>
+					) : undefined}
 				</frame>
 			);
 			return [
 				element,
 				() => {
 					hosted.destroy();
+					restore?.();
 					pcall(() => target.Destroy());
 				},
 			] as LuaTuple<[ReturnType<Story["template"]>, () => void]>;
