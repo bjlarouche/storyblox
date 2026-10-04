@@ -276,6 +276,8 @@ function Storyblox(props: StorybloxProps) {
 	const storiesRef = useRef(stories);
 	const hostRef = useRef<Frame>();
 	const renderError = useRef<unknown>();
+	const boundaryFailed = useRef(false);
+	const [boundaryKey, setBoundaryKey] = useState(0);
 	storiesRef.current = stories;
 	selectedRef.current = selectedStory;
 	renderError.current = undefined;
@@ -534,6 +536,12 @@ function Storyblox(props: StorybloxProps) {
 	}, [root, primaryTheme, secondaryTheme, onThemeChange]);
 
 	useEffect(() => {
+		if (!boundaryFailed.current) return;
+		boundaryFailed.current = false;
+		setBoundaryKey((current) => current + 1);
+	}, [selectedStory]);
+
+	useEffect(() => {
 		bridgeGeneration.current += 1;
 		const requestId = pendingCase.current;
 		const marker = controlRoot(root);
@@ -597,9 +605,10 @@ function Storyblox(props: StorybloxProps) {
 					}
 					second={
 						<ErrorBoundary
-							key={`preview-${previewKey}`}
+							key={`preview-${previewKey}-${boundaryKey}`}
 							fallback={(e) => {
 								renderError.current = e;
+								boundaryFailed.current = true;
 								controlRoot(root)?.SetAttribute("storyblox-error", `${e}`);
 								const errorComponnt = (
 									<frame key="Error" {...errorContainer}>
