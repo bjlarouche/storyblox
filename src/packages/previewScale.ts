@@ -12,6 +12,18 @@ export function previewScale(
 	return scale;
 }
 
+export const ZOOM_STEPS = [0.5, 1, 2];
+
+export function stepZoom(current: number, direction: number) {
+	let index = 1;
+	for (let i = 0; i < ZOOM_STEPS.size(); i++) {
+		if (ZOOM_STEPS[i] === current) index = i;
+	}
+	const step = index + direction;
+	if (step < 0 || step >= ZOOM_STEPS.size()) return current;
+	return ZOOM_STEPS[step];
+}
+
 export const GRID_CELL = 8;
 
 export function gridLineCount(length: number, cell: number) {

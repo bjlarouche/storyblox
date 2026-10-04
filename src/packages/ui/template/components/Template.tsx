@@ -5,7 +5,7 @@ import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
-import { GRID_CELL, gridLineCount, previewScale } from "../../../previewScale";
+import { GRID_CELL, gridLineCount, previewScale, stepZoom } from "../../../previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
@@ -78,6 +78,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 	const [split, setSplit] = useState(10000);
 	const [fit, setFit] = useState(true);
 	const [grid, setGrid] = useState(false);
+	const [zoom, setZoom] = useState(1);
 	const [dock, setDock] = useState({ x: 0, y: 0 });
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
@@ -126,7 +127,9 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			const logicalHeight = typeOf(logical?.height) === "number" ? (logical?.height as number) : undefined;
 			const background = typeOf(logical?.background) === "Color3" ? (logical?.background as Color3) : undefined;
 			const scaled = logicalWidth !== undefined && logicalHeight !== undefined;
-			const scale = scaled ? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y) : 1;
+			const scale = scaled
+				? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y) * zoom
+				: 1;
 			setTemplate(
 				<frame
 					key={`mount-${epoch}`}
@@ -159,7 +162,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 			themeMounted.current = undefined;
 			setFailure(error);
 		}
-	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid]);
+	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, zoom]);
 
 	if (failure !== undefined) {
 		throw failure;
@@ -187,6 +190,41 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 										Position: new UDim2(1, -theme.spacing.calc(2.5), 0.5, 0),
 									} as WriteableStyle<ImageButton>
 								}
+							/>
+							<textbutton
+								key="ZoomOut"
+								Text="-"
+								Size={new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5))}
+								AnchorPoint={new Vector2(1, 0.5)}
+								Position={new UDim2(1, -theme.spacing.calc(16), 0.5, 0)}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.secondary.main}
+								Event={{ MouseButton1Click: () => setZoom((current) => stepZoom(current, -1)) }}
+							/>
+							<textlabel
+								key="Zoom"
+								Text={`${math.floor(zoom * 100)}%`}
+								Size={new UDim2(0, theme.spacing.calc(2.5), 0, theme.spacing.calc(1.5))}
+								AnchorPoint={new Vector2(1, 0.5)}
+								Position={new UDim2(1, -theme.spacing.calc(13.5), 0.5, 0)}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.secondary.main}
+							/>
+							<textbutton
+								key="ZoomIn"
+								Text="+"
+								Size={new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5))}
+								AnchorPoint={new Vector2(1, 0.5)}
+								Position={new UDim2(1, -theme.spacing.calc(12), 0.5, 0)}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.secondary.main}
+								Event={{ MouseButton1Click: () => setZoom((current) => stepZoom(current, 1)) }}
 							/>
 							<textbutton
 								key="Grid"
