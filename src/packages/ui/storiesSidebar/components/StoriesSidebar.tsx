@@ -19,7 +19,7 @@ export interface StoriesSidebarProps {
 }
 
 function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick }: StoriesSidebarProps) {
-	const { logo, filterInput, storiesTree, divider, versionLabel } = useStoriesSidebarStyles();
+	const { logo, filterInput, storiesTree, divider, versionLabel, statusLabel } = useStoriesSidebarStyles();
 
 	const [draft, setDraft] = useState("");
 	const [query, setQuery] = useState("");
@@ -106,6 +106,12 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick
 
 			<Divider className={divider} />
 
+			<textlabel
+				key="Status"
+				{...versionLabel}
+				{...statusLabel}
+				Text={stories.size() === 1 ? "1 story" : `${stories.size()} stories`}
+			/>
 			<textlabel {...versionLabel} Text={`@rbxts/storyblox ${version}`}></textlabel>
 		</Sidebar>
 	);

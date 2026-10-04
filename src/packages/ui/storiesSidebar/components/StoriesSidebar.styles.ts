@@ -49,6 +49,9 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			BorderSizePixel: 0,
 			ZIndex: 5100,
 		} as WriteableStyle<TextLabel>,
+		statusLabel: {
+			Position: new UDim2(0, theme.padding.calc(2), 1, -(theme.padding.calc(3) + theme.spacing.calc(1))),
+		} as WriteableStyle<TextLabel>,
 	});
 });
 
