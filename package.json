@@ -12,7 +12,8 @@
 		"test": "node --experimental-strip-types scripts/cleanup-gate.check.mjs && node --experimental-strip-types scripts/story-registry.check.mjs && node --experimental-strip-types scripts/normalize-story.check.mjs && node --experimental-strip-types scripts/story-generation.check.mjs && node --experimental-strip-types scripts/canvas-ready.check.mjs",
 		"prepublishOnly": "pnpm build",
 		"plugin:build": "pnpm build",
-		"plugin:install:local": "rojo build plugin/shell.project.json -o \"$HOME/Documents/Roblox/Plugins/storyblox-plugin.rbxm\""
+		"plugin:install:local": "rojo build plugin/shell.project.json -o \"$HOME/Documents/Roblox/Plugins/storyblox-plugin.rbxm\"",
+		"plugin:fixtures": "node scripts/plugin-fixtures.check.mjs"
 	},
 	"keywords": [
 		"roblox-ts",
