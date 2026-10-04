@@ -4,6 +4,9 @@ import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
+import { storyMatches } from "../storySearch";
+
+const SEARCH_DELAY = 0.2;
 
 export interface StoriesSidebarProps {
 	stories: Story[];
@@ -17,11 +20,24 @@ export interface StoriesSidebarProps {
 function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick }: StoriesSidebarProps) {
 	const { logo, filterInput, storiesTree, divider, versionLabel } = useStoriesSidebarStyles();
 
-	const [filter, setFilter] = useState<string>("");
+	const [draft, setDraft] = useState("");
+	const [query, setQuery] = useState("");
 	const [tree, setTree] = useState<Tree | undefined>();
 
 	useEffect(() => {
+		const pending = task.delay(SEARCH_DELAY, () => setQuery(draft));
+		return () => task.cancel(pending);
+	}, [draft]);
+
+	useEffect(() => {
 		if (stories.size() === 0) {
+			setTree(undefined);
+			return;
+		}
+
+		const matches = stories.filter((story) => storyMatches(story.title, query));
+		if (matches.size() === 0) {
+			setTree(undefined);
 			return;
 		}
 
@@ -30,7 +46,19 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick
 			branches: [],
 		};
 
-		stories.forEach((story) => {
+		if (query.size() > 0) {
+			matches.forEach((story) => {
+				tree.branches.push({
+					title: story.title,
+					leaves: [],
+					onClick: () => onClick(story),
+				});
+			});
+			setTree(tree);
+			return;
+		}
+
+		matches.forEach((story) => {
 			const paths = story.title.split("/");
 			const componentName = paths[0];
 			const storyName = paths[1];
@@ -59,27 +87,34 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick
 		});
 
 		setTree(tree);
-	}, [stories]);
+	}, [stories, query]);
 
 	return (
 		<Sidebar size="large">
 			<imagelabel key="Logo" Image={logoSrc} {...logo} />
 
 			<Input
-				variant="standard"
-				placeholder="Filter"
-				width={new UDim(1, 0)}
-				className={filterInput}
-				onTextChanged={(text: string) => {
-					if (filter !== text) {
-						setFilter(text);
-					}
-				}}
+				{...({
+					variant: "standard",
+					placeholder: "Filter",
+					width: new UDim(1, 0),
+					text: draft,
+					className: filterInput,
+					onInput: (text: string) => setDraft(text),
+					onTextChanged: (text: string) => setDraft(text),
+				} as React.ComponentProps<typeof Input> & { onInput?: (text: string) => void })}
 			/>
 
 			<frame key="StoriesTree" {...storiesTree}>
-				{tree !== undefined && (
-					<TreeView {...({ tree, icon: Icons.Book, filter, selected } as TreeViewProps)} />
+				{tree !== undefined && <TreeView {...({ tree, icon: Icons.Book, selected } as TreeViewProps)} />}
+				{query.size() > 0 && tree === undefined && (
+					<textlabel
+						{...versionLabel}
+						Text="No stories found"
+						Position={new UDim2(0, 0, 0, 0)}
+						AnchorPoint={new Vector2(0, 0)}
+						TextXAlignment={Enum.TextXAlignment.Left}
+					/>
 				)}
 			</frame>
 
