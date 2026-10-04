@@ -95,13 +95,14 @@ function gridLines(width: number, height: number) {
 	return lines;
 }
 
-const SplitPane = (
+export const SplitPane = (
 	Uiblox as unknown as {
 		SplitPane: (props: {
 			vertical?: boolean;
 			value: number;
 			onChange: (value: number) => void;
 			min?: number;
+			max?: number;
 			first?: React.ReactNode;
 			second?: React.ReactNode;
 		}) => React.Element;

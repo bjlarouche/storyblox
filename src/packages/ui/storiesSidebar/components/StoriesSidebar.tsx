@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "@rbxts/react";
-import { Branch, Icons, Sidebar, Divider, Tree, TreeView, TreeViewProps, Input } from "@rbxts/uiblox";
+import { Branch, Icons, Sidebar, Divider, Tree, TreeView, TreeViewProps, Input, WriteableStyle } from "@rbxts/uiblox";
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
@@ -76,7 +76,7 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick
 	}, [stories, query]);
 
 	return (
-		<Sidebar size="large">
+		<Sidebar size="large" className={{ Size: new UDim2(1, 0, 1, 0) } as WriteableStyle<Frame>}>
 			<imagelabel key="Logo" Image={logoSrc} {...logo} />
 
 			<Input
