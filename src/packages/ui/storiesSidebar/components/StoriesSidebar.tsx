@@ -5,7 +5,7 @@ import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
 import { storyMatches } from "../storySearch";
-import { storyBranches } from "../storyTree";
+import { favoriteBranch, storyBranches } from "../storyTree";
 
 const SEARCH_DELAY = 0.2;
 
@@ -15,11 +15,20 @@ export interface StoriesSidebarProps {
 	version?: string;
 	selected?: string;
 	focusSearch?: number;
+	favorites?: string[];
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onClick: (story: Story<any>) => void;
 }
 
-function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, focusSearch = 0, onClick }: StoriesSidebarProps) {
+function StoriesSidebar({
+	stories,
+	logoSrc,
+	version = VERSION,
+	selected,
+	focusSearch = 0,
+	favorites = [],
+	onClick,
+}: StoriesSidebarProps) {
 	const { logo, filterInput, storiesTree, divider, versionLabel, statusLabel } = useStoriesSidebarStyles();
 	const sidebar = useRef<Frame>();
 
@@ -72,16 +81,17 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, focusSe
 				Log.Error("Story title is empty should follow the pattern '<componentName>/<storyName>'");
 			}
 		});
-		tree.branches = storyBranches(
-			matches.map((story) => ({
-				title: story.title,
-				onClick: () => onClick(story),
-			})),
-			{ folder: Icons.OpenBox, component: Icons.ListPrimary, story: Icons.Book },
-		) as Branch[];
+		const nodes = matches.map((story) => ({
+			title: story.title,
+			onClick: () => onClick(story),
+		}));
+		const icons = { folder: Icons.OpenBox, component: Icons.ListPrimary, story: Icons.Book };
+		tree.branches = storyBranches(nodes, icons) as Branch[];
+		const favoritesBranch = favoriteBranch(nodes, favorites, icons);
+		if (favoritesBranch !== undefined) tree.branches.unshift(favoritesBranch as Branch);
 
 		setTree(tree);
-	}, [stories, query]);
+	}, [stories, query, favorites]);
 
 	return (
 		<Sidebar size="large" className={{ Size: new UDim2(1, 0, 1, 0) } as WriteableStyle<Frame>}>

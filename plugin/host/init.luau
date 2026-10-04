@@ -8,12 +8,17 @@ return function(plugin, widget, root)
 	widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	local stories = script.Parent:WaitForChild("stories")
 	local saved = plugin:GetSetting("theme")
+	local savedFavorites = plugin:GetSetting("favorites")
 	local handle = ReactRoblox.createRoot(root)
 	handle:render(React.createElement(Storyblox, {
 		root = stories,
 		themeName = saved == "light" and "light" or "dark",
 		onThemeChange = function(name)
 			plugin:SetSetting("theme", name)
+		end,
+		favorites = type(savedFavorites) == "string" and savedFavorites or "",
+		onFavoritesChange = function(value)
+			plugin:SetSetting("favorites", value)
 		end,
 	}))
 	return function()
