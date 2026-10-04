@@ -11,7 +11,13 @@ export interface ReactStoryShape {
 
 export type NormalizedStory =
 	| { kind: "react"; story: ReactStoryShape }
-	| { kind: "native"; title: string; mount: (target: unknown, context: unknown) => unknown }
+	| {
+			kind: "native";
+			title: string;
+			mount: (target: unknown, context: unknown) => unknown;
+			args?: unknown;
+			argTypes?: unknown;
+	  }
 	| { kind: "reject"; reason: string };
 
 export function matchesStoryName(name: string, suffix: string): boolean {
@@ -116,10 +122,14 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 	}
 	if (native) {
 		if (typeOf(exported.title) !== "string") return { kind: "reject", reason: "title" };
+		const described = exported as { args?: unknown; argTypes?: unknown };
+		if (!argsMatch(described.args, described.argTypes)) return { kind: "reject", reason: "args" };
 		return {
 			kind: "native",
 			title: exported.title as string,
 			mount: exported.mount as (target: unknown) => unknown,
+			args: described.args,
+			argTypes: described.argTypes,
 		};
 	}
 	return { kind: "reject", reason: "export" };

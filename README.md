@@ -47,7 +47,7 @@ ModuleScripts in `ReplicatedStorage` whose names end in `.stories`, but you can 
 this by passing in a `root?: Instance` prop to the `Storyblox` component. The loader
 reads a `default` export with `title` and `template`, a function `(target, context) -> cleanup`,
 or a table `{ renderer = "native", title = "...", mount = fn }`. `defineStory({ title, args, argTypes, render })` is the same kind of table: `controls.string()`, `controls.boolean()`, and `controls.number()` describe args, and a present value has to match. Missing args are optional. Other shapes are skipped.
-Native mounts get `context.theme`, the active Uiblox theme table, and remount when it changes.
+Native mounts get `context.theme`, `context.args`, and `context.target`. `own`, `connect`, and `onCleanup` register cleanup that still runs if `mount` throws. A returned function remounts when args or the theme change. `{ update = fn }` applies the next args on the same instances. Refresh remounts either way. Functions on the args table stay functions.
 
 Here are some example stories:
 

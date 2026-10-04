@@ -20,6 +20,9 @@
           "Native.stories": {
             "$path": "../fixtures/native"
           },
+          "Controlled.stories": {
+            "$path": "../fixtures/controlled"
+          },
           "ViewportNative.stories": {
             "$path": "../fixtures/viewport"
           },
