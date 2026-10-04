@@ -114,6 +114,11 @@ export const SplitPane = (
 	}
 ).SplitPane;
 
+const stars = Uiblox as unknown as {
+	Tooltip: (props: { text: string; className?: WriteableStyle<Frame>; children?: React.ReactNode }) => React.Element;
+	Icons: { Star: Icons; StarFilled: Icons };
+};
+
 export interface TemplateProps {
 	story?: Story;
 	primaryThemeEnabled?: boolean;
@@ -310,6 +315,9 @@ function Template({
 		throw failure;
 	}
 
+	const favoriteShown = onToggleFavorite !== undefined && story !== undefined;
+	const favoriteSlot = favoriteShown ? theme.spacing.calc(2) : 0;
+
 	return (
 		<frame key="Template" {...root}>
 			<frame key="Container" {...container}>
@@ -317,6 +325,33 @@ function Template({
 				<Shadow />
 
 				<frame key="NavBar" {...navBar}>
+					{favoriteShown && (
+						<stars.Tooltip
+							text={starred ? "Remove from favorites" : "Add to favorites"}
+							className={
+								{
+									Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+									Position: new UDim2(0, theme.spacing.calc(0.5), 0.5, 0),
+									AnchorPoint: new Vector2(0, 0.5),
+									AutomaticSize: Enum.AutomaticSize.None,
+									ZIndex: 300,
+								} as WriteableStyle<Frame>
+							}
+						>
+							<IconButton
+								id="Favorite"
+								icon={starred ? stars.Icons.StarFilled : stars.Icons.Star}
+								tint={theme.options.constants.colors.textMuted}
+								onClick={onToggleFavorite}
+								className={
+									{
+										Size: new UDim2(1, 0, 1, 0),
+										Position: new UDim2(0, 0, 0, 0),
+									} as WriteableStyle<ImageButton>
+								}
+							/>
+						</stars.Tooltip>
+					)}
 					<textlabel
 						key="Title"
 						Text={
@@ -329,6 +364,8 @@ function Template({
 								: "Canvas"
 						}
 						{...title}
+						Position={new UDim2(0, theme.spacing.calc(0.5) + favoriteSlot, 0, 0)}
+						Size={new UDim2(1, -(theme.spacing.calc(5) + favoriteSlot), 1, 0)}
 					/>
 					{onToggleTheme && (
 						<frame
@@ -347,21 +384,6 @@ function Template({
 								Padding={new UDim(0, theme.spacing.calc(1))}
 								SortOrder={Enum.SortOrder.LayoutOrder}
 							/>
-							{onToggleFavorite !== undefined && story !== undefined ? (
-								<textbutton
-									key="Star"
-									Text={starred ? "Starred" : "Star"}
-									LayoutOrder={0}
-									AutomaticSize={Enum.AutomaticSize.X}
-									Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
-									BackgroundTransparency={1}
-									Font={theme.typography.fontFamilies.semibold}
-									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.palette.secondary.main}
-									TextTransparency={starred ? 0 : 0.45}
-									Event={{ MouseButton1Click: onToggleFavorite }}
-								/>
-							) : undefined}
 							{!native && (story as { preview?: { kind?: unknown } } | undefined)?.preview?.kind === "viewport" && (
 								<>
 									<textbutton
