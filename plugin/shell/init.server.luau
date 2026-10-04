@@ -1,8 +1,8 @@
 -- Clone ServerStorage.StorybloxPlugin before require so Studio cannot serve a cached module.
 local ss = game:GetService("ServerStorage")
 local toolbar = plugin:CreateToolbar("Storyblox")
-local toggle = toolbar:CreateButton("Storyblox (dev)", "Toggle Storyblox", "rbxassetid://9314009398")
-local reloadBtn = toolbar:CreateButton("Reload", "Reload StorybloxPlugin", `rbxasset://studio_svg_textures/Lua/FileSync/{settings().Studio.Theme.Name}/Large/Refresh.png`)
+local toggle = toolbar:CreateButton("Storyblox (dev)", "Toggle Storyblox", "rbxassetid://9311703342")
+local reloadBtn = toolbar:CreateButton("Reload", "Reload StorybloxPlugin", "rbxassetid://75431112013973")
 local widget = plugin:CreateDockWidgetPluginGui("StorybloxDev", DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, true, false, 420, 320, 240, 180))
 widget.Title = "Storyblox (dev)"
 widget.Name = "StorybloxDev"
