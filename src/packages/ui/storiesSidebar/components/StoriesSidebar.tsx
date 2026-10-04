@@ -94,13 +94,15 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick
 			<imagelabel key="Logo" Image={logoSrc} {...logo} />
 
 			<Input
-				variant="standard"
-				placeholder="Filter"
-				width={new UDim(1, 0)}
-				text={draft}
-				className={filterInput}
-				onInput={(text: string) => setDraft(text)}
-				onTextChanged={(text: string) => setDraft(text)}
+				{...({
+					variant: "standard",
+					placeholder: "Filter",
+					width: new UDim(1, 0),
+					text: draft,
+					className: filterInput,
+					onInput: (text: string) => setDraft(text),
+					onTextChanged: (text: string) => setDraft(text),
+				} as React.ComponentProps<typeof Input> & { onInput?: (text: string) => void })}
 			/>
 
 			<frame key="StoriesTree" {...storiesTree}>
