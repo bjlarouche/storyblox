@@ -12,6 +12,11 @@ export function removeStory<T extends TitledStory>(stories: T[], title: string):
 	return stories.filter((item) => item.title !== title);
 }
 
+export function keepSelection<T extends TitledStory>(current: T | undefined, incoming: T, preferred?: string) {
+	if (preferred !== undefined) return preferred === incoming.title ? incoming : current;
+	return current === undefined || current.title === incoming.title ? incoming : current;
+}
+
 export function createStorySession<T extends TitledStory>(update: (apply: (stories: T[]) => T[]) => void) {
 	return {
 		upsert(story: T) {

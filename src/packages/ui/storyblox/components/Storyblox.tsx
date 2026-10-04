@@ -17,7 +17,7 @@ import { Template } from "../../template";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
-import { createStorySession } from "../storyRegistry";
+import { createStorySession, keepSelection } from "../storyRegistry";
 
 const DEFAULT_EXTENSION = ".stories";
 
@@ -147,11 +147,7 @@ function Storyblox(props: StorybloxProps) {
 				session.upsert(story);
 				const storiesFolder = ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
 				const preferred = storiesFolder?.GetAttribute("storyblox-select") as string | undefined;
-				if (preferred === story.title) {
-					setSelectedStory(story);
-				} else if (preferred === undefined) {
-					setSelectedStory((current) => current ?? story);
-				}
+				setSelectedStory((current) => keepSelection(current, story, preferred));
 
 				logDebug(`Tracking story: ${title}`);
 			} catch (error) {
@@ -260,6 +256,10 @@ function Storyblox(props: StorybloxProps) {
 					version={version}
 					release={release}
 					onClick={(story: Story) => {
+						(ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories") ?? root)?.SetAttribute(
+							"storyblox-select",
+							story.title,
+						);
 						setSelectedStory(story);
 					}}
 					primaryThemeEnabled={theme === primaryTheme}

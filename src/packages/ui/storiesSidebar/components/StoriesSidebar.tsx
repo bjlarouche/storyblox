@@ -29,13 +29,7 @@ function StoriesSidebar({
 		useStoriesSidebarStyles();
 
 	const [filter, setFilter] = useState<string>("");
-	const [, setSelectedStory] = useState<Story | undefined>();
 	const [tree, setTree] = useState<Tree | undefined>();
-
-	const clickOnStory = (story: Story) => {
-		setSelectedStory(story);
-		onClick(story);
-	};
 
 	useEffect(() => {
 		if (stories.size() === 0) {
@@ -59,7 +53,7 @@ function StoriesSidebar({
 
 			const newleaf: Leaf = {
 				title: storyName,
-				onClick: () => clickOnStory(story),
+				onClick: () => onClick(story),
 			};
 
 			const branch = tree.branches.find((branch: Branch) => branch.title === componentName);
