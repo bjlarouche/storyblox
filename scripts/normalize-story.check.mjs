@@ -1,4 +1,7 @@
-globalThis.typeOf = (value) => (typeof value === "object" && value !== null ? "table" : typeof value);
+globalThis.typeOf = (value) => {
+	if (value !== null && typeof value === "object" && value.__type) return value.__type;
+	return typeof value === "object" && value !== null ? "table" : typeof value;
+};
 globalThis.pairs = (record) => Object.keys(record).map((key) => [key, record[key]]);
 String.prototype.size = function size() {
 	return this.length;
@@ -73,5 +76,33 @@ if (ambiguous.kind !== "reject") throw new Error("ambiguous export was accepted"
 
 const wrongName = normalizeExport({ default: { title: "A/B", template: () => {} } }, "Button.story", suffix);
 if (wrongName.kind !== "reject") throw new Error("suffix mismatch was accepted");
+
+const datatypes = normalizeExport(
+	{
+		default: {
+			title: "Fixture/Datatypes",
+			args: { paint: { __type: "Color3" }, icon: 123 },
+			argTypes: { paint: { type: "color" }, icon: { type: "asset" } },
+			render: () => "ok",
+		},
+	},
+	"Datatypes.stories",
+	suffix,
+);
+if (datatypes.kind !== "react") throw new Error("datatype story");
+
+const badAsset = normalizeExport(
+	{
+		default: {
+			title: "Fixture/Datatypes",
+			args: { icon: -1 },
+			argTypes: { icon: { type: "asset" } },
+			render: () => "ok",
+		},
+	},
+	"Datatypes.stories",
+	suffix,
+);
+if (badAsset.kind !== "reject" || badAsset.reason !== "args") throw new Error("bad asset");
 
 console.log("normalize story ok");

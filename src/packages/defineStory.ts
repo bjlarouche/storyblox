@@ -1,11 +1,12 @@
 export interface ControlSpec {
-	type: "string" | "boolean" | "number" | "enum";
+	type: "string" | "boolean" | "number" | "enum" | "color" | "vector2" | "vector3" | "udim" | "udim2" | "EnumItem" | "asset" | "cframe";
 	options?: string[];
 	control?: "radio" | "slider";
 	min?: number;
 	max?: number;
 	step?: number;
 	optional?: boolean;
+	enumType?: string;
 }
 
 export const controls = {
@@ -21,6 +22,14 @@ export const controls = {
 		max,
 		step,
 	}),
+	color: (): ControlSpec => ({ type: "color" }),
+	vector2: (): ControlSpec => ({ type: "vector2" }),
+	vector3: (): ControlSpec => ({ type: "vector3" }),
+	udim: (): ControlSpec => ({ type: "udim" }),
+	udim2: (): ControlSpec => ({ type: "udim2" }),
+	enumItem: (enumType: string, options: string[]): ControlSpec => ({ type: "EnumItem", enumType, options }),
+	asset: (): ControlSpec => ({ type: "asset" }),
+	cframe: (): ControlSpec => ({ type: "cframe" }),
 };
 
 export interface ModernStory<T> {

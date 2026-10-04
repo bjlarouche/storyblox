@@ -39,6 +39,16 @@ function argValueMatches(value: unknown, kind: unknown): boolean {
 	if (kind === "boolean") return typeOf(value) === "boolean";
 	if (kind === "number") return typeOf(value) === "number";
 	if (kind === "enum") return typeOf(value) === "string";
+	if (kind === "color") return typeOf(value) === "Color3";
+	if (kind === "vector2") return typeOf(value) === "Vector2";
+	if (kind === "vector3") return typeOf(value) === "Vector3";
+	if (kind === "udim") return typeOf(value) === "UDim";
+	if (kind === "udim2") return typeOf(value) === "UDim2";
+	if (kind === "EnumItem") return typeOf(value) === "EnumItem";
+	if (kind === "cframe") return typeOf(value) === "CFrame";
+	if (kind === "asset") {
+		return typeOf(value) === "number" && (value as number) === value && (value as number) >= 0 && (value as number) % 1 === 0;
+	}
 	return false;
 }
 
