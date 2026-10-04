@@ -204,6 +204,8 @@ function Storyblox(props: StorybloxProps) {
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
 	const [previewKey, setPreviewKey] = useState(0);
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
+	const [focusSearch, setFocusSearch] = useState(0);
+	const [remount, setRemount] = useState(0);
 	const generation = useRef(0);
 	const failed = useRef(false);
 	const storiesRef = useRef(stories);
@@ -379,10 +381,18 @@ function Storyblox(props: StorybloxProps) {
 		};
 		const selectConn = marker.GetAttributeChangedSignal("storyblox-select").Connect(onSelect);
 		const themeConn = marker.GetAttributeChangedSignal("storyblox-theme").Connect(onTheme);
+		const focusConn = marker
+			.GetAttributeChangedSignal("storyblox-focus-search")
+			.Connect(() => setFocusSearch((current) => current + 1));
+		const remountConn = marker
+			.GetAttributeChangedSignal("storyblox-remount")
+			.Connect(() => setRemount((current) => current + 1));
 		onSelect();
 		return () => {
 			selectConn.Disconnect();
 			themeConn.Disconnect();
+			focusConn.Disconnect();
+			remountConn.Disconnect();
 		};
 	}, [root, primaryTheme, secondaryTheme, onThemeChange]);
 
@@ -432,6 +442,7 @@ function Storyblox(props: StorybloxProps) {
 							logoSrc={logoSrc}
 							version={version}
 							selected={selectedStory?.title}
+							focusSearch={focusSearch}
 							onClick={(story: Story) => {
 								controlRoot(root)?.SetAttribute("storyblox-select", story.title);
 								setSelectedStory(story);
@@ -472,6 +483,7 @@ function Storyblox(props: StorybloxProps) {
 						>
 							<Template
 								story={selectedStory}
+								remount={remount}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
 								storyTheme={storyTheme}

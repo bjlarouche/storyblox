@@ -100,6 +100,15 @@ local function onFolder(ch)
 	if ch.Name == "StorybloxPlugin" then resync() end
 end
 
+local function command(name)
+	local stories = ss:FindFirstChild("StorybloxPlugin") and ss.StorybloxPlugin:FindFirstChild("stories")
+	if stories then stories:SetAttribute(name, (stories:GetAttribute(name) or 0) + 1) end
+end
+local focusAction = plugin:CreatePluginAction("StorybloxFocusSearch", "Storyblox: Focus search", "Focus the story filter", "", true)
+local remountAction = plugin:CreatePluginAction("StorybloxRemount", "Storyblox: Remount story", "Remount the selected story", "", true)
+table.insert(lifetime, focusAction.Triggered:Connect(function() command("storyblox-focus-search") end))
+table.insert(lifetime, remountAction.Triggered:Connect(function() command("storyblox-remount") end))
+
 toggle.Click:Connect(function() widget.Enabled = not widget.Enabled end)
 reloadBtn.Click:Connect(load)
 table.insert(lifetime, ss.ChildAdded:Connect(onFolder))

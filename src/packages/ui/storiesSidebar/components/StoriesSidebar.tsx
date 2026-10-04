@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "@rbxts/react";
+import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Branch, Icons, Sidebar, Divider, Tree, TreeView, TreeViewProps, Input, WriteableStyle } from "@rbxts/uiblox";
 import { Story } from "../../../../interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
@@ -14,12 +14,20 @@ export interface StoriesSidebarProps {
 	logoSrc: string;
 	version?: string;
 	selected?: string;
+	focusSearch?: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onClick: (story: Story<any>) => void;
 }
 
-function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick }: StoriesSidebarProps) {
+function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, focusSearch = 0, onClick }: StoriesSidebarProps) {
 	const { logo, filterInput, storiesTree, divider, versionLabel, statusLabel } = useStoriesSidebarStyles();
+	const sidebar = useRef<Frame>();
+
+	useEffect(() => {
+		if (focusSearch === 0) return;
+		const box = sidebar.current?.Parent?.FindFirstChildWhichIsA("TextBox", true);
+		if (box) box.CaptureFocus();
+	}, [focusSearch]);
 
 	const [draft, setDraft] = useState("");
 	const [query, setQuery] = useState("");
@@ -91,7 +99,7 @@ function StoriesSidebar({ stories, logoSrc, version = VERSION, selected, onClick
 				} as React.ComponentProps<typeof Input> & { onInput?: (text: string) => void })}
 			/>
 
-			<frame key="StoriesTree" {...storiesTree}>
+			<frame key="StoriesTree" ref={sidebar} {...storiesTree}>
 				{tree !== undefined && <TreeView {...({ tree, icon: Icons.Book, selected } as TreeViewProps)} />}
 				{query.size() > 0 && tree === undefined && (
 					<textlabel
