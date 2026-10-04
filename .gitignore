@@ -103,6 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
+# Local Studio window shots. They include the rest of the Studio window.
+captures/
+
 # Rbx build output
 out/*
 !out/tsconfig.tsbuildinfo
