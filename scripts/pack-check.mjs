@@ -26,6 +26,7 @@ try {
 		.split("\n")
 		.filter(Boolean);
 	if (files.some((file) => file.endsWith("tsbuildinfo"))) throw new Error("tarball includes tsbuildinfo");
+	if (files.some((file) => file.includes("/fixtures/"))) throw new Error("tarball includes fixtures");
 	if (!files.includes("package/out/init.luau")) throw new Error("tarball missing out/init.luau");
 	if (files.includes("package/out/init.lua")) throw new Error("tarball includes out/init.lua");
 
