@@ -29,6 +29,9 @@
           "NativeScene.stories": {
             "$path": "../fixtures/scene"
           },
+          "WorkspaceScene.stories": {
+            "$path": "../fixtures/workspace"
+          },
           "Adapter.stories": {
             "$path": "../fixtures/adapter"
           },
