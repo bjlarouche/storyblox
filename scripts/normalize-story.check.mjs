@@ -105,4 +105,19 @@ const badAsset = normalizeExport(
 );
 if (badAsset.kind !== "reject" || badAsset.reason !== "args") throw new Error("bad asset");
 
+const themed = normalizeExport(
+	{
+		default: {
+			title: "Fixture/Nested",
+			args: {},
+			render: (_args, context) => context?.theme,
+		},
+	},
+	"Nested.stories",
+	suffix,
+);
+if (themed.kind !== "react" || themed.story.template({}, { theme: "Dark" }) !== "Dark") {
+	throw new Error("preview theme context");
+}
+
 console.log("normalize story ok");

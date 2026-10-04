@@ -323,6 +323,9 @@ function Storyblox(props: StorybloxProps) {
 	}, [root, findStories, logDebug]);
 
 	const primaryThemeEnabled = theme === primaryTheme;
+	const [storyOnPrimary, setStoryOnPrimary] = useState(true);
+	const storyTheme = storyOnPrimary ? primaryTheme : secondaryTheme;
+	const toggleStoryTheme = () => setStoryOnPrimary((current) => !current);
 	const toggleTheme = () => {
 		const chosen = primaryThemeEnabled ? secondaryTheme : primaryTheme;
 		const name = chosen === primaryTheme ? "dark" : "light";
@@ -430,6 +433,9 @@ function Storyblox(props: StorybloxProps) {
 								}}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
+								storyTheme={storyTheme}
+								storyOnPrimary={storyOnPrimary}
+								onToggleStoryTheme={toggleStoryTheme}
 							/>
 						);
 					}}
@@ -438,6 +444,9 @@ function Storyblox(props: StorybloxProps) {
 						story={selectedStory}
 						primaryThemeEnabled={primaryThemeEnabled}
 						onToggleTheme={toggleTheme}
+						storyTheme={storyTheme}
+						storyOnPrimary={storyOnPrimary}
+						onToggleStoryTheme={toggleStoryTheme}
 					/>
 				</ErrorBoundary>
 			</frame>
