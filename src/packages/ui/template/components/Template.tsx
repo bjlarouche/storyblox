@@ -157,6 +157,10 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 									args={args}
 									argTypes={(story as { argTypes?: unknown } | undefined)?.argTypes}
 									onChange={(key, value) => setArgs((current) => patchArg(current, key, value))}
+									onReset={() => {
+										const described = story as { args?: unknown; props?: unknown } | undefined;
+										setArgs(copyArgs(described?.args ?? described?.props));
+									}}
 								/>
 							</frame>
 						}
