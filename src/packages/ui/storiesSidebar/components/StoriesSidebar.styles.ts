@@ -1,15 +1,14 @@
 import { createStyles, makeStyles, Theme, WriteableStyle } from "@rbxts/uiblox";
 
 const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
-	const logoOffset = 0;
-	const filterOffset = logoOffset + theme.spacing.calc(3) + theme.padding.calc(2);
+	const filterOffset = theme.spacing.calc(3) + theme.padding.calc(2);
 	const storiesOffset = filterOffset + theme.spacing.calc(2) + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(4) + theme.padding.calc(2);
 
 	return createStyles({
 		logo: {
 			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(2)),
-			Position: new UDim2(0.5, 0, 0, logoOffset),
+			Position: new UDim2(0.5, 0, 0, 0),
 			AnchorPoint: new Vector2(0.5, 0),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,

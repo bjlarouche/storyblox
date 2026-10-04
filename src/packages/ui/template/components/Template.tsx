@@ -66,6 +66,7 @@ function Template({ story, primaryThemeEnabled, onToggleTheme }: TemplateProps) 
 								Size: new UDim2(1, -theme.spacing.calc(3), 0, theme.spacing.calc(2)),
 								Position: new UDim2(0, theme.spacing.calc(0.5), 0, 0),
 								TextXAlignment: Enum.TextXAlignment.Left,
+								TextTruncate: Enum.TextTruncate.AtEnd,
 								Font: theme.typography.fontFamilies.semibold,
 								TextColor3: theme.options.constants.colors.textMuted,
 							} as WriteableStyle<TextButton>
