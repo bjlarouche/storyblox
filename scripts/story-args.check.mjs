@@ -10,7 +10,7 @@ String.prototype.size = function size() {
 	return this.length;
 };
 
-const { copyArgs, patchArg, omitArg, applyArg, commitNumberText } = await import("../src/packages/ui/template/storyArgs.ts");
+const { copyArgs, patchArg, omitArg, applyArg, commitNumberText, choiceOptions } = await import("../src/packages/ui/template/storyArgs.ts");
 
 const source = { label: "Primary", disabled: false };
 const copied = copyArgs(source);
@@ -30,5 +30,11 @@ if (commitNumberText("nope") !== undefined || commitNumberText("") !== undefined
 	throw new Error("invalid draft");
 }
 if (commitNumberText("3") !== 3) throw new Error("number draft");
+
+const choices = choiceOptions(["contained", { label: "Outlined", value: "outlined" }, { label: "Text" }]);
+if (choices[0]?.value !== "contained" || choices[0]?.label !== "contained") throw new Error("string choice");
+if (choices[1]?.value !== "outlined" || choices[1]?.label !== "Outlined") throw new Error("labeled choice");
+if (choices[2]?.value !== "Text" || choices[2]?.label !== "Text") throw new Error("label only");
+if (choiceOptions(undefined).length !== 0) throw new Error("empty choices");
 
 console.log("story args ok");

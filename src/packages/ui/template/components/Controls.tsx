@@ -11,8 +11,8 @@ import {
 	removeItem,
 	switchUnion,
 } from "../../../nestedArgs";
-import { ArgValues, commitNumberText } from "../storyArgs";
-import { argDoc } from "../storyLabel";
+import { ArgValues, choiceOptions, commitNumberText } from "../storyArgs";
+import { argHint } from "../storyLabel";
 
 interface Spec {
 	type?: string;
@@ -43,6 +43,7 @@ const kit = Uiblox as unknown as {
 		value: string;
 		options: { label: string; value: string }[];
 		onChange: (value: string) => void;
+		className?: { Size?: UDim2 };
 	}) => React.Element;
 	RadioGroup: (props: {
 		value: string;
@@ -112,6 +113,8 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 	const [rowKeys, setRowKeys] = useState<{ [key: string]: Array<string> }>({});
 	const specs = typeOf(argTypes) === "table" ? (argTypes as { [key: string]: Spec }) : {};
 	const fallbacks = typeOf(defaults) === "table" ? (defaults as ArgValues) : {};
+	const fill = { Size: new UDim2(1, 0, 0, theme.spacing.calc(2)) };
+	const gap = new UDim(0, theme.padding.calc(1));
 	const rows: React.Element[] = [];
 	if (typeOf(description) === "string") {
 		rows.push(
@@ -134,24 +137,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 	for (const [key, spec] of pairs(specs)) {
 		const name = key as string;
 		const value = args[name];
-		const label = (
-			<textlabel
-				key={`${name}-label`}
-				Text={argDoc(name, spec, fallbacks[name])}
-				LayoutOrder={order}
-				Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
-				AutomaticSize={Enum.AutomaticSize.Y}
-				TextWrapped={true}
-				BackgroundTransparency={1}
-				Font={theme.typography.fontFamilies.default}
-				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.options.constants.colors.textMuted}
-				TextXAlignment={Enum.TextXAlignment.Left}
-			/>
-		);
-		order += 1;
-		rows.push(label);
-		const options = (spec?.options ?? []).map((option) => ({ label: option, value: option }));
+		const options = choiceOptions(spec?.options);
 		const commitNumber = (incoming: unknown) => {
 			const committed = commitNumberText(tostring(incoming));
 			if (committed !== undefined) onChange(name, committed);
@@ -163,7 +149,6 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					key={name}
 					value={value === true}
 					mixed={spec.optional === true && value === undefined}
-					label={name}
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
@@ -211,6 +196,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					key={name}
 					value={typeOf(value) === "string" ? (value as string) : ""}
 					options={options}
+					className={fill}
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
@@ -227,7 +213,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 			if (spec?.type === "EnumItem" && options.size() > 0) {
 				const selected = typeOf(value) === "EnumItem" ? (value as { Name: string }).Name : "";
 				editor = (
-					<kit.Select key={name} value={selected} options={options} onChange={(incoming) => commitText(incoming)} />
+					<kit.Select key={name} value={selected} options={options} className={fill} onChange={(incoming) => commitText(incoming)} />
 				);
 			} else {
 				editor = (
@@ -360,6 +346,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					key={name}
 					value={selected}
 					options={variantNames}
+					className={fill}
 					onChange={(incoming) => onChange(name, switchUnion(tag, incoming, {}))}
 				/>
 			);
@@ -405,19 +392,65 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 		if (editor !== undefined) {
 			rows.push(
 				<frame
-					key={`${name}-editor`}
+					key={name}
 					LayoutOrder={order}
 					Size={new UDim2(1, 0, 0, 0)}
 					AutomaticSize={Enum.AutomaticSize.Y}
 					BackgroundTransparency={1}
 				>
-					<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, theme.padding.calc(1))} />
-					{editor}
+					<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={gap} SortOrder={Enum.SortOrder.LayoutOrder} />
+					<textlabel
+						key="Name"
+						Text={name}
+						LayoutOrder={1}
+						Size={new UDim2(1, 0, 0, 0)}
+						AutomaticSize={Enum.AutomaticSize.Y}
+						TextWrapped={true}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.text.primary}
+						TextXAlignment={Enum.TextXAlignment.Left}
+					/>
+					<frame key="Editor" LayoutOrder={2} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+						{editor}
+					</frame>
+					<textlabel
+						key="Hint"
+						Text={argHint(spec, fallbacks[name])}
+						LayoutOrder={3}
+						Size={new UDim2(1, 0, 0, 0)}
+						AutomaticSize={Enum.AutomaticSize.Y}
+						TextWrapped={true}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.default}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.options.constants.colors.textMuted}
+						TextXAlignment={Enum.TextXAlignment.Left}
+					/>
+					{spec?.description !== undefined && (
+						<textlabel
+							key="Help"
+							Text={spec.description}
+							LayoutOrder={4}
+							Size={new UDim2(1, 0, 0, 0)}
+							AutomaticSize={Enum.AutomaticSize.Y}
+							TextWrapped={true}
+							BackgroundTransparency={1}
+							Font={theme.typography.fontFamilies.default}
+							TextSize={theme.typography.fontSizes.caption}
+							TextColor3={theme.options.constants.colors.textMuted}
+							TextXAlignment={Enum.TextXAlignment.Left}
+						/>
+					)}
 					{faults[name] !== undefined && faults[name].size() > 0 && (
 						<textlabel
 							key="Fault"
 							Text={faults[name]}
-							Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
+							LayoutOrder={5}
+							Size={new UDim2(1, 0, 0, 0)}
+							AutomaticSize={Enum.AutomaticSize.Y}
+							TextWrapped={true}
 							BackgroundTransparency={1}
 							Font={theme.typography.fontFamilies.default}
 							TextSize={theme.typography.fontSizes.caption}
@@ -429,7 +462,9 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						<textbutton
 							key="Clear"
 							Text="Clear"
-							Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
+							LayoutOrder={6}
+							AutomaticSize={Enum.AutomaticSize.X}
+							Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 							BackgroundTransparency={1}
 							Font={theme.typography.fontFamilies.semibold}
 							TextSize={theme.typography.fontSizes.caption}
@@ -443,34 +478,6 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 		}
 		order += 1;
 	}
-	rows.push(
-		order > 1 ? (
-			<textbutton
-				key="Reset"
-				Text="Reset"
-				LayoutOrder={0}
-				Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
-				BackgroundTransparency={1}
-				Font={theme.typography.fontFamilies.semibold}
-				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.palette.secondary.main}
-				TextXAlignment={Enum.TextXAlignment.Left}
-				Event={{ MouseButton1Click: onReset }}
-			/>
-		) : (
-			<textlabel
-				key="NoControls"
-				Text="No controls for this story"
-				LayoutOrder={0}
-				Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
-				BackgroundTransparency={1}
-				Font={theme.typography.fontFamilies.default}
-				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.options.constants.colors.textMuted}
-				TextXAlignment={Enum.TextXAlignment.Left}
-			/>
-		),
-	);
 
 	return (
 		<scrollingframe
@@ -480,21 +487,67 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 			BorderSizePixel={0}
 			CanvasSize={new UDim2(0, 0, 0, 0)}
 			AutomaticCanvasSize={Enum.AutomaticSize.Y}
+			ScrollingDirection={Enum.ScrollingDirection.Y}
 			ScrollBarThickness={theme.spacing.calc(0.5)}
+			ClipsDescendants={true}
 		>
-			<uilistlayout Padding={new UDim(0, theme.padding.calc(1))} SortOrder={Enum.SortOrder.LayoutOrder} />
-			<textlabel
-				key="ControlsTitle"
-				Text="Controls"
-				LayoutOrder={-2}
-				Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
-				BackgroundTransparency={1}
-				Font={theme.typography.fontFamilies.semibold}
-				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.options.constants.colors.textMuted}
-				TextXAlignment={Enum.TextXAlignment.Left}
+			<uipadding
+				PaddingTop={gap}
+				PaddingBottom={gap}
+				PaddingLeft={gap}
+				PaddingRight={gap}
 			/>
+			<uilistlayout Padding={new UDim(0, theme.spacing.calc(1))} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<frame
+				key="Header"
+				LayoutOrder={-3}
+				Size={new UDim2(1, 0, 0, theme.spacing.calc(1.5))}
+				BackgroundTransparency={1}
+			>
+				<textlabel
+					key="ControlsTitle"
+					Text="Controls"
+					Size={new UDim2(1, -theme.spacing.calc(4), 1, 0)}
+					BackgroundTransparency={1}
+					Font={theme.typography.fontFamilies.semibold}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={theme.palette.text.primary}
+					TextXAlignment={Enum.TextXAlignment.Left}
+					TextYAlignment={Enum.TextYAlignment.Center}
+				/>
+				{order > 1 && (
+					<textbutton
+						key="Reset"
+						Text="Reset"
+						Size={new UDim2(0, theme.spacing.calc(4), 1, 0)}
+						Position={new UDim2(1, 0, 0, 0)}
+						AnchorPoint={new Vector2(1, 0)}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.secondary.main}
+						TextXAlignment={Enum.TextXAlignment.Right}
+						Event={{ MouseButton1Click: onReset }}
+					/>
+				)}
+			</frame>
+			<frame key="ControlsRule" LayoutOrder={-2} Size={new UDim2(1, 0, 0, 1)} BackgroundColor3={theme.palette.divider} BorderSizePixel={0} />
 			{rows}
+			{order <= 1 && (
+				<textlabel
+					key="NoControls"
+					Text="No controls for this story"
+					LayoutOrder={0}
+					Size={new UDim2(1, 0, 0, 0)}
+					AutomaticSize={Enum.AutomaticSize.Y}
+					TextWrapped={true}
+					BackgroundTransparency={1}
+					Font={theme.typography.fontFamilies.default}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={theme.options.constants.colors.textMuted}
+					TextXAlignment={Enum.TextXAlignment.Left}
+				/>
+			)}
 		</scrollingframe>
 	);
 }

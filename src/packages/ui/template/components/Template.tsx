@@ -502,26 +502,18 @@ function Template({
 						onChange={setSplit}
 						first={<Canvas className={canvas}>{template}</Canvas>}
 						second={
-							<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
-								<uipadding
-									key="ControlsInset"
-									PaddingTop={new UDim(0, theme.padding.calc(2))}
-									PaddingLeft={new UDim(0, theme.padding.calc(2))}
-									PaddingRight={new UDim(0, theme.padding.calc(2))}
-								/>
-								<Controls
-									theme={theme}
-									args={args}
-									argTypes={argTypes}
-									defaults={(story as { args?: unknown; props?: unknown } | undefined)?.args ?? (story as { props?: unknown } | undefined)?.props}
-									description={(story as { description?: unknown } | undefined)?.description}
-									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
-									onReset={() => {
-										const described = story as { args?: unknown; props?: unknown } | undefined;
-										setArgs(copyArgs(described?.args ?? described?.props));
-									}}
-								/>
-							</frame>
+							<Controls
+								theme={theme}
+								args={args}
+								argTypes={argTypes}
+								defaults={(story as { args?: unknown; props?: unknown } | undefined)?.args ?? (story as { props?: unknown } | undefined)?.props}
+								description={(story as { description?: unknown } | undefined)?.description}
+								onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
+								onReset={() => {
+									const described = story as { args?: unknown; props?: unknown } | undefined;
+									setArgs(copyArgs(described?.args ?? described?.props));
+								}}
+							/>
 						}
 					/>
 				</frame>
