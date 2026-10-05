@@ -17,6 +17,7 @@ import { SplitPane, Template } from "../../template";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { parseFavorites, toggleFavorite } from "../../storiesSidebar/storyTree";
+import { useDragScroll } from "../../scroll";
 import { mountNative } from "../nativeMount";
 import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
@@ -273,6 +274,7 @@ function Storyblox(props: StorybloxProps) {
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
 	const [shellWidth, setShellWidth] = useState(0);
 	const [inspectorWidth, setInspectorWidth] = useState(10000);
+	const [inspectorFrame, setInspectorFrame] = useState<ScrollingFrame>();
 	const [pane, setPane] = useState("canvas");
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
@@ -311,6 +313,7 @@ function Storyblox(props: StorybloxProps) {
 	const [favoriteList, setFavoriteList] = useState(parseFavorites(favorites));
 	const favoritesRef = useRef(favoriteList);
 	favoritesRef.current = favoriteList;
+	useDragScroll(inspectorFrame);
 	const toggleFavoriteStory = (title: string) => {
 		const chosen = toggleFavorite(favoritesRef.current, title);
 		favoritesRef.current = chosen;
@@ -682,10 +685,23 @@ function Storyblox(props: StorybloxProps) {
 						</ErrorBoundary>
 	);
 	const inspector = (
-		<frame key="Inspector" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+		<scrollingframe
+			key="Inspector"
+			ref={setInspectorFrame}
+			Size={new UDim2(1, 0, 1, 0)}
+			BackgroundTransparency={1}
+			BorderSizePixel={0}
+			CanvasSize={new UDim2(0, 0, 0, 0)}
+			AutomaticCanvasSize={Enum.AutomaticSize.Y}
+			ScrollingDirection={Enum.ScrollingDirection.Y}
+			ScrollBarThickness={theme.spacing.calc(0.5)}
+			ScrollBarImageTransparency={0.75}
+			ClipsDescendants={true}
+		>
 			<uipadding
 				key="InspectorInset"
 				PaddingTop={new UDim(0, theme.padding.calc(2))}
+				PaddingBottom={new UDim(0, theme.padding.calc(2))}
 				PaddingLeft={new UDim(0, theme.padding.calc(2))}
 				PaddingRight={new UDim(0, theme.padding.calc(2))}
 			/>
@@ -710,7 +726,8 @@ function Storyblox(props: StorybloxProps) {
 				key="InspectorBody"
 				Text={storyInspector(selectedStory as never)}
 				LayoutOrder={2}
-				Size={new UDim2(1, 0, 1, -theme.spacing.calc(2))}
+				Size={new UDim2(1, 0, 0, 0)}
+				AutomaticSize={Enum.AutomaticSize.Y}
 				TextWrapped={true}
 				TextYAlignment={Enum.TextYAlignment.Top}
 				BackgroundTransparency={1}
@@ -719,7 +736,7 @@ function Storyblox(props: StorybloxProps) {
 				TextColor3={theme.options.constants.colors.textMuted}
 				TextXAlignment={Enum.TextXAlignment.Left}
 			/>
-		</frame>
+		</scrollingframe>
 	);
 	const tab = (id: string, label: string, order: number) => (
 		<textbutton
