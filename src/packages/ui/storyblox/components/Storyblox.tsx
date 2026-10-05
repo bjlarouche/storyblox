@@ -249,6 +249,8 @@ export interface StorybloxProps {
 	onThemeChange?: (themeName: "dark" | "light") => void;
 	favorites?: string;
 	onFavoritesChange?: (favorites: string) => void;
+	inspectorOpen?: boolean;
+	onInspectorOpenChange?: (open: boolean) => void;
 }
 
 function Storyblox(props: StorybloxProps) {
@@ -264,6 +266,8 @@ function Storyblox(props: StorybloxProps) {
 		onThemeChange,
 		favorites,
 		onFavoritesChange,
+		inspectorOpen = true,
+		onInspectorOpenChange,
 	} = props;
 
 	const { errorContainer, errorMessage } = useStorybloxStyles();
@@ -275,6 +279,7 @@ function Storyblox(props: StorybloxProps) {
 	const [shellWidth, setShellWidth] = useState(0);
 	const [inspectorWidth, setInspectorWidth] = useState(10000);
 	const [inspectorFrame, setInspectorFrame] = useState<ScrollingFrame>();
+	const [inspectorShown, setInspectorShown] = useState(inspectorOpen !== false);
 	const [pane, setPane] = useState("canvas");
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
@@ -445,6 +450,12 @@ function Storyblox(props: StorybloxProps) {
 		setTheme(chosen);
 		if (onThemeChange) onThemeChange(name);
 		controlRoot(root)?.SetAttribute("storyblox-theme", name);
+	};
+	const toggleInspector = () => {
+		const open = !inspectorShown;
+		setInspectorShown(open);
+		if (!open) setPane((current) => (current === "inspector" ? "canvas" : current));
+		if (onInspectorOpenChange) onInspectorOpenChange(open);
 	};
 
 	useEffect(() => {
@@ -654,6 +665,8 @@ function Storyblox(props: StorybloxProps) {
 										}}
 										primaryThemeEnabled={primaryThemeEnabled}
 										onToggleTheme={toggleTheme}
+										inspectorOpen={inspectorShown}
+										onToggleInspector={toggleInspector}
 										starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
 										onToggleFavorite={
 											selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined
@@ -677,6 +690,8 @@ function Storyblox(props: StorybloxProps) {
 								}}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
+								inspectorOpen={inspectorShown}
+								onToggleInspector={toggleInspector}
 								starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
 								onToggleFavorite={
 									selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined
@@ -786,10 +801,10 @@ function Storyblox(props: StorybloxProps) {
 							<uipadding key="TabInset" PaddingLeft={new UDim(0, theme.padding.calc(1))} />
 							{tab("stories", "Stories", 1)}
 							{tab("canvas", "Canvas", 2)}
-							{tab("inspector", "Inspector", 3)}
+							{inspectorShown && tab("inspector", "Inspector", 3)}
 						</frame>
 						<frame key="Pane" LayoutOrder={2} Size={new UDim2(1, 0, 1, -theme.spacing.calc(2))} BackgroundTransparency={1}>
-							{pane === "stories" ? sidebar : pane === "inspector" ? inspector : canvas}
+							{pane === "stories" ? sidebar : pane === "inspector" && inspectorShown ? inspector : canvas}
 						</frame>
 					</frame>
 				) : (
@@ -800,7 +815,11 @@ function Storyblox(props: StorybloxProps) {
 						onChange={setSidebarWidth}
 						first={sidebar}
 						second={
-							<SplitPane value={inspectorWidth} min={160} onChange={setInspectorWidth} first={canvas} second={inspector} />
+							inspectorShown ? (
+								<SplitPane value={inspectorWidth} min={160} onChange={setInspectorWidth} first={canvas} second={inspector} />
+							) : (
+								canvas
+							)
 						}
 					/>
 				)}

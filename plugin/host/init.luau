@@ -9,6 +9,7 @@ return function(plugin, widget, root)
 	local stories = script.Parent:WaitForChild("stories")
 	local saved = plugin:GetSetting("theme")
 	local savedFavorites = plugin:GetSetting("favorites")
+	local savedInspector = plugin:GetSetting("inspectorOpen")
 	local handle = ReactRoblox.createRoot(root)
 	handle:render(React.createElement(Storyblox, {
 		root = stories,
@@ -19,6 +20,10 @@ return function(plugin, widget, root)
 		favorites = type(savedFavorites) == "string" and savedFavorites or "",
 		onFavoritesChange = function(value)
 			plugin:SetSetting("favorites", value)
+		end,
+		inspectorOpen = savedInspector ~= false,
+		onInspectorOpenChange = function(open)
+			plugin:SetSetting("inspectorOpen", open)
 		end,
 	}))
 	return function()
