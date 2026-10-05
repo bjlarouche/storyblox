@@ -3,3 +3,7 @@ export { TemplateProps } from "./components/Template";
 export * from "./components/Template";
 export { default as ActionsPanel } from "./components/ActionsPanel";
 export { ActionsPanelProps } from "./components/ActionsPanel";
+export { default as InspectorPane } from "./components/InspectorPane";
+export { InspectorPaneProps, InspectorTab } from "./components/InspectorPane";
+export { ActionLogContext, useActionLog } from "./actionLogContext";
+export { ActionLogApi } from "./actionLogContext";
