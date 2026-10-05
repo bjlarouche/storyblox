@@ -74,6 +74,11 @@ const kit = Uiblox as unknown as {
 		disabled?: boolean;
 		onChange: (value: number) => void;
 	}) => React.Element;
+	ColorPicker: (props: {
+		value: Color3;
+		onChange: (value: Color3) => void;
+		disabled?: boolean;
+	}) => React.Element;
 };
 
 export interface ControlsProps {
@@ -97,7 +102,6 @@ function writeFault(current: { [key: string]: string }, key: string, reason: str
 
 function datatype(kind?: string) {
 	return (
-		kind === "color" ||
 		kind === "vector2" ||
 		kind === "vector3" ||
 		kind === "udim" ||
@@ -245,7 +249,20 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
-		} else if (datatype(spec?.type)) {
+		} else if (spec?.type === "color" && typeOf((Uiblox as unknown as { ColorPicker?: unknown }).ColorPicker) === "function") {
+			const color = typeOf(value) === "Color3" ? (value as Color3) : new Color3();
+			editor = (
+				<kit.ColorPicker
+					key={name}
+					value={color}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (datatype(spec?.type) || spec?.type === "color") {
 			const commitText = (text: string) => {
 				const parsed = parseDatatype(spec ?? {}, text);
 				if (!parsed.ok) {
