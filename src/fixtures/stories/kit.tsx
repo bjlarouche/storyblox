@@ -34,6 +34,7 @@ interface SwitchProps {
 	onChange: (value: boolean) => void;
 	disabled?: boolean;
 	label?: string;
+	size?: "small" | "medium" | "large";
 }
 
 interface SliderProps {
