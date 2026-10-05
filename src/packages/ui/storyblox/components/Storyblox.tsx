@@ -164,10 +164,10 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 			let hosted: ReturnType<typeof mountNative>;
 			try {
 				hosted = mountNative(mount, target, props, theme, scene);
-			} catch (error) {
+			} catch (failure) {
 				restore?.();
 				pcall(() => target.Destroy());
-				throw error;
+				throw failure;
 			}
 			session.update = hosted.update;
 			const element = (
