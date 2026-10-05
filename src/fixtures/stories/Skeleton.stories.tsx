@@ -14,7 +14,7 @@ export default {
 	title: "Feedback/Skeleton",
 	args: {
 		variant: "text",
-		animation: "pulse",
+		animation: "shimmer",
 		width: 180,
 		height: 14,
 		lines: 3,
@@ -41,7 +41,12 @@ export default {
 			env.wait();
 			const host = env.find("SkeletonHost");
 			env.expect(host !== undefined, "host");
-			env.expect(host?.FindFirstChildWhichIsA("UIGradient", true) === undefined, "reduced motion stays still");
+			const gradient = host?.FindFirstChildWhichIsA("UIGradient", true) as UIGradient | undefined;
+			env.expect(gradient !== undefined, "reduced motion keeps static gradient");
+			env.expect(
+				gradient !== undefined && gradient.Offset.X === 0 && gradient.Offset.Y === 0,
+				"reduced motion gradient is still",
+			);
 		},
 	},
 	render: (args: Args) => (
