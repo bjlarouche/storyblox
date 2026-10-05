@@ -36,7 +36,7 @@ function SwitchStory(args: Args) {
 
 export default {
 	title: "Components/Switch",
-	args: { value: false, disabled: false, label: "Enabled", size: "medium" },
+	args: { value: true, disabled: false, label: "Enabled", size: "medium" },
 	argTypes: {
 		value: { type: "boolean" },
 		disabled: { type: "boolean" },
