@@ -6,6 +6,7 @@ export { StoryAction } from "./storyActions";
 export { formatActionLine, formatActionValue } from "./formatAction";
 export { useActionLog, ActionLogContext } from "./ui/template/actionLogContext";
 export { ActionLogApi } from "./ui/template/actionLogContext";
+export { normalizeTags, parseTagList, storyHasTag, filterStoriesByTags } from "./storyTags";
 
 export { Story } from "../interfaces";
 export { StoryElement } from "../interfaces";
