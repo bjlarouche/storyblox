@@ -34,6 +34,7 @@ export const BottomNavigation = kit.BottomNavigation;
 export const ToggleButton = kit.ToggleButton;
 export const ToggleButtonGroup = kit.ToggleButtonGroup;
 export const Link = kit.Link;
+export const Rating = kit.Rating;
 export const BrickColorPicker = kit.BrickColorPicker;
 export const CFrameEditor = kit.CFrameEditor;
 export const EnumPicker = kit.EnumPicker;
