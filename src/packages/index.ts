@@ -17,3 +17,6 @@ export { StoryExport } from "../interfaces";
 
 export { STORYBLOX_LOGO } from "../constants";
 export { VERSION } from "../constants";
+
+export { collectGuiBoxes, formatMeasure, guiBox, relativeBox } from "./layoutTools";
+export { BoxRect } from "./layoutTools";

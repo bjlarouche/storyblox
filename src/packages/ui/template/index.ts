@@ -7,3 +7,5 @@ export { default as InspectorPane } from "./components/InspectorPane";
 export { InspectorPaneProps, InspectorTab } from "./components/InspectorPane";
 export { ActionLogContext, useActionLog } from "./actionLogContext";
 export { ActionLogApi } from "./actionLogContext";
+export { default as OutlineOverlay } from "./components/OutlineOverlay";
+export { OutlineOverlayProps } from "./components/OutlineOverlay";
