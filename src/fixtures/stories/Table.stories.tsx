@@ -3,6 +3,7 @@ import { Table, useArg } from "./kitBreadth";
 
 interface Args {
 	selected: number;
+	dense: boolean;
 }
 
 function TableStory(args: Args) {
@@ -15,6 +16,7 @@ function TableStory(args: Args) {
 				["Grace", "Admiral"],
 			]}
 			selected={selected}
+			dense={args.dense}
 			onRowActivated={setSelected}
 		/>
 	);
@@ -22,7 +24,10 @@ function TableStory(args: Args) {
 
 export default {
 	title: "Components/Table",
-	args: { selected: 0 },
-	argTypes: { selected: { type: "number" } },
+	args: { selected: 0, dense: false },
+	argTypes: {
+		selected: { type: "number" },
+		dense: { type: "boolean" },
+	},
 	render: (args: Args) => <TableStory {...args} />,
 };
