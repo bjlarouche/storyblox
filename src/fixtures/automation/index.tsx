@@ -279,7 +279,8 @@ export = function (storiesRoot: Instance) {
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-size").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-bg").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-scan").Connect(runScan),
-		storiesRoot.DescendantAdded.Connect(() => {
+		storiesRoot.DescendantAdded.Connect((inst) => {
+			if (!inst.IsA("ModuleScript")) return;
 			catalog = buildCatalog(storiesRoot);
 			storiesRoot.SetAttribute(
 				"storyblox-viewport-stories",
