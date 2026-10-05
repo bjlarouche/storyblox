@@ -2,16 +2,16 @@ import React from "@rbxts/react";
 import { Paper } from "./kitBreadth";
 
 interface Args {
-	elevation: "flat" | "raised";
+	elevation: "flat" | "raised" | "outlined";
 	square: boolean;
 	text: string;
 }
 
 export default {
 	title: "Components/Paper",
-	args: { elevation: "flat", square: false, text: "Surface" },
+	args: { elevation: "outlined", square: false, text: "Surface" },
 	argTypes: {
-		elevation: { type: "enum", options: ["flat", "raised"] },
+		elevation: { type: "enum", options: ["flat", "raised", "outlined"] },
 		square: { type: "boolean" },
 		text: { type: "string" },
 	},
