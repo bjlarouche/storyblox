@@ -9,6 +9,15 @@ export default {
 		gap: new UDim(0.5, 8),
 		span: new UDim2(0.5, 1, 1, -2),
 		font: Enum.Font.SourceSans,
+		face: Font.fromEnum(Enum.Font.Gotham),
+		gradient: new ColorSequence([
+			new ColorSequenceKeypoint(0, Color3.fromRGB(255, 80, 80)),
+			new ColorSequenceKeypoint(1, Color3.fromRGB(80, 120, 255)),
+		]),
+		fade: new NumberSequence([
+			new NumberSequenceKeypoint(0, 0),
+			new NumberSequenceKeypoint(1, 1),
+		]),
 		icon: 123,
 		origin: new CFrame(0, 1, 0),
 	},
@@ -18,7 +27,10 @@ export default {
 		place: { type: "vector3" },
 		gap: { type: "udim" },
 		span: { type: "udim2" },
-		font: { type: "EnumItem", enumType: "Font", options: ["SourceSans", "Gotham"] },
+		font: { type: "EnumItem", enumType: "Font" },
+		face: { type: "font" },
+		gradient: { type: "colorSequence" },
+		fade: { type: "numberSequence" },
 		icon: { type: "asset" },
 		origin: { type: "cframe" },
 	},
@@ -29,15 +41,18 @@ export default {
 		gap: UDim;
 		span: UDim2;
 		font: Enum.Font;
+		face: Font;
+		gradient: ColorSequence;
+		fade: NumberSequence;
 		icon: number;
 		origin: CFrame;
 	}) => (
 		<textlabel
-			Text={`R=${args.paint.R} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} icon=${args.icon} Y=${args.origin.Y}`}
+			Text={`R=${args.paint.R} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y}`}
 			Size={new UDim2(1, 0, 0, 24)}
 			BackgroundTransparency={1}
 			TextSize={16}
-			Font={Enum.Font.SourceSans}
+			FontFace={args.face}
 			TextXAlignment={Enum.TextXAlignment.Left}
 		/>
 	),

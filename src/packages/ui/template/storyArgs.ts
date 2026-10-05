@@ -47,6 +47,20 @@ export function choiceOptions(options: unknown): Array<{ label: string; value: s
 	return chosen;
 }
 
+export function enumItemOptions(enumType?: string, options?: unknown): Array<{ label: string; value: string }> {
+	if (typeOf(enumType) === "string") {
+		const enumObj = (Enum as unknown as { [key: string]: { GetEnumItems?: () => EnumItem[] } })[enumType as string];
+		if (enumObj !== undefined && typeOf(enumObj.GetEnumItems) === "function") {
+			const chosen = new Array<{ label: string; value: string }>();
+			for (const item of enumObj.GetEnumItems!()) {
+				chosen.push({ label: item.Name, value: item.Name });
+			}
+			if (chosen.size() > 0) return chosen;
+		}
+	}
+	return choiceOptions(options);
+}
+
 export function commitNumberText(text: string): number | undefined {
 	if (text.size() === 0) return undefined;
 	const value = tonumber(text);

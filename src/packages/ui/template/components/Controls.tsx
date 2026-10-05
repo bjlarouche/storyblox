@@ -12,7 +12,7 @@ import {
 	switchUnion,
 } from "packages/nestedArgs";
 import { useDragScroll } from "../../scroll";
-import { ArgValues, choiceOptions, commitNumberText } from "../storyArgs";
+import { ArgValues, choiceOptions, commitNumberText, enumItemOptions } from "../storyArgs";
 import { argHint } from "../storyLabel";
 
 interface Spec {
@@ -89,6 +89,17 @@ const kit = Uiblox as unknown as {
 		onChange: (value: UDim | UDim2) => void;
 		disabled?: boolean;
 	}) => React.Element;
+	FontEditor: (props: { value: Font; onChange: (value: Font) => void; disabled?: boolean }) => React.Element;
+	ColorSequenceEditor: (props: {
+		value: ColorSequence;
+		onChange: (value: ColorSequence) => void;
+		disabled?: boolean;
+	}) => React.Element;
+	NumberSequenceEditor: (props: {
+		value: NumberSequence;
+		onChange: (value: NumberSequence) => void;
+		disabled?: boolean;
+	}) => React.Element;
 };
 
 export interface ControlsProps {
@@ -114,7 +125,9 @@ function datatype(kind?: string) {
 	return kind === "EnumItem" || kind === "asset" || kind === "cframe";
 }
 
-function hasKit(name: "ColorPicker" | "VectorEditor" | "UDimEditor") {
+function hasKit(
+	name: "ColorPicker" | "VectorEditor" | "UDimEditor" | "FontEditor" | "ColorSequenceEditor" | "NumberSequenceEditor",
+) {
 	return typeOf((Uiblox as unknown as { [key: string]: unknown })[name]) === "function";
 }
 
@@ -171,7 +184,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 	for (const [key, spec] of pairs(specs)) {
 		const name = key as string;
 		const value = args[name];
-		const options = choiceOptions(spec?.options);
+		const options = spec?.type === "EnumItem" ? enumItemOptions(spec?.enumType, spec?.options) : choiceOptions(spec?.options);
 		const commitNumber = (incoming: unknown) => {
 			const committed = commitNumberText(tostring(incoming));
 			if (committed !== undefined) onChange(name, committed);
@@ -289,6 +302,47 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					}}
 				/>
 			);
+		} else if (spec?.type === "font" && hasKit("FontEditor")) {
+			const face = typeOf(value) === "Font" ? (value as Font) : Font.fromEnum(Enum.Font.SourceSans);
+			editor = (
+				<kit.FontEditor
+					key={name}
+					value={face}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (spec?.type === "colorSequence" && hasKit("ColorSequenceEditor")) {
+			const sequence =
+				typeOf(value) === "ColorSequence" ? (value as ColorSequence) : new ColorSequence(new Color3(1, 1, 1));
+			editor = (
+				<kit.ColorSequenceEditor
+					key={name}
+					value={sequence}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (spec?.type === "numberSequence" && hasKit("NumberSequenceEditor")) {
+			const sequence =
+				typeOf(value) === "NumberSequence" ? (value as NumberSequence) : new NumberSequence(0, 1);
+			editor = (
+				<kit.NumberSequenceEditor
+					key={name}
+					value={sequence}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
 		} else if ((spec?.type === "udim" || spec?.type === "udim2") && hasKit("UDimEditor")) {
 			const dim =
 				spec.type === "udim2"
@@ -315,7 +369,10 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 			spec?.type === "vector2" ||
 			spec?.type === "vector3" ||
 			spec?.type === "udim" ||
-			spec?.type === "udim2"
+			spec?.type === "udim2" ||
+			spec?.type === "font" ||
+			spec?.type === "colorSequence" ||
+			spec?.type === "numberSequence"
 		) {
 			const commitText = (text: string) => {
 				const parsed = parseDatatype(spec ?? {}, text);

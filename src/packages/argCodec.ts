@@ -86,6 +86,36 @@ export function encodeValue(
 		if (typeOf(item.Name) !== "string" || typeOf(item.EnumType?.Name) !== "string") return fail(path, "enum");
 		return { ok: true, value: { kind: "enum", enumType: item.EnumType?.Name, name: item.Name } };
 	}
+	if (kind === "Font") {
+		const face = value as { Family?: unknown; Weight?: { Name?: unknown }; Style?: { Name?: unknown } };
+		if (typeOf(face.Family) !== "string") return fail(path, "font");
+		if (typeOf(face.Weight?.Name) !== "string" || typeOf(face.Style?.Name) !== "string") return fail(path, "font");
+		return {
+			ok: true,
+			value: { kind: "font", family: face.Family, weight: face.Weight?.Name, style: face.Style?.Name },
+		};
+	}
+	if (kind === "ColorSequence") {
+		const stops: Array<{ t: number; r: number; g: number; b: number }> = [];
+		for (const key of (value as { Keypoints: Array<{ Time: number; Value: { R: number; G: number; B: number } }> })
+			.Keypoints) {
+			if (!finite(key.Time) || !unit(key.Value.R) || !unit(key.Value.G) || !unit(key.Value.B)) {
+				return fail(path, "colorSequence");
+			}
+			stops.push({ t: key.Time, r: key.Value.R, g: key.Value.G, b: key.Value.B });
+		}
+		if (stops.size() < 2) return fail(path, "colorSequence");
+		return { ok: true, value: { kind: "colorSequence", stops } };
+	}
+	if (kind === "NumberSequence") {
+		const stops: Array<{ t: number; v: number; e: number }> = [];
+		for (const key of (value as { Keypoints: Array<{ Time: number; Value: number; Envelope: number }> }).Keypoints) {
+			if (!finite(key.Time) || !finite(key.Value) || !finite(key.Envelope)) return fail(path, "numberSequence");
+			stops.push({ t: key.Time, v: key.Value, e: key.Envelope });
+		}
+		if (stops.size() < 2) return fail(path, "numberSequence");
+		return { ok: true, value: { kind: "numberSequence", stops } };
+	}
 	if (kind === "CFrame") {
 		const frame = value as { X: number; Y: number; Z: number; LookVector?: Vector; UpVector?: Vector };
 		if (!finite(frame.X) || !finite(frame.Y) || !finite(frame.Z)) return fail(path, "cframe");
@@ -139,6 +169,20 @@ export function decodeValue(tagged: unknown): unknown {
 		return item;
 	}
 	if (value.kind === "asset") return value.id;
+	if (value.kind === "font") {
+		const weight = (Enum.FontWeight as unknown as { [key: string]: Enum.FontWeight })[value.weight as string];
+		const style = (Enum.FontStyle as unknown as { [key: string]: Enum.FontStyle })[value.style as string];
+		if (weight === undefined || style === undefined) return undefined;
+		return new Font(value.family as string, weight, style);
+	}
+	if (value.kind === "colorSequence") {
+		const stops = value.stops as Array<{ t: number; r: number; g: number; b: number }>;
+		return new ColorSequence(stops.map((stop) => new ColorSequenceKeypoint(stop.t, new Color3(stop.r, stop.g, stop.b))));
+	}
+	if (value.kind === "numberSequence") {
+		const stops = value.stops as Array<{ t: number; v: number; e: number }>;
+		return new NumberSequence(stops.map((stop) => new NumberSequenceKeypoint(stop.t, stop.v, stop.e)));
+	}
 	if (value.kind === "cframe") {
 		const x = value.x as number;
 		const y = value.y as number;
@@ -195,6 +239,9 @@ export function formatDatatype(value: unknown): string {
 	if (record.kind === "udim2") return `${record.xScale}, ${record.xOffset}, ${record.yScale}, ${record.yOffset}`;
 	if (record.kind === "enum") return tostring(record.name);
 	if (record.kind === "asset") return tostring(record.id);
+	if (record.kind === "font") return `${record.family} ${record.weight} ${record.style}`;
+	if (record.kind === "colorSequence") return tostring((record.stops as Array<unknown>).size());
+	if (record.kind === "numberSequence") return tostring((record.stops as Array<unknown>).size());
 	if (record.kind === "cframe") {
 		let text = `${record.x}, ${record.y}, ${record.z}`;
 		if (record.lookX !== undefined) text += `, ${record.lookX}, ${record.lookY}, ${record.lookZ}`;

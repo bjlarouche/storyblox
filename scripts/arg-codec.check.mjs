@@ -78,7 +78,46 @@ globalThis.UDim2 = UDim2;
 globalThis.CFrame = CFrame;
 
 const font = asType("EnumItem", { Name: "SourceSans", EnumType: { Name: "Font" } });
-globalThis.Enum = { Font: { SourceSans: font } };
+const regular = asType("EnumItem", { Name: "Regular", EnumType: { Name: "FontWeight" } });
+const normal = asType("EnumItem", { Name: "Normal", EnumType: { Name: "FontStyle" } });
+globalThis.Enum = {
+	Font: { SourceSans: font },
+	FontWeight: { Regular: regular },
+	FontStyle: { Normal: normal },
+};
+globalThis.Font = class Font {
+	constructor(family, weight, style) {
+		this.Family = family;
+		this.Weight = weight;
+		this.Style = style;
+		kinds.set(this, "Font");
+	}
+};
+globalThis.ColorSequenceKeypoint = class ColorSequenceKeypoint {
+	constructor(time, color) {
+		this.Time = time;
+		this.Value = color;
+	}
+};
+globalThis.ColorSequence = class ColorSequence {
+	constructor(keys) {
+		this.Keypoints = keys;
+		kinds.set(this, "ColorSequence");
+	}
+};
+globalThis.NumberSequenceKeypoint = class NumberSequenceKeypoint {
+	constructor(time, value, envelope = 0) {
+		this.Time = time;
+		this.Value = value;
+		this.Envelope = envelope;
+	}
+};
+globalThis.NumberSequence = class NumberSequence {
+	constructor(keys) {
+		this.Keypoints = keys;
+		kinds.set(this, "NumberSequence");
+	}
+};
 
 String.prototype.size = function size() {
 	return this.length;
@@ -166,5 +205,23 @@ const badIcon = parseDatatype({ type: "asset" }, "-1");
 if (badIcon.ok || badIcon.reason !== "asset") throw new Error("asset editor reject");
 const moved = parseDatatype({ type: "cframe" }, "0, 1, 0");
 if (!moved.ok || moved.value.Y !== 1) throw new Error("cframe editor");
+
+const face = new Font("rbxasset://fonts/families/Gotham.json", regular, normal);
+const decodedFace = roundTrip(face);
+if (decodedFace.Family !== face.Family || decodedFace.Weight !== regular || decodedFace.Style !== normal) {
+	throw new Error("font");
+}
+const gradient = new ColorSequence([
+	new ColorSequenceKeypoint(0, new Color3(1, 0, 0)),
+	new ColorSequenceKeypoint(1, new Color3(0, 0, 1)),
+]);
+const decodedGradient = roundTrip(gradient);
+if (decodedGradient.Keypoints.length !== 2 || decodedGradient.Keypoints[0].Value.R !== 1) throw new Error("colorSequence");
+const fade = new NumberSequence([
+	new NumberSequenceKeypoint(0, 0, 0),
+	new NumberSequenceKeypoint(1, 1, 0),
+]);
+const decodedFade = roundTrip(fade);
+if (decodedFade.Keypoints.length !== 2 || decodedFade.Keypoints[1].Value !== 1) throw new Error("numberSequence");
 
 console.log("arg codec ok");
