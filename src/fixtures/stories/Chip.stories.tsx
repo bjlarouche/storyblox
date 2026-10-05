@@ -6,6 +6,7 @@ interface Args {
 	selected: boolean;
 	disabled: boolean;
 	deletable: boolean;
+	size: "small" | "medium" | "large";
 }
 
 function ChipStory(args: Args) {
@@ -25,6 +26,7 @@ function ChipStory(args: Args) {
 			label={args.label}
 			selected={selected}
 			disabled={args.disabled}
+			size={args.size}
 			onActivated={() => setSelected(!selected)}
 			onDelete={args.deletable ? () => setVisible(false) : undefined}
 		/>
@@ -33,12 +35,13 @@ function ChipStory(args: Args) {
 
 export default {
 	title: "Components/Chip",
-	args: { label: "Chip", selected: false, disabled: false, deletable: true },
+	args: { label: "Chip", selected: false, disabled: false, deletable: true, size: "medium" },
 	argTypes: {
 		label: { type: "string" },
 		selected: { type: "boolean" },
 		disabled: { type: "boolean" },
 		deletable: { type: "boolean" },
+		size: { type: "enum", options: ["small", "medium", "large"] },
 	},
 	render: (args: Args) => <ChipStory {...args} />,
 };
