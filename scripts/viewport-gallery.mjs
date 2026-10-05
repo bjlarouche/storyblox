@@ -14,7 +14,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const name = (process.argv[2] ?? "viewport").replace(/[^\w.-]+/g, "-");
-const outDir = resolve(process.cwd(), "../storyblox-assets/captures");
+const outDir = resolve("/Users/blarouche/Documents/GitHub/storyblox-assets/captures");
 mkdirSync(outDir, { recursive: true });
 
 const finder = `#import <CoreGraphics/CoreGraphics.h>
