@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Input, Theme } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
-import { formatDatatype, parseDatatype } from "../../../argCodec";
+import { formatDatatype, parseDatatype } from "packages/argCodec";
 import {
 	insertItem,
 	mountControlEditor,
@@ -10,7 +10,7 @@ import {
 	readOnlyKind,
 	removeItem,
 	switchUnion,
-} from "../../../nestedArgs";
+} from "packages/nestedArgs";
 import { ArgValues, choiceOptions, commitNumberText } from "../storyArgs";
 import { argHint } from "../storyLabel";
 

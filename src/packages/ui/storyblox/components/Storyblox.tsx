@@ -12,7 +12,7 @@ import {
 	WriteableStyle,
 } from "@rbxts/uiblox";
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
-import { Story } from "../../../../interfaces";
+import { Story } from "interfaces";
 import { SplitPane, Template } from "../../template";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
@@ -22,8 +22,8 @@ import { normalizeExport, NormalizedStory } from "../normalizeStory";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
 import { insideCanvas } from "../canvasReady";
 import { createStorySession, keepSelection } from "../storyRegistry";
-import { ClaimedId, claimStoryId, releaseStoryId } from "../../../defineStory";
-import { checkRequest, PROTOCOL_VERSION } from "../../../bridgeProtocol";
+import { ClaimedId, claimStoryId, releaseStoryId } from "packages/defineStory";
+import { checkRequest, PROTOCOL_VERSION } from "packages/bridgeProtocol";
 import { narrowShell } from "../shellLayout";
 
 const DEFAULT_EXTENSION = ".stories";
