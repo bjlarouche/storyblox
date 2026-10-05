@@ -1,11 +1,16 @@
 import React, { useState } from "@rbxts/react";
 import { Theme } from "@rbxts/uiblox";
+import { A11yFinding } from "packages/a11yHeuristics";
+import { CaseResult } from "packages/storyCases";
 import { StoryAction } from "packages/storyActions";
 import { ArgValues } from "../storyArgs";
+import A11yPanel from "./A11yPanel";
 import ActionsPanel from "./ActionsPanel";
 import Controls from "./Controls";
+import DocsPanel from "./DocsPanel";
+import InteractionsPanel from "./InteractionsPanel";
 
-export type InspectorTab = "controls" | "actions";
+export type InspectorTab = "controls" | "actions" | "interactions" | "docs" | "a11y";
 
 export interface InspectorPaneProps {
 	theme: Theme;
@@ -20,11 +25,45 @@ export interface InspectorPaneProps {
 		disabled?: boolean;
 		onReset: () => void;
 	};
+	interactions?: {
+		cases: string[];
+		results: CaseResult[];
+		running?: string;
+		onRun: (name: string) => void;
+		onRerun: () => void;
+	};
+	docs?: {
+		title?: string;
+		description?: unknown;
+		argTypes?: unknown;
+		source?: string;
+	};
+	a11y?: {
+		findings: A11yFinding[];
+		onRescan: () => void;
+	};
+}
+
+function tabLabel(tab: InspectorTab) {
+	if (tab === "controls") return "Controls";
+	if (tab === "actions") return "Actions";
+	if (tab === "interactions") return "Interact";
+	if (tab === "docs") return "Docs";
+	return "A11y";
+}
+
+function availableTabs(props: InspectorPaneProps): InspectorTab[] {
+	const tabs: InspectorTab[] = ["controls"];
+	if (props.actions !== undefined) tabs.push("actions");
+	if (props.interactions !== undefined) tabs.push("interactions");
+	if (props.docs !== undefined) tabs.push("docs");
+	if (props.a11y !== undefined) tabs.push("a11y");
+	return tabs;
 }
 
 function InspectorPane(props: InspectorPaneProps) {
-	const { theme, actions } = props;
-	const tabs: InspectorTab[] = actions !== undefined ? ["controls", "actions"] : ["controls"];
+	const { theme } = props;
+	const tabs = availableTabs(props);
 	const [tab, setTab] = useState<InspectorTab>("controls");
 	const current = tabs.includes(tab) ? tab : "controls";
 	const barHeight = theme.spacing.calc(1.5);
@@ -51,7 +90,7 @@ function InspectorPane(props: InspectorPaneProps) {
 					{tabs.map((name, index) => (
 						<textbutton
 							key={name}
-							Text={name === "controls" ? "Controls" : "Actions"}
+							Text={tabLabel(name)}
 							LayoutOrder={index}
 							AutomaticSize={Enum.AutomaticSize.X}
 							Size={new UDim2(0, 0, 1, 0)}
@@ -81,13 +120,35 @@ function InspectorPane(props: InspectorPaneProps) {
 						onReset={props.onReset}
 					/>
 				)}
-				{current === "actions" && actions !== undefined && (
+				{current === "actions" && props.actions !== undefined && (
 					<ActionsPanel
 						theme={theme}
-						events={actions.events}
-						disabled={actions.disabled}
-						onReset={actions.onReset}
+						events={props.actions.events}
+						disabled={props.actions.disabled}
+						onReset={props.actions.onReset}
 					/>
+				)}
+				{current === "interactions" && props.interactions !== undefined && (
+					<InteractionsPanel
+						theme={theme}
+						cases={props.interactions.cases}
+						results={props.interactions.results}
+						running={props.interactions.running}
+						onRun={props.interactions.onRun}
+						onRerun={props.interactions.onRerun}
+					/>
+				)}
+				{current === "docs" && props.docs !== undefined && (
+					<DocsPanel
+						theme={theme}
+						title={props.docs.title}
+						description={props.docs.description}
+						argTypes={props.docs.argTypes}
+						source={props.docs.source}
+					/>
+				)}
+				{current === "a11y" && props.a11y !== undefined && (
+					<A11yPanel theme={theme} findings={props.a11y.findings} onRescan={props.a11y.onRescan} />
 				)}
 			</frame>
 		</frame>
