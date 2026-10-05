@@ -5,6 +5,7 @@ export interface ControlSpec {
 		| "number"
 		| "enum"
 		| "color"
+		| "brickColor"
 		| "vector2"
 		| "vector3"
 		| "udim"
@@ -52,6 +53,7 @@ export const controls = {
 		step,
 	}),
 	color: (): ControlSpec => ({ type: "color" }),
+	brickColor: (): ControlSpec => ({ type: "brickColor" }),
 	vector2: (): ControlSpec => ({ type: "vector2" }),
 	vector3: (): ControlSpec => ({ type: "vector3" }),
 	udim: (): ControlSpec => ({ type: "udim" }),

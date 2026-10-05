@@ -4,6 +4,7 @@ export default {
 	title: "Layout/Data Types",
 	args: {
 		paint: new Color3(0.2, 0.4, 0.6),
+		brick: new BrickColor(23),
 		shift: new Vector2(4, 5),
 		place: new Vector3(1, 2, 3),
 		gap: new UDim(0.5, 8),
@@ -23,6 +24,7 @@ export default {
 	},
 	argTypes: {
 		paint: { type: "color" },
+		brick: { type: "brickColor" },
 		shift: { type: "vector2" },
 		place: { type: "vector3" },
 		gap: { type: "udim" },
@@ -36,6 +38,7 @@ export default {
 	},
 	render: (args: {
 		paint: Color3;
+		brick: BrickColor;
 		shift: Vector2;
 		place: Vector3;
 		gap: UDim;
@@ -48,7 +51,7 @@ export default {
 		origin: CFrame;
 	}) => (
 		<textlabel
-			Text={`R=${args.paint.R} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y}`}
+			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y}`}
 			Size={new UDim2(1, 0, 0, 24)}
 			BackgroundTransparency={1}
 			TextSize={16}

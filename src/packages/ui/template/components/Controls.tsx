@@ -79,6 +79,11 @@ const kit = Uiblox as unknown as {
 		onChange: (value: Color3) => void;
 		disabled?: boolean;
 	}) => React.Element;
+	BrickColorPicker: (props: {
+		value: BrickColor;
+		onChange: (value: BrickColor) => void;
+		disabled?: boolean;
+	}) => React.Element;
 	VectorEditor: (props: {
 		value: Vector2 | Vector3;
 		onChange: (value: Vector2 | Vector3) => void;
@@ -126,7 +131,14 @@ function datatype(kind?: string) {
 }
 
 function hasKit(
-	name: "ColorPicker" | "VectorEditor" | "UDimEditor" | "FontEditor" | "ColorSequenceEditor" | "NumberSequenceEditor",
+	name:
+		| "ColorPicker"
+		| "BrickColorPicker"
+		| "VectorEditor"
+		| "UDimEditor"
+		| "FontEditor"
+		| "ColorSequenceEditor"
+		| "NumberSequenceEditor",
 ) {
 	return typeOf((Uiblox as unknown as { [key: string]: unknown })[name]) === "function";
 }
@@ -282,6 +294,19 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					}}
 				/>
 			);
+		} else if (spec?.type === "brickColor" && hasKit("BrickColorPicker")) {
+			const brick = typeOf(value) === "BrickColor" ? (value as BrickColor) : new BrickColor(194);
+			editor = (
+				<kit.BrickColorPicker
+					key={name}
+					value={brick}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
 		} else if ((spec?.type === "vector2" || spec?.type === "vector3") && hasKit("VectorEditor")) {
 			const vector =
 				spec.type === "vector3"
@@ -366,6 +391,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 		} else if (
 			datatype(spec?.type) ||
 			spec?.type === "color" ||
+			spec?.type === "brickColor" ||
 			spec?.type === "vector2" ||
 			spec?.type === "vector3" ||
 			spec?.type === "udim" ||

@@ -58,6 +58,14 @@ export function encodeValue(
 		if (!unit(color.R) || !unit(color.G) || !unit(color.B)) return fail(path, "color");
 		return { ok: true, value: { kind: "color", r: color.R, g: color.G, b: color.B } };
 	}
+	if (kind === "BrickColor") {
+		const brick = value as { Name?: unknown; Number?: unknown };
+		if (typeOf(brick.Name) !== "string" || (brick.Name as string).size() === 0) return fail(path, "brickColor");
+		if (!finite(brick.Number) || (brick.Number as number) < 0 || (brick.Number as number) % 1 !== 0) {
+			return fail(path, "brickColor");
+		}
+		return { ok: true, value: { kind: "brickColor", name: brick.Name, number: brick.Number } };
+	}
 	if (kind === "Vector2") return vector(value as Vector, path, "xy");
 	if (kind === "Vector3") return vector(value as Vector, path, "xyz");
 	if (kind === "UDim") {
@@ -156,6 +164,12 @@ export function decodeValue(tagged: unknown): unknown {
 	if (typeOf(tagged) !== "table") return tagged;
 	const value = tagged as Tagged;
 	if (value.kind === "color") return new Color3(value.r as number, value.g as number, value.b as number);
+	if (value.kind === "brickColor") {
+		if (!finite(value.number) || (value.number as number) % 1 !== 0) return undefined;
+		const named = new BrickColor(value.number as number);
+		if (typeOf(value.name) === "string" && named.Name !== value.name) return undefined;
+		return named;
+	}
 	if (value.kind === "vector2") return new Vector2(value.x as number, value.y as number);
 	if (value.kind === "vector3") return new Vector3(value.x as number, value.y as number, value.z as number);
 	if (value.kind === "udim") return new UDim(value.scale as number, value.offset as number);
@@ -233,6 +247,7 @@ export function formatDatatype(value: unknown): string {
 	if (typeOf(tagged) !== "table") return tostring(tagged);
 	const record = tagged as Tagged;
 	if (record.kind === "color") return `${record.r}, ${record.g}, ${record.b}`;
+	if (record.kind === "brickColor") return record.name as string;
 	if (record.kind === "vector2") return `${record.x}, ${record.y}`;
 	if (record.kind === "vector3") return `${record.x}, ${record.y}, ${record.z}`;
 	if (record.kind === "udim") return `${record.scale}, ${record.offset}`;
@@ -263,6 +278,12 @@ export function parseDatatype(
 		const item = enumType?.[text];
 		if (item === undefined || typeOf(item) !== "EnumItem") return { ok: false, reason: "enum" };
 		return { ok: true, value: item };
+	}
+	if (kind === "brickColor") {
+		if (text.size() === 0) return { ok: false, reason: "brickColor" };
+		const brick = new BrickColor(text as never);
+		if (brick.Name !== text) return { ok: false, reason: "brickColor" };
+		return { ok: true, value: brick };
 	}
 	if (kind === "asset") {
 		const encoded = encodeValue(readNumber(text), "value", { type: "asset" });
