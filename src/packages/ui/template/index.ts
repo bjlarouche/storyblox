@@ -13,3 +13,5 @@ export { default as A11yPanel } from "./components/A11yPanel";
 export { A11yPanelProps } from "./components/A11yPanel";
 export { default as DocsPanel } from "./components/DocsPanel";
 export { DocsPanelProps } from "./components/DocsPanel";
+export { default as InteractionsPanel } from "./components/InteractionsPanel";
+export { InteractionsPanelProps } from "./components/InteractionsPanel";
