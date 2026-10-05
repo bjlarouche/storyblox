@@ -1,7 +1,6 @@
 Array.prototype.size = function size() {
 	return this.length;
 };
-Array.prototype.join = Array.prototype.join;
 globalThis.typeOf = (value) => {
 	if (value === null || value === undefined) return "nil";
 	if (typeof value === "string") return "string";
