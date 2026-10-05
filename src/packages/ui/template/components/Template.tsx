@@ -18,6 +18,7 @@ import { CaseResult, createCaseClock, createSeed, runCase } from "packages/story
 import { ActionLogContext } from "../actionLogContext";
 import InspectorPane from "./InspectorPane";
 import OutlineOverlay from "./OutlineOverlay";
+import SafeBoundary from "./SafeBoundary";
 import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
@@ -457,6 +458,7 @@ function Template({
 				<uicorner key="Corner" {...corner} />
 				<Shadow />
 
+				<SafeBoundary resetKey={`toolbar:${storyKey}`} compact>
 				<frame key="NavBar" {...navBar}>
 					{favoriteShown && (
 						<stars.Tooltip
@@ -671,6 +673,7 @@ function Template({
 						</frame>
 					)}
 				</frame>
+				</SafeBoundary>
 
 				{hasStoryTools && (
 					<frame
@@ -758,6 +761,7 @@ function Template({
 						}
 						second={
 							<ThemeProvider theme={{ ...theme, density: "compact" }}>
+								<SafeBoundary resetKey={`inspector:${storyKey}`}>
 								<InspectorPane
 									key={`inspector-${actionVersion}`}
 									theme={{ ...theme, density: "compact" }}
@@ -765,6 +769,7 @@ function Template({
 									argTypes={argTypes}
 									defaults={storyArgs(story as never)}
 									description={(story as { description?: unknown } | undefined)?.description}
+									resetKey={storyKey}
 									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
 									onReset={() => setArgs(copyArgs(storyArgs(story as never)))}
 									actions={
@@ -820,6 +825,7 @@ function Template({
 											: undefined
 									}
 								/>
+								</SafeBoundary>
 							</ThemeProvider>
 						}
 					/>

@@ -14,6 +14,7 @@ import {
 import { useDragScroll } from "../../scroll";
 import { ArgValues, choiceOptions, commitNumberText, enumItemOptions } from "../storyArgs";
 import { argHint } from "../storyLabel";
+import SafeBoundary from "./SafeBoundary";
 
 interface Spec {
 	type?: string;
@@ -113,6 +114,7 @@ export interface ControlsProps {
 	argTypes?: unknown;
 	defaults?: unknown;
 	description?: unknown;
+	resetKey?: string;
 	onChange: (key: string, value: unknown) => void;
 	onReset: () => void;
 }
@@ -160,7 +162,7 @@ function CustomEditor(props: { editor: string; value: unknown; onChange: (value:
 	return <frame ref={host} Size={new UDim2(1, 0, 0, 22)} BackgroundTransparency={1} />;
 }
 
-function Controls({ theme, args, argTypes, defaults, description, onChange, onReset }: ControlsProps) {
+function Controls({ theme, args, argTypes, defaults, description, resetKey = "", onChange, onReset }: ControlsProps) {
 	const [faults, setFaults] = useState<{ [key: string]: string }>({});
 	const [rowKeys, setRowKeys] = useState<{ [key: string]: Array<string> }>({});
 	const [listFrame, setListFrame] = useState<ScrollingFrame>();
@@ -612,7 +614,9 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						TextXAlignment={Enum.TextXAlignment.Left}
 					/>
 					<frame key="Editor" LayoutOrder={2} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
-						{editor}
+						<SafeBoundary resetKey={`${resetKey}:${name}`} compact>
+							{editor}
+						</SafeBoundary>
 					</frame>
 					<textlabel
 						key="Hint"

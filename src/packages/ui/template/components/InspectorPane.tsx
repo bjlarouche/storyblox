@@ -9,6 +9,7 @@ import ActionsPanel from "./ActionsPanel";
 import Controls from "./Controls";
 import DocsPanel from "./DocsPanel";
 import InteractionsPanel from "./InteractionsPanel";
+import SafeBoundary from "./SafeBoundary";
 
 export type InspectorTab = "controls" | "actions" | "interactions" | "docs" | "a11y";
 
@@ -18,6 +19,7 @@ export interface InspectorPaneProps {
 	argTypes?: unknown;
 	defaults?: unknown;
 	description?: unknown;
+	resetKey?: string;
 	onChange: (key: string, value: unknown) => void;
 	onReset: () => void;
 	actions?: {
@@ -63,6 +65,7 @@ function availableTabs(props: InspectorPaneProps): InspectorTab[] {
 
 function InspectorPane(props: InspectorPaneProps) {
 	const { theme } = props;
+	const resetKey = props.resetKey ?? "";
 	const tabs = availableTabs(props);
 	const [tab, setTab] = useState<InspectorTab>("controls");
 	const current = tabs.includes(tab) ? tab : "controls";
@@ -110,45 +113,56 @@ function InspectorPane(props: InspectorPaneProps) {
 				BackgroundTransparency={1}
 			>
 				{current === "controls" && (
-					<Controls
-						theme={theme}
-						args={props.args}
-						argTypes={props.argTypes}
-						defaults={props.defaults}
-						description={props.description}
-						onChange={props.onChange}
-						onReset={props.onReset}
-					/>
+					<SafeBoundary resetKey={`controls:${resetKey}`}>
+						<Controls
+							theme={theme}
+							args={props.args}
+							argTypes={props.argTypes}
+							defaults={props.defaults}
+							description={props.description}
+							resetKey={resetKey}
+							onChange={props.onChange}
+							onReset={props.onReset}
+						/>
+					</SafeBoundary>
 				)}
 				{current === "actions" && props.actions !== undefined && (
-					<ActionsPanel
-						theme={theme}
-						events={props.actions.events}
-						disabled={props.actions.disabled}
-						onReset={props.actions.onReset}
-					/>
+					<SafeBoundary resetKey={`actions:${resetKey}`}>
+						<ActionsPanel
+							theme={theme}
+							events={props.actions.events}
+							disabled={props.actions.disabled}
+							onReset={props.actions.onReset}
+						/>
+					</SafeBoundary>
 				)}
 				{current === "interactions" && props.interactions !== undefined && (
-					<InteractionsPanel
-						theme={theme}
-						cases={props.interactions.cases}
-						results={props.interactions.results}
-						running={props.interactions.running}
-						onRun={props.interactions.onRun}
-						onRerun={props.interactions.onRerun}
-					/>
+					<SafeBoundary resetKey={`interactions:${resetKey}`}>
+						<InteractionsPanel
+							theme={theme}
+							cases={props.interactions.cases}
+							results={props.interactions.results}
+							running={props.interactions.running}
+							onRun={props.interactions.onRun}
+							onRerun={props.interactions.onRerun}
+						/>
+					</SafeBoundary>
 				)}
 				{current === "docs" && props.docs !== undefined && (
-					<DocsPanel
-						theme={theme}
-						title={props.docs.title}
-						description={props.docs.description}
-						argTypes={props.docs.argTypes}
-						source={props.docs.source}
-					/>
+					<SafeBoundary resetKey={`docs:${resetKey}`}>
+						<DocsPanel
+							theme={theme}
+							title={props.docs.title}
+							description={props.docs.description}
+							argTypes={props.docs.argTypes}
+							source={props.docs.source}
+						/>
+					</SafeBoundary>
 				)}
 				{current === "a11y" && props.a11y !== undefined && (
-					<A11yPanel theme={theme} findings={props.a11y.findings} onRescan={props.a11y.onRescan} />
+					<SafeBoundary resetKey={`a11y:${resetKey}`}>
+						<A11yPanel theme={theme} findings={props.a11y.findings} onRescan={props.a11y.onRescan} />
+					</SafeBoundary>
 				)}
 			</frame>
 		</frame>
