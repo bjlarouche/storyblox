@@ -44,7 +44,9 @@ return function(plugin, widget, root)
 	local fixtures = storybloxRoot:FindFirstChild("fixtures")
 	local harnessMod = fixtures and fixtures:FindFirstChild("automation")
 	if harnessMod then
-		local ok, start = pcall(require, harnessMod)
+		local ok, start = pcall(function()
+			return TS.import(script, harnessMod)
+		end)
 		if ok and type(start) == "function" then
 			local okStart, stopper = pcall(start, stories)
 			if okStart and type(stopper) == "function" then
