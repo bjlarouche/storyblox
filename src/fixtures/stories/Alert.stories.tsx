@@ -7,6 +7,7 @@ interface Args {
 	message: string;
 	closable: boolean;
 	filled: boolean;
+	square: boolean;
 }
 
 function AlertStory(args: Args) {
@@ -26,6 +27,7 @@ function AlertStory(args: Args) {
 			title={args.title === "" ? undefined : args.title}
 			message={args.message}
 			filled={args.filled}
+			square={args.square}
 			onClose={args.closable ? () => setVisible(false) : undefined}
 		/>
 	);
@@ -33,13 +35,14 @@ function AlertStory(args: Args) {
 
 export default {
 	title: "Feedback/Alert",
-	args: { severity: "info", title: "Note", message: "Something happened", closable: true, filled: false },
+	args: { severity: "info", title: "Note", message: "Something happened", closable: true, filled: false, square: true },
 	argTypes: {
 		severity: { type: "enum", options: ["info", "success", "warning", "error"] },
 		title: { type: "string" },
 		message: { type: "string" },
 		closable: { type: "boolean" },
 		filled: { type: "boolean" },
+		square: { type: "boolean" },
 	},
 	render: (args: Args) => <AlertStory {...args} />,
 };
