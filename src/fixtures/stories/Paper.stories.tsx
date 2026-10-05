@@ -1,15 +1,22 @@
 import React from "@rbxts/react";
 import { Paper } from "./kitBreadth";
 
+interface Args {
+	elevation: "flat" | "raised";
+	square: boolean;
+	text: string;
+}
+
 export default {
 	title: "Components/Paper",
-	args: { elevation: "flat", text: "Surface" },
+	args: { elevation: "flat", square: false, text: "Surface" },
 	argTypes: {
 		elevation: { type: "enum", options: ["flat", "raised"] },
+		square: { type: "boolean" },
 		text: { type: "string" },
 	},
-	render: (args: { elevation: "flat" | "raised"; text: string }) => (
-		<Paper elevation={args.elevation}>
+	render: (args: Args) => (
+		<Paper elevation={args.elevation} square={args.square}>
 			<textlabel Size={new UDim2(1, 0, 0, 24)} BackgroundTransparency={1} Text={args.text} TextSize={16} Font={Enum.Font.SourceSans} />
 		</Paper>
 	),
