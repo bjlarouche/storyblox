@@ -88,6 +88,22 @@ const ranged = normalizeExport(
 );
 if (ranged.kind !== "react" || ranged.story.template() !== "low:20") throw new Error("radio and slider");
 
+const toggled = normalizeExport(
+	{
+		default: {
+			title: "Components/Switch",
+			args: { on: true, flagged: false },
+			argTypes: { on: controls.switch(), flagged: controls.boolean() },
+			render: (args) => `${args.on}:${args.flagged}`,
+		},
+	},
+	"Switch.stories",
+	".stories",
+);
+if (toggled.kind !== "react" || toggled.story.argTypes.on.control !== "switch") throw new Error("switch control");
+if (toggled.story.argTypes.flagged.control !== undefined) throw new Error("boolean stays checkbox default");
+if (toggled.story.template() !== "true:false") throw new Error("switch args");
+
 const legacy = normalizeExport(
 	{ default: { title: "Button/Base", template: () => "el" } },
 	"Button.stories",

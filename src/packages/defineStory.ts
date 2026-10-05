@@ -19,11 +19,12 @@ export interface ControlSpec {
 		| "custom"
 		| "readonly";
 	options?: string[];
-	control?: "radio" | "slider";
+	control?: "radio" | "slider" | "switch";
 	min?: number;
 	max?: number;
 	step?: number;
 	optional?: boolean;
+	disabled?: boolean;
 	enumType?: string;
 	fields?: { [key: string]: ControlSpec };
 	item?: ControlSpec;
@@ -36,6 +37,7 @@ export interface ControlSpec {
 export const controls = {
 	string: (): ControlSpec => ({ type: "string" }),
 	boolean: (): ControlSpec => ({ type: "boolean" }),
+	switch: (): ControlSpec => ({ type: "boolean", control: "switch" }),
 	number: (): ControlSpec => ({ type: "number" }),
 	enum: (options: string[]): ControlSpec => ({ type: "enum", options }),
 	radio: (options: string[]): ControlSpec => ({ type: "enum", options, control: "radio" }),

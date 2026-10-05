@@ -14,6 +14,30 @@ interface RadioProps {
 	placeholder?: string;
 }
 
+interface CheckboxProps {
+	value: boolean;
+	onChange: (value: boolean) => void;
+	disabled?: boolean;
+	mixed?: boolean;
+	label?: string;
+}
+
+interface SwitchProps {
+	value: boolean;
+	onChange: (value: boolean) => void;
+	disabled?: boolean;
+	label?: string;
+}
+
+interface SliderProps {
+	value: number;
+	onChange: (value: number) => void;
+	min: number;
+	max: number;
+	step?: number;
+	disabled?: boolean;
+}
+
 interface SplitProps {
 	value: number;
 	onChange: (value: number) => void;
@@ -29,16 +53,10 @@ interface TooltipProps {
 	children?: React.ReactNode;
 }
 
-interface CheckboxProps {
-	value: boolean;
-	onChange: (value: boolean) => void;
-	disabled?: boolean;
-	mixed?: boolean;
-	label?: string;
-}
-
 const kit = Uiblox as unknown as {
 	Checkbox: (props: CheckboxProps) => React.Element;
+	Switch: (props: SwitchProps) => React.Element;
+	Slider: (props: SliderProps) => React.Element;
 	RadioGroup: (props: RadioProps) => React.Element;
 	Select: (props: RadioProps) => React.Element;
 	Tabs: (props: RadioProps) => React.Element;
@@ -47,6 +65,8 @@ const kit = Uiblox as unknown as {
 };
 
 export const Checkbox = kit.Checkbox;
+export const Switch = kit.Switch;
+export const Slider = kit.Slider;
 export const RadioGroup = kit.RadioGroup;
 export const Select = kit.Select;
 export const Tabs = kit.Tabs;
