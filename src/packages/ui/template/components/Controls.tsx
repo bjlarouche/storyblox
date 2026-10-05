@@ -11,6 +11,7 @@ import {
 	removeItem,
 	switchUnion,
 } from "packages/nestedArgs";
+import { useDragScroll } from "../../scroll";
 import { ArgValues, choiceOptions, commitNumberText } from "../storyArgs";
 import { argHint } from "../storyLabel";
 
@@ -127,6 +128,12 @@ function CustomEditor(props: { editor: string; value: unknown; onChange: (value:
 function Controls({ theme, args, argTypes, defaults, description, onChange, onReset }: ControlsProps) {
 	const [faults, setFaults] = useState<{ [key: string]: string }>({});
 	const [rowKeys, setRowKeys] = useState<{ [key: string]: Array<string> }>({});
+	const [listFrame, setListFrame] = useState<ScrollingFrame>();
+	const drag = useDragScroll(listFrame);
+	const click = (action: () => void) => () => {
+		if (drag.suppressClick()) return;
+		action();
+	};
 	const specs = typeOf(argTypes) === "table" ? (argTypes as { [key: string]: Spec }) : {};
 	const fallbacks = typeOf(defaults) === "table" ? (defaults as ArgValues) : {};
 	const fill = { Size: new UDim2(1, 0, 0, theme.spacing.calc(2)) };
@@ -328,12 +335,12 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						TextColor3={theme.palette.secondary.main}
 						TextXAlignment={Enum.TextXAlignment.Left}
 						Event={{
-							MouseButton1Click: () => {
+							MouseButton1Click: click(() => {
 								const last = items.size() - 1;
 								if (last < 1) return;
 								onChange(name, moveItem(items, last, last - 1));
 								setRowKeys((current) => patchField(current, name, moveItem(keys, last, last - 1)) as { [key: string]: Array<string> });
-							},
+							}),
 						}}
 					/>
 					<textbutton
@@ -346,12 +353,12 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						TextColor3={theme.palette.secondary.main}
 						TextXAlignment={Enum.TextXAlignment.Left}
 						Event={{
-							MouseButton1Click: () => {
+							MouseButton1Click: click(() => {
 								const last = items.size() - 1;
 								if (last < 0) return;
 								onChange(name, removeItem(items, last));
 								setRowKeys((current) => patchField(current, name, removeItem(keys, last)) as { [key: string]: Array<string> });
-							},
+							}),
 						}}
 					/>
 					<textbutton
@@ -364,11 +371,11 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						TextColor3={theme.palette.secondary.main}
 						TextXAlignment={Enum.TextXAlignment.Left}
 						Event={{
-							MouseButton1Click: () => {
+							MouseButton1Click: click(() => {
 								const blank = spec.item?.type === "number" ? 0 : "";
 								onChange(name, insertItem(items, items.size(), blank));
 								setRowKeys((current) => patchField(current, name, insertItem(keys, keys.size(), freshKey(name))) as { [key: string]: Array<string> });
-							},
+							}),
 						}}
 					/>
 				</frame>
@@ -508,7 +515,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 							TextSize={theme.typography.fontSizes.caption}
 							TextColor3={theme.palette.secondary.main}
 							TextXAlignment={Enum.TextXAlignment.Left}
-							Event={{ MouseButton1Click: () => onChange(name, undefined) }}
+							Event={{ MouseButton1Click: click(() => onChange(name, undefined)) }}
 						/>
 					)}
 				</frame>,
@@ -520,6 +527,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 	return (
 		<scrollingframe
 			key="ControlsList"
+			ref={setListFrame}
 			Size={new UDim2(1, 0, 1, 0)}
 			BackgroundTransparency={1}
 			BorderSizePixel={0}
@@ -527,6 +535,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 			AutomaticCanvasSize={Enum.AutomaticSize.Y}
 			ScrollingDirection={Enum.ScrollingDirection.Y}
 			ScrollBarThickness={theme.spacing.calc(0.5)}
+			ScrollBarImageTransparency={0.75}
 			ClipsDescendants={true}
 		>
 			<uipadding
@@ -565,7 +574,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						TextSize={theme.typography.fontSizes.caption}
 						TextColor3={theme.palette.secondary.main}
 						TextXAlignment={Enum.TextXAlignment.Right}
-						Event={{ MouseButton1Click: onReset }}
+						Event={{ MouseButton1Click: click(onReset) }}
 					/>
 				)}
 			</frame>
