@@ -5,6 +5,7 @@ import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
+import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
@@ -142,7 +143,7 @@ function Template({
 	argsRequest,
 	onCaseResult,
 }: TemplateProps) {
-	const { root, container, corner, navBar, title, preview, canvas } = useTemplateStyles();
+	const { root, container, corner, navBar, storyBar, title, preview, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
 	const [gate] = useState(createCleanupGate);
 	const [template, setTemplate] = useState<React.Element | undefined>();
@@ -170,6 +171,14 @@ function Template({
 		for (const _ of pairs(argTypes as object)) controlled = true;
 	}
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
+	const chromeHeight = theme.spacing.calc(2);
+	const storyBarHeight = theme.spacing.calc(1.75);
+	const storyTools = resolveStoryTools((story as { tools?: StoryTools } | undefined)?.tools, {
+		orbit: () => setYaw((current) => current + ORBIT_STEP),
+		resetCamera: () => setYaw(0),
+	});
+	const hasStoryTools = storyTools.size() > 0;
+	const topBars = chromeHeight + (hasStoryTools ? storyBarHeight : 0);
 	const mountKey = `${storyKey}@${epoch}`;
 	const mounted = useRef("");
 	const themeMounted = useRef<Theme | undefined>(undefined);
@@ -385,38 +394,10 @@ function Template({
 								Padding={new UDim(0, theme.spacing.calc(1))}
 								SortOrder={Enum.SortOrder.LayoutOrder}
 							/>
-							{!native && (story as { preview?: { kind?: unknown } } | undefined)?.preview?.kind === "viewport" && (
-								<>
-									<textbutton
-										key="Orbit"
-										Text="Orbit"
-										LayoutOrder={1}
-										AutomaticSize={Enum.AutomaticSize.X}
-										Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
-										BackgroundTransparency={1}
-										Font={theme.typography.fontFamilies.semibold}
-										TextSize={theme.typography.fontSizes.caption}
-										TextColor3={theme.palette.secondary.main}
-										Event={{ MouseButton1Click: () => setYaw((current) => current + ORBIT_STEP) }}
-									/>
-									<textbutton
-										key="CameraReset"
-										Text="Cam reset"
-										LayoutOrder={2}
-										AutomaticSize={Enum.AutomaticSize.X}
-										Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
-										BackgroundTransparency={1}
-										Font={theme.typography.fontFamilies.semibold}
-										TextSize={theme.typography.fontSizes.caption}
-										TextColor3={theme.palette.secondary.main}
-										Event={{ MouseButton1Click: () => setYaw(0) }}
-									/>
-								</>
-							)}
 							<textbutton
 								key="ZoomOut"
 								Text="-"
-								LayoutOrder={3}
+								LayoutOrder={1}
 								AutomaticSize={Enum.AutomaticSize.X}
 								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
@@ -428,7 +409,7 @@ function Template({
 							<textlabel
 								key="Zoom"
 								Text={`${math.floor(zoom * 100)}%`}
-								LayoutOrder={4}
+								LayoutOrder={2}
 								AutomaticSize={Enum.AutomaticSize.X}
 								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
@@ -439,7 +420,7 @@ function Template({
 							<textbutton
 								key="ZoomIn"
 								Text="+"
-								LayoutOrder={5}
+								LayoutOrder={3}
 								AutomaticSize={Enum.AutomaticSize.X}
 								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
@@ -451,7 +432,7 @@ function Template({
 							<textbutton
 								key="Grid"
 								Text={grid ? "Grid on" : "Grid"}
-								LayoutOrder={6}
+								LayoutOrder={4}
 								AutomaticSize={Enum.AutomaticSize.X}
 								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
@@ -464,7 +445,7 @@ function Template({
 							<textbutton
 								key="Fit"
 								Text={fit ? "Fit" : "100%"}
-								LayoutOrder={7}
+								LayoutOrder={5}
 								AutomaticSize={Enum.AutomaticSize.X}
 								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
 								BackgroundTransparency={1}
@@ -481,7 +462,7 @@ function Template({
 								className={
 									{
 										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
-										LayoutOrder: 8,
+										LayoutOrder: 6,
 									} as WriteableStyle<ImageButton>
 								}
 							/>
@@ -493,7 +474,7 @@ function Template({
 								className={
 									{
 										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
-										LayoutOrder: 9,
+										LayoutOrder: 7,
 									} as WriteableStyle<ImageButton>
 								}
 							/>
@@ -501,9 +482,50 @@ function Template({
 					)}
 				</frame>
 
+				{hasStoryTools && (
+					<frame
+						key="StoryTools"
+						{...storyBar}
+						Position={new UDim2(0.5, 0, 0, chromeHeight)}
+						AnchorPoint={new Vector2(0.5, 0)}
+					>
+						<uilistlayout
+							key="StoryToolsLayout"
+							FillDirection={Enum.FillDirection.Horizontal}
+							VerticalAlignment={Enum.VerticalAlignment.Center}
+							HorizontalAlignment={Enum.HorizontalAlignment.Left}
+							Padding={new UDim(0, theme.spacing.calc(1))}
+							SortOrder={Enum.SortOrder.LayoutOrder}
+						/>
+						<uipadding
+							key="StoryToolsPad"
+							PaddingLeft={new UDim(0, theme.spacing.calc(0.5))}
+							PaddingRight={new UDim(0, theme.spacing.calc(0.5))}
+						/>
+						{storyTools.map((tool, index) => (
+							<textbutton
+								key={tool.id}
+								Text={tool.label}
+								LayoutOrder={index}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.25))}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.options.constants.colors.textMuted}
+								TextTransparency={tool.active === false ? 0.45 : 0}
+								Selectable={true}
+								Event={{ MouseButton1Click: tool.onClick }}
+							/>
+						))}
+					</frame>
+				)}
+
 				<frame
 					key="Preview"
 					{...preview}
+					Size={new UDim2(1, 0, 1, -topBars)}
+					Position={new UDim2(0, 0, 0, topBars)}
 					ref={(rbx: Frame | undefined) => {
 						if (!rbx) return;
 						const x = rbx.AbsoluteSize.X;

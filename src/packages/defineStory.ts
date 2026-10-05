@@ -68,6 +68,30 @@ export const controls = {
 	readonly: (): ControlSpec => ({ type: "readonly" }),
 };
 
+export interface StoryTool {
+	id: string;
+	label: string;
+	icon?: string;
+	active?: boolean;
+	onClick: () => void;
+}
+
+export interface StoryToolHost {
+	orbit: () => void;
+	resetCamera: () => void;
+}
+
+export type StoryTools = StoryTool[] | ((host: StoryToolHost) => StoryTool[]);
+
+export function resolveStoryTools(tools: StoryTools | undefined, host: StoryToolHost): StoryTool[] {
+	if (tools === undefined) return [];
+	if (typeOf(tools) === "function") {
+		const resolved = (tools as (host: StoryToolHost) => StoryTool[])(host);
+		return typeOf(resolved) === "table" ? resolved : [];
+	}
+	return tools as StoryTool[];
+}
+
 export interface ModernStory<T> {
 	id?: string;
 	title: string;
@@ -82,6 +106,7 @@ export interface ModernStory<T> {
 		height?: number;
 		background?: Color3;
 	};
+	tools?: StoryTools;
 	component?: unknown;
 }
 
