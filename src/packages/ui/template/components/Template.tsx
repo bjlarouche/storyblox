@@ -197,8 +197,8 @@ function Template({
 	const argTypes = (story as { argTypes?: unknown } | undefined)?.argTypes;
 	const controlled = hasStoryControls(story as never);
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
-	const chromeHeight = theme.spacing.calc(2);
-	const storyBarHeight = theme.spacing.calc(1.75);
+	const chromeHeight = theme.spacing.calc(3.5);
+	const storyBarHeight = theme.spacing.calc(3);
 	const storyTools = resolveStoryTools((story as { tools?: StoryTools } | undefined)?.tools, {
 		orbit: () => setYaw((current) => current + ORBIT_STEP),
 		resetCamera: () => setYaw(0),
