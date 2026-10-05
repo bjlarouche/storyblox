@@ -2,9 +2,11 @@ import React from "@rbxts/react";
 import { Grid } from "./kitBreadth";
 
 interface Args {
-	cols: number;
+	columns: number;
 	cell: number;
 	gap: number;
+	startCorner: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+	fillDirection: "Horizontal" | "Vertical";
 }
 
 function Cell(props: { order: number; text: string }) {
@@ -15,6 +17,7 @@ function Cell(props: { order: number; text: string }) {
 			BorderSizePixel={0}
 			Text={props.text}
 			TextColor3={Color3.fromRGB(240, 240, 240)}
+			TextSize={14}
 			LayoutOrder={props.order}
 		/>
 	);
@@ -22,17 +25,26 @@ function Cell(props: { order: number; text: string }) {
 
 export default {
 	title: "Layout/Grid",
-	args: { cols: 3, cell: 64, gap: 8 },
+	args: { columns: 3, cell: 64, gap: 1, startCorner: "top-left", fillDirection: "Horizontal" },
 	argTypes: {
-		cols: { type: "number", min: 1, max: 6, step: 1 },
+		columns: { type: "number", min: 1, max: 6, step: 1 },
 		cell: { type: "number", min: 32, max: 120, step: 8 },
-		gap: { type: "number", min: 0, max: 24, step: 2 },
+		gap: { type: "number", min: 0, max: 3, step: 0.5 },
+		startCorner: {
+			type: "enum",
+			options: ["top-left", "top-right", "bottom-left", "bottom-right"],
+		},
+		fillDirection: { type: "enum", options: ["Horizontal", "Vertical"] },
 	},
 	render: (args: Args) => (
 		<Grid
 			cellSize={UDim2.fromOffset(args.cell, args.cell)}
-			cellPadding={UDim2.fromOffset(args.gap, args.gap)}
-			fillDirectionMaxCells={args.cols}
+			gap={args.gap}
+			columns={args.columns}
+			startCorner={args.startCorner}
+			fillDirection={
+				args.fillDirection === "Vertical" ? Enum.FillDirection.Vertical : Enum.FillDirection.Horizontal
+			}
 		>
 			<Cell order={0} text="1" />
 			<Cell order={1} text="2" />

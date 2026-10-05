@@ -36,6 +36,7 @@ export const ToggleButtonGroup = kit.ToggleButtonGroup;
 export const Link = kit.Link;
 export const Rating = kit.Rating;
 export const Stack = kit.Stack;
+export const FlexItem = kit.FlexItem;
 export const Box = kit.Box;
 export const Container = kit.Container;
 export const Divider = kit.Divider;
