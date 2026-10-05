@@ -26,6 +26,7 @@ import { insideCanvas } from "../canvasReady";
 import { createStorySession, keepSelection } from "../storyRegistry";
 import { ClaimedId, claimStoryId, releaseStoryId } from "packages/defineStory";
 import { checkRequest, PROTOCOL_VERSION } from "packages/bridgeProtocol";
+import { filterStoriesByTags, parseTagList } from "packages/storyTags";
 import { narrowShell } from "../shellLayout";
 
 const DEFAULT_EXTENSION = ".stories";
@@ -167,6 +168,8 @@ function Storyblox(props: StorybloxProps) {
 	const { errorContainer, errorMessage } = useStorybloxStyles();
 
 	const [stories, setStories] = useState<Story[]>([]);
+	const [includeTags, setIncludeTags] = useState<string[]>([]);
+	const [excludeTags, setExcludeTags] = useState<string[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
 	const [previewKey, setPreviewKey] = useState(0);
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
@@ -389,6 +392,16 @@ function Storyblox(props: StorybloxProps) {
 		const focusConn = marker
 			.GetAttributeChangedSignal("storyblox-focus-search")
 			.Connect(() => setFocusSearch((current) => current + 1));
+		const includeConn = marker.GetAttributeChangedSignal("storyblox-include-tags").Connect(() => {
+			const raw = marker.GetAttribute("storyblox-include-tags");
+			setIncludeTags(parseTagList(typeOf(raw) === "string" ? (raw as string) : undefined));
+		});
+		const excludeConn = marker.GetAttributeChangedSignal("storyblox-exclude-tags").Connect(() => {
+			const raw = marker.GetAttribute("storyblox-exclude-tags");
+			setExcludeTags(parseTagList(typeOf(raw) === "string" ? (raw as string) : undefined));
+		});
+		setIncludeTags(parseTagList(typeOf(marker.GetAttribute("storyblox-include-tags")) === "string" ? (marker.GetAttribute("storyblox-include-tags") as string) : undefined));
+		setExcludeTags(parseTagList(typeOf(marker.GetAttribute("storyblox-exclude-tags")) === "string" ? (marker.GetAttribute("storyblox-exclude-tags") as string) : undefined));
 		const remountConn = marker
 			.GetAttributeChangedSignal("storyblox-remount")
 			.Connect(() => setRemount((current) => current + 1));
@@ -469,6 +482,8 @@ function Storyblox(props: StorybloxProps) {
 			favoriteConn.Disconnect();
 			paneConn.Disconnect();
 			focusConn.Disconnect();
+			includeConn.Disconnect();
+			excludeConn.Disconnect();
 			remountConn.Disconnect();
 			caseConn.Disconnect();
 		};
@@ -514,13 +529,22 @@ function Storyblox(props: StorybloxProps) {
 		};
 	}, [selectedStory, previewKey, root]);
 
+	const visibleStories = useMemo(
+		() =>
+			filterStoriesByTags(
+				stories as Array<Story & { tags?: string[] }>,
+				includeTags.size() > 0 ? includeTags : undefined,
+				excludeTags.size() > 0 ? excludeTags : undefined,
+			),
+		[stories, includeTags, excludeTags],
+	);
 	const rememberWidth = (rbx: Frame) => {
 		const x = rbx.AbsoluteSize.X;
 		setShellWidth((current) => (current === x ? current : x));
 	};
 	const sidebar = (
 		<StoriesSidebar
-			stories={stories}
+			stories={visibleStories}
 			logoSrc={logoSrc}
 			version={version}
 			selected={selectedStory?.title}
