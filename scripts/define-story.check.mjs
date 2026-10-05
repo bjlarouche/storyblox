@@ -1,4 +1,7 @@
 globalThis.typeOf = (value) => (typeof value === "object" && value !== null ? "table" : typeof value);
+Array.prototype.size = function size() {
+	return this.length;
+};
 globalThis.pairs = (record) => Object.keys(record).map((key) => [key, record[key]]);
 String.prototype.size = function size() {
 	return this.length;
@@ -10,7 +13,7 @@ String.prototype.sub = function sub(start, finish) {
 	return this.slice(from, to);
 };
 
-const { defineStory, controls, claimStoryId, releaseStoryId, resolveStoryTools } = await import(
+const { defineStory, controls, claimStoryId, releaseStoryId, resolveStoryTools, storyFeatures } = await import(
 	"../src/packages/defineStory.ts"
 );
 const { normalizeExport } = await import("../src/packages/ui/storyblox/normalizeStory.ts");
@@ -157,5 +160,30 @@ const withTools = normalizeExport(
 	".stories",
 );
 if (withTools.kind !== "react" || typeof withTools.story.tools !== "function") throw new Error("tools passthrough");
+
+const configured = normalizeExport(
+	{
+		default: defineStory({
+			title: "Examples/Button",
+			args: { label: "Continue" },
+			argTypes: { label: controls.string() },
+			tags: ["dev"],
+			parameters: { layout: "centered" },
+			globals: { theme: "dark" },
+			features: { actions: true },
+			decorators: [(inner) => (args) => `wrapped:${inner(args)}`],
+			render: (args) => args.label,
+		}),
+	},
+	"Configured.stories",
+	".stories",
+);
+if (configured.kind !== "react") throw new Error("configured story");
+if (configured.story.tags[0] !== "dev" || configured.story.parameters.layout !== "centered") throw new Error("parameters");
+if (configured.story.globals.theme !== "dark") throw new Error("globals");
+const flags = storyFeatures({ actions: true });
+if (flags.actions !== true || flags.docs !== false || flags.measure !== false) throw new Error("feature defaults");
+if (configured.story.features.actions !== true || configured.story.features.docs !== false) throw new Error("features");
+if (configured.story.template() !== "wrapped:Continue") throw new Error("decorator");
 
 console.log("define story ok");

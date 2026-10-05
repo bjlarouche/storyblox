@@ -92,6 +92,24 @@ export function resolveStoryTools(tools: StoryTools | undefined, host: StoryTool
 	return tools as StoryTool[];
 }
 
+export interface StoryFeatures {
+	actions?: boolean;
+	docs?: boolean;
+	interactions?: boolean;
+	outline?: boolean;
+	measure?: boolean;
+}
+
+export function storyFeatures(features?: StoryFeatures) {
+	return {
+		actions: features?.actions === true,
+		docs: features?.docs === true,
+		interactions: features?.interactions === true,
+		outline: features?.outline === true,
+		measure: features?.measure === true,
+	};
+}
+
 export interface ModernStory<T> {
 	id?: string;
 	title: string;
@@ -107,6 +125,11 @@ export interface ModernStory<T> {
 		background?: Color3;
 	};
 	tools?: StoryTools;
+	tags?: string[];
+	parameters?: { [key: string]: unknown };
+	globals?: { [key: string]: unknown };
+	decorators?: Array<(inner: (args: T) => unknown) => (args: T) => unknown>;
+	features?: StoryFeatures;
 	component?: unknown;
 }
 

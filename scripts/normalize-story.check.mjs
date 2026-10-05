@@ -1,3 +1,6 @@
+Array.prototype.size = function size() {
+	return this.length;
+};
 globalThis.typeOf = (value) => {
 	if (value !== null && typeof value === "object" && value.__type) return value.__type;
 	return typeof value === "object" && value !== null ? "table" : typeof value;

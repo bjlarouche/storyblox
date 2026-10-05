@@ -10,6 +10,16 @@ export interface ReactStoryShape {
 	tools?: unknown;
 	cases?: unknown;
 	description?: unknown;
+	tags?: unknown;
+	parameters?: unknown;
+	globals?: unknown;
+	features?: {
+		actions: boolean;
+		docs: boolean;
+		interactions: boolean;
+		outline: boolean;
+		measure: boolean;
+	};
 }
 
 export type NormalizedStory =
@@ -92,12 +102,18 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		description?: unknown;
 		component?: unknown;
 		template?: unknown;
+		tags?: unknown;
+		parameters?: unknown;
+		globals?: unknown;
+		decorators?: unknown;
+		features?: unknown;
 	};
 	if (typeOf(story.title) !== "string" || typeOf(story.render) !== "function") return undefined;
 	if (typeOf(story.template) === "function") return undefined;
 	if (!argsMatch(story.args, story.argTypes)) return undefined;
 	const render = story.render as (args: unknown, context?: unknown) => unknown;
 	const args = story.args;
+	const decorators = decoratorsOf(story.decorators);
 	return {
 		id: typeOf(story.id) === "string" ? (story.id as string) : undefined,
 		title: story.title as string,
@@ -107,10 +123,42 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		tools: story.tools,
 		cases: story.cases,
 		description: story.description,
+		tags: typeOf(story.tags) === "table" ? story.tags : undefined,
+		parameters: typeOf(story.parameters) === "table" ? story.parameters : undefined,
+		globals: typeOf(story.globals) === "table" ? story.globals : undefined,
+		features: featureFlags(story.features),
 		props: args,
 		component: story.component,
-		template: (props: unknown, context: unknown) => render(props !== undefined ? props : args, context),
+		template: (props: unknown, context: unknown) => {
+			const value = props !== undefined ? props : args;
+			if (decorators.size() === 0) return render(value, context);
+			let wrapped = (incoming: unknown) => render(incoming, context);
+			for (let index = decorators.size() - 1; index >= 0; index--) wrapped = decorators[index](wrapped);
+			return wrapped(value);
+		},
 	};
+}
+
+function featureFlags(value: unknown) {
+	const features = typeOf(value) === "table" ? (value as { [key: string]: unknown }) : {};
+	return {
+		actions: features.actions === true,
+		docs: features.docs === true,
+		interactions: features.interactions === true,
+		outline: features.outline === true,
+		measure: features.measure === true,
+	};
+}
+
+function decoratorsOf(value: unknown): Array<(inner: (args: unknown) => unknown) => (args: unknown) => unknown> {
+	if (typeOf(value) !== "table") return [];
+	const kept: Array<(inner: (args: unknown) => unknown) => (args: unknown) => unknown> = [];
+	for (const item of value as Array<unknown>) {
+		if (typeOf(item) === "function") {
+			kept.push(item as (inner: (args: unknown) => unknown) => (args: unknown) => unknown);
+		}
+	}
+	return kept;
 }
 
 export function normalizeExport(mod: unknown, moduleName: string, suffix: string): NormalizedStory {

@@ -1,6 +1,6 @@
 export { Storyblox } from "./ui";
-export { defineStory, controls, claimStoryId, releaseStoryId, resolveStoryTools } from "./defineStory";
-export { ControlSpec, ModernStory, ClaimedId, StoryTool, StoryToolHost, StoryTools } from "./defineStory";
+export { defineStory, controls, claimStoryId, releaseStoryId, resolveStoryTools, storyFeatures } from "./defineStory";
+export { ControlSpec, ModernStory, ClaimedId, StoryTool, StoryToolHost, StoryTools, StoryFeatures } from "./defineStory";
 
 export { Story } from "../interfaces";
 export { StoryElement } from "../interfaces";
