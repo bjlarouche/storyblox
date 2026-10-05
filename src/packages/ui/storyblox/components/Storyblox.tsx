@@ -13,7 +13,7 @@ import {
 } from "@rbxts/uiblox";
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "interfaces";
-import { SplitPane, Template } from "../../template";
+import { SafeBoundary, SplitPane, Template } from "../../template";
 import { withStoryControls } from "../../template/storyControls";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
@@ -543,29 +543,31 @@ function Storyblox(props: StorybloxProps) {
 		setShellWidth((current) => (current === x ? current : x));
 	};
 	const sidebar = (
-		<StoriesSidebar
-			stories={visibleStories}
-			logoSrc={logoSrc}
-			version={version}
-			selected={selectedStory?.title}
-			focusSearch={focusSearch}
-			favorites={favoriteList}
-			includeTags={includeTags.join(",")}
-			excludeTags={excludeTags.join(",")}
-			onIncludeTagsChange={(value) => {
-				setIncludeTags(parseTagList(value));
-				controlRoot(root)?.SetAttribute("storyblox-include-tags", value.size() > 0 ? value : undefined);
-			}}
-			onExcludeTagsChange={(value) => {
-				setExcludeTags(parseTagList(value));
-				controlRoot(root)?.SetAttribute("storyblox-exclude-tags", value.size() > 0 ? value : undefined);
-			}}
-			onClick={(story: Story) => {
-				controlRoot(root)?.SetAttribute("storyblox-select", story.title);
-				setSelectedStory(story);
-				setPane("canvas");
-			}}
-		/>
+		<SafeBoundary resetKey="sidebar">
+			<StoriesSidebar
+				stories={visibleStories}
+				logoSrc={logoSrc}
+				version={version}
+				selected={selectedStory?.title}
+				focusSearch={focusSearch}
+				favorites={favoriteList}
+				includeTags={includeTags.join(",")}
+				excludeTags={excludeTags.join(",")}
+				onIncludeTagsChange={(value) => {
+					setIncludeTags(parseTagList(value));
+					controlRoot(root)?.SetAttribute("storyblox-include-tags", value.size() > 0 ? value : undefined);
+				}}
+				onExcludeTagsChange={(value) => {
+					setExcludeTags(parseTagList(value));
+					controlRoot(root)?.SetAttribute("storyblox-exclude-tags", value.size() > 0 ? value : undefined);
+				}}
+				onClick={(story: Story) => {
+					controlRoot(root)?.SetAttribute("storyblox-select", story.title);
+					setSelectedStory(story);
+					setPane("canvas");
+				}}
+			/>
+		</SafeBoundary>
 	);
 	const onRenderError = (failure: unknown | undefined) => {
 		renderError.current = failure;
@@ -636,58 +638,60 @@ function Storyblox(props: StorybloxProps) {
 						</ErrorBoundary>
 	);
 	const inspector = (
-		<scrollingframe
-			key="Inspector"
-			ref={setInspectorFrame}
-			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundTransparency={1}
-			BorderSizePixel={0}
-			CanvasSize={new UDim2(0, 0, 0, 0)}
-			AutomaticCanvasSize={Enum.AutomaticSize.Y}
-			ScrollingDirection={Enum.ScrollingDirection.Y}
-			ScrollBarThickness={theme.spacing.calc(0.5)}
-			ScrollBarImageTransparency={0.75}
-			ClipsDescendants={true}
-		>
-			<uipadding
-				key="InspectorInset"
-				PaddingTop={new UDim(0, theme.padding.calc(2))}
-				PaddingBottom={new UDim(0, theme.padding.calc(2))}
-				PaddingLeft={new UDim(0, theme.padding.calc(2))}
-				PaddingRight={new UDim(0, theme.padding.calc(2))}
-			/>
-			<uilistlayout
-				key="InspectorLayout"
-				FillDirection={Enum.FillDirection.Vertical}
-				Padding={new UDim(0, theme.padding.calc(1))}
-				SortOrder={Enum.SortOrder.LayoutOrder}
-			/>
-			<textlabel
-				key="InspectorTitle"
-				Text="Inspector"
-				LayoutOrder={1}
-				Size={new UDim2(1, 0, 0, theme.spacing.calc(1.5))}
+		<SafeBoundary resetKey={`meta:${selectedStory?.title ?? ""}`}>
+			<scrollingframe
+				key="Inspector"
+				ref={setInspectorFrame}
+				Size={new UDim2(1, 0, 1, 0)}
 				BackgroundTransparency={1}
-				Font={theme.typography.fontFamilies.semibold}
-				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.palette.text.secondary}
-				TextXAlignment={Enum.TextXAlignment.Left}
-			/>
-			<textlabel
-				key="InspectorBody"
-				Text={storyInspector(selectedStory as never)}
-				LayoutOrder={2}
-				Size={new UDim2(1, 0, 0, 0)}
-				AutomaticSize={Enum.AutomaticSize.Y}
-				TextWrapped={true}
-				TextYAlignment={Enum.TextYAlignment.Top}
-				BackgroundTransparency={1}
-				Font={theme.typography.fontFamilies.default}
-				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.palette.text.secondary}
-				TextXAlignment={Enum.TextXAlignment.Left}
-			/>
-		</scrollingframe>
+				BorderSizePixel={0}
+				CanvasSize={new UDim2(0, 0, 0, 0)}
+				AutomaticCanvasSize={Enum.AutomaticSize.Y}
+				ScrollingDirection={Enum.ScrollingDirection.Y}
+				ScrollBarThickness={theme.spacing.calc(0.5)}
+				ScrollBarImageTransparency={0.75}
+				ClipsDescendants={true}
+			>
+				<uipadding
+					key="InspectorInset"
+					PaddingTop={new UDim(0, theme.padding.calc(2))}
+					PaddingBottom={new UDim(0, theme.padding.calc(2))}
+					PaddingLeft={new UDim(0, theme.padding.calc(2))}
+					PaddingRight={new UDim(0, theme.padding.calc(2))}
+				/>
+				<uilistlayout
+					key="InspectorLayout"
+					FillDirection={Enum.FillDirection.Vertical}
+					Padding={new UDim(0, theme.padding.calc(1))}
+					SortOrder={Enum.SortOrder.LayoutOrder}
+				/>
+				<textlabel
+					key="InspectorTitle"
+					Text="Inspector"
+					LayoutOrder={1}
+					Size={new UDim2(1, 0, 0, theme.spacing.calc(1.5))}
+					BackgroundTransparency={1}
+					Font={theme.typography.fontFamilies.semibold}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={theme.palette.text.secondary}
+					TextXAlignment={Enum.TextXAlignment.Left}
+				/>
+				<textlabel
+					key="InspectorBody"
+					Text={storyInspector(selectedStory as never)}
+					LayoutOrder={2}
+					Size={new UDim2(1, 0, 0, 0)}
+					AutomaticSize={Enum.AutomaticSize.Y}
+					TextWrapped={true}
+					TextYAlignment={Enum.TextYAlignment.Top}
+					BackgroundTransparency={1}
+					Font={theme.typography.fontFamilies.default}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={theme.palette.text.secondary}
+					TextXAlignment={Enum.TextXAlignment.Left}
+				/>
+			</scrollingframe>
+		</SafeBoundary>
 	);
 	const tab = (id: string, label: string, order: number) => (
 		<textbutton

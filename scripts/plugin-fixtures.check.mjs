@@ -75,6 +75,10 @@ const needles = [
 	"BounceBall",
 	"hostColor",
 	"defined story",
+	"Dev/Crash Control",
+	"Dev/Crash Story",
+	"intentional control crash",
+	"intentional story crash",
 ];
 
 try {

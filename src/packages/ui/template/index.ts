@@ -5,6 +5,8 @@ export { default as ActionsPanel } from "./components/ActionsPanel";
 export { ActionsPanelProps } from "./components/ActionsPanel";
 export { default as InspectorPane } from "./components/InspectorPane";
 export { InspectorPaneProps, InspectorTab } from "./components/InspectorPane";
+export { default as SafeBoundary } from "./components/SafeBoundary";
+export { SafeBoundaryProps } from "./components/SafeBoundary";
 export { ActionLogContext, useActionLog } from "./actionLogContext";
 export { ActionLogApi } from "./actionLogContext";
 export { default as OutlineOverlay } from "./components/OutlineOverlay";
