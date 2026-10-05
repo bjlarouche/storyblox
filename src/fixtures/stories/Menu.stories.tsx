@@ -3,6 +3,7 @@ import { Menu, useArg } from "./kitBreadth";
 
 interface Args {
 	open: boolean;
+	empty: boolean;
 }
 
 function MenuStory(args: Args) {
@@ -19,11 +20,15 @@ function MenuStory(args: Args) {
 			<Menu
 				anchor={anchor}
 				open={open}
-				items={[
-					{ id: "a", text: "One" },
-					{ id: "b", text: "Two" },
-					{ id: "c", text: "Disabled", disabled: true },
-				]}
+				items={
+					args.empty
+						? []
+						: [
+								{ id: "a", text: "One" },
+								{ id: "b", text: "Two" },
+								{ id: "c", text: "Disabled", disabled: true },
+							]
+				}
 				onSelect={() => setOpen(false)}
 				onClose={() => setOpen(false)}
 			/>
@@ -33,7 +38,10 @@ function MenuStory(args: Args) {
 
 export default {
 	title: "Components/Menu",
-	args: { open: false },
-	argTypes: { open: { type: "boolean" } },
+	args: { open: false, empty: false },
+	argTypes: {
+		open: { type: "boolean" },
+		empty: { type: "boolean" },
+	},
 	render: (args: Args) => <MenuStory {...args} />,
 };

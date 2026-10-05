@@ -10,16 +10,22 @@ interface Args {
 	placeholder: string;
 	value: string;
 	disabled: boolean;
+	mode: "default" | "empty" | "no-results";
 }
 
 function SelectStory(args: Args) {
 	const [value, setValue] = useArg(args.value);
+	const empty = args.mode === "empty";
+	const noResults = args.mode === "no-results";
 	return (
 		<Select
-			value={value}
-			options={options}
+			value={empty ? "" : value}
+			options={empty ? [] : options}
 			placeholder={args.placeholder}
 			disabled={args.disabled}
+			searchable={noResults || undefined}
+			defaultOpen={empty || noResults}
+			defaultQuery={noResults ? "zzz" : undefined}
 			onChange={setValue}
 		/>
 	);
@@ -27,11 +33,12 @@ function SelectStory(args: Args) {
 
 export default {
 	title: "Components/Select",
-	args: { placeholder: "Pick one", value: "", disabled: false },
+	args: { placeholder: "Pick one", value: "", disabled: false, mode: "default" },
 	argTypes: {
 		placeholder: { type: "string" },
 		value: { type: "enum", options: ["", "one", "two"] },
 		disabled: { type: "boolean" },
+		mode: { type: "enum", options: ["default", "empty", "no-results"] },
 	},
 	render: (args: Args) => <SelectStory {...args} />,
 };

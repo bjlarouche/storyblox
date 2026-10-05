@@ -15,6 +15,9 @@ interface RadioProps {
 	row?: boolean;
 	size?: "small" | "medium" | "large";
 	orientation?: "horizontal" | "vertical";
+	searchable?: boolean;
+	defaultOpen?: boolean;
+	defaultQuery?: string;
 }
 
 interface CheckboxProps {
