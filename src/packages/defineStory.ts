@@ -12,6 +12,9 @@ export interface ControlSpec {
 		| "EnumItem"
 		| "asset"
 		| "cframe"
+		| "font"
+		| "colorSequence"
+		| "numberSequence"
 		| "object"
 		| "array"
 		| "dictionary"
@@ -53,7 +56,10 @@ export const controls = {
 	vector3: (): ControlSpec => ({ type: "vector3" }),
 	udim: (): ControlSpec => ({ type: "udim" }),
 	udim2: (): ControlSpec => ({ type: "udim2" }),
-	enumItem: (enumType: string, options: string[]): ControlSpec => ({ type: "EnumItem", enumType, options }),
+	enumItem: (enumType: string, options?: string[]): ControlSpec => ({ type: "EnumItem", enumType, options }),
+	font: (): ControlSpec => ({ type: "font" }),
+	colorSequence: (): ControlSpec => ({ type: "colorSequence" }),
+	numberSequence: (): ControlSpec => ({ type: "numberSequence" }),
 	asset: (): ControlSpec => ({ type: "asset" }),
 	cframe: (): ControlSpec => ({ type: "cframe" }),
 	object: (fields: { [key: string]: ControlSpec }): ControlSpec => ({ type: "object", fields }),

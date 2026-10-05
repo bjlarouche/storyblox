@@ -61,6 +61,9 @@ function argValueMatches(value: unknown, kind: unknown): boolean {
 	if (kind === "vector3") return typeOf(value) === "Vector3";
 	if (kind === "udim") return typeOf(value) === "UDim";
 	if (kind === "udim2") return typeOf(value) === "UDim2";
+	if (kind === "font") return typeOf(value) === "Font";
+	if (kind === "colorSequence") return typeOf(value) === "ColorSequence";
+	if (kind === "numberSequence") return typeOf(value) === "NumberSequence";
 	if (kind === "EnumItem") return typeOf(value) === "EnumItem";
 	if (kind === "cframe") return typeOf(value) === "CFrame";
 	if (kind === "asset") {
