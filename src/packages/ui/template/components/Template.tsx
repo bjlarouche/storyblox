@@ -16,6 +16,7 @@ import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
+const INSPECTOR_ICON = "rbxassetid://94615499225611" as Icons;
 const CONTROLS_MIN = 120;
 const SCENE_BACKDROP = new Color3(0.1, 0.1, 0.12);
 
@@ -510,7 +511,7 @@ function Template({
 								>
 									<IconButton
 										id="Inspector"
-										icon={Icons.NewspaperVariant1}
+										icon={INSPECTOR_ICON}
 										tint={theme.options.constants.colors.textMuted}
 										onClick={onToggleInspector}
 										className={
