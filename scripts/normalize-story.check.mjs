@@ -80,7 +80,7 @@ if (wrongName.kind !== "reject") throw new Error("suffix mismatch was accepted")
 const datatypes = normalizeExport(
 	{
 		default: {
-			title: "Fixture/Datatypes",
+			title: "Layout/Data Types",
 			args: { paint: { __type: "Color3" }, icon: 123 },
 			argTypes: { paint: { type: "color" }, icon: { type: "asset" } },
 			render: () => "ok",
@@ -94,7 +94,7 @@ if (datatypes.kind !== "react") throw new Error("datatype story");
 const badAsset = normalizeExport(
 	{
 		default: {
-			title: "Fixture/Datatypes",
+			title: "Layout/Data Types",
 			args: { icon: -1 },
 			argTypes: { icon: { type: "asset" } },
 			render: () => "ok",
@@ -108,7 +108,7 @@ if (badAsset.kind !== "reject" || badAsset.reason !== "args") throw new Error("b
 const themed = normalizeExport(
 	{
 		default: {
-			title: "Fixture/Nested",
+			title: "Layout/Nested Args",
 			args: {},
 			render: (_args, context) => context?.theme,
 		},

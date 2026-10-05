@@ -2,7 +2,7 @@ import React from "@rbxts/react";
 import { Button } from "@rbxts/uiblox";
 
 export default {
-	title: "Inputs/Button/Primary",
+	title: "Examples/Button",
 	component: Button,
 	args: { label: "Primary", variant: "contained", disabled: false },
 	argTypes: {

@@ -1,7 +1,7 @@
 import React from "@rbxts/react";
 
 export default {
-	title: "Fixture/Datatypes",
+	title: "Layout/Data Types",
 	args: {
 		paint: new Color3(0.2, 0.4, 0.6),
 		shift: new Vector2(4, 5),

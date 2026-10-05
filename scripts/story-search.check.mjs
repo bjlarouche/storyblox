@@ -13,10 +13,10 @@ String.prototype.upper = function upper() {
 
 const { storyMatches } = await import("../src/packages/ui/storiesSidebar/storySearch.ts");
 
-if (!storyMatches("Inputs/Button/Primary", "button")) throw new Error("deep segment");
-if (!storyMatches("Fixture/Styled", "xture")) throw new Error("cross-segment");
-if (storyMatches("Fixture/Styled", "missing")) throw new Error("no match");
-if (!storyMatches("Fixture/Styled", "sTyLeD")) throw new Error("case");
-if (!storyMatches("Fixture/Styled", "")) throw new Error("empty query");
+if (!storyMatches("Examples/Button", "button")) throw new Error("deep segment");
+if (!storyMatches("Examples/Styled Labels", "es/st")) throw new Error("cross-segment");
+if (storyMatches("Examples/Styled Labels", "missing")) throw new Error("no match");
+if (!storyMatches("Examples/Styled Labels", "sTyLeD")) throw new Error("case");
+if (!storyMatches("Examples/Styled Labels", "")) throw new Error("empty query");
 
 console.log("story search ok");

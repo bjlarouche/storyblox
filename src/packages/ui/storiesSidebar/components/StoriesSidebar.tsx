@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Branch, Icons, Sidebar, Divider, Tree, TreeView, TreeViewProps, Input, WriteableStyle } from "@rbxts/uiblox";
-import { Story } from "../../../../interfaces";
+import { Story } from "interfaces";
 import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
