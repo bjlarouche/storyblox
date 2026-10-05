@@ -41,22 +41,20 @@ return function(plugin, widget, root)
 	})))
 	local stopHarness
 	local storybloxRoot = TS.getModule(script, "@rbxts", "storyblox")
-	local fixtures = storybloxRoot:FindFirstChild("fixtures")
-	local harnessMod = fixtures and fixtures:FindFirstChild("automation")
-	if harnessMod then
-		local ok, start = pcall(function()
-			return TS.import(script, harnessMod)
-		end)
-		if ok and type(start) == "function" then
-			local okStart, stopper = pcall(start, stories)
-			if okStart and type(stopper) == "function" then
-				stopHarness = stopper
-			elseif not okStart then
-				warn("[Storyblox] viewport harness: ", stopper)
-			end
-		elseif not ok then
-			warn("[Storyblox] viewport harness: ", start)
+	local ssStories = game:GetService("ServerStorage"):FindFirstChild("StorybloxPlugin")
+	ssStories = ssStories and ssStories:FindFirstChild("stories")
+	local ok, start = pcall(function()
+		return TS.import(script, storybloxRoot, "fixtures", "automation")
+	end)
+	if ok and type(start) == "function" and ssStories then
+		local okStart, stopper = pcall(start, ssStories)
+		if okStart and type(stopper) == "function" then
+			stopHarness = stopper
+		elseif not okStart then
+			warn("[Storyblox] viewport harness: ", stopper)
 		end
+	elseif not ok then
+		warn("[Storyblox] viewport harness: ", start)
 	end
 	return function()
 		if stopHarness then pcall(stopHarness) end
