@@ -9,6 +9,7 @@ import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { createActionLog } from "packages/storyActions";
+import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import { hasStoryControls, storyArgs } from "../storyControls";
 import { storyLabel } from "../storyLabel";
@@ -20,6 +21,16 @@ import useTemplateStyles from "./Template.styles";
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
 const INSPECTOR_ICON = "rbxassetid://94615499225611" as Icons;
 const CONTROLS_MIN = 120;
+
+function caseNames(story: Story | undefined): string[] {
+	const cases = (story as { cases?: { [key: string]: unknown } } | undefined)?.cases;
+	const names = new Array<string>();
+	if (typeOf(cases) !== "table") return names;
+	for (const [name, body] of pairs(cases as object)) {
+		if (typeOf(body) === "function") names.push(name as string);
+	}
+	return names;
+}
 
 function HostScene(props: { yaw: number; onOrbit: (dx: number) => void; children?: React.ReactNode }) {
 	const frame = useRef<ViewportFrame>();
@@ -191,8 +202,17 @@ function Template({
 	const [argsStory, setArgsStory] = useState("");
 	const [args, setArgs] = useState<ArgValues>({});
 	const [actionVersion, setActionVersion] = useState(0);
+	const [caseResults, setCaseResults] = useState<CaseResult[]>([]);
+	const [caseRunning, setCaseRunning] = useState<string | undefined>();
+	const [lastCase, setLastCase] = useState<string | undefined>();
+	const [a11yFindings, setA11yFindings] = useState<A11yFinding[]>([]);
+	const [panelCaseRequest, setPanelCaseRequest] = useState<{ name: string; id: number } | undefined>();
+	const activeCaseRequest = caseRequest ?? panelCaseRequest;
 	const actionLog = useMemo(() => createActionLog(), [storyKey]);
-	const actionsEnabled = (story as { features?: { actions?: boolean } } | undefined)?.features?.actions === true;
+	const features = (story as { features?: { actions?: boolean; interactions?: boolean; docs?: boolean } } | undefined)?.features;
+	const actionsEnabled = features?.actions === true;
+	const interactionsEnabled = features?.interactions === true;
+	const docsEnabled = features?.docs === true;
 	const actionApi = useMemo(
 		() => ({
 			disabled: !actionsEnabled,
@@ -208,6 +228,10 @@ function Template({
 		setArgsStory(storyKey);
 		setArgs(copyArgs(storyArgs(story as never)));
 		setYaw(0);
+		setCaseResults([]);
+		setCaseRunning(undefined);
+		setLastCase(undefined);
+		setA11yFindings([]);
 	}
 	const previewTheme = theme;
 	const argTypes = (story as { argTypes?: unknown } | undefined)?.argTypes;
@@ -237,15 +261,25 @@ function Template({
 	}, [remount]);
 
 	useEffect(() => {
-		if (caseRequest === undefined || story === undefined) return;
-		const name = caseRequest.name;
+		if (activeCaseRequest === undefined || story === undefined) return;
+		const name = activeCaseRequest.name;
 		const cases = (story as { cases?: { [key: string]: unknown } }).cases;
 		const body = cases?.[name];
 		if (typeOf(body) !== "function") {
-			onCaseResult?.({ name, passed: false, failures: ["missing case"] });
+			const missing = { name, passed: false, failures: ["missing case"] };
+			setCaseRunning(undefined);
+			setCaseResults((current) => {
+				const updated = new Array<CaseResult>();
+				for (const item of current) updated.push(item);
+				updated.push(missing);
+				return updated;
+			});
+			onCaseResult?.(missing);
 			return;
 		}
 		setArgs(copyArgs(storyArgs(story as never)));
+		setCaseRunning(name);
+		setLastCase(name);
 		const key = mounted.current;
 		const clock = createCaseClock();
 		task.spawn(() => {
@@ -264,9 +298,16 @@ function Template({
 				() => mounted.current !== key,
 			);
 			clock.cancel();
+			setCaseRunning(undefined);
+			setCaseResults((current) => {
+				const updated = new Array<CaseResult>();
+				for (const item of current) updated.push(item);
+				updated.push(result);
+				return updated;
+			});
 			onCaseResult?.(result);
 		});
-	}, [caseRequest]);
+	}, [activeCaseRequest]);
 
 	useEffect(() => {
 		if (argsRequest === undefined || story === undefined) return;
@@ -656,6 +697,47 @@ function Template({
 													onReset: () => {
 														actionLog.reset();
 														setActionVersion((current) => current + 1);
+													},
+												}
+											: undefined
+									}
+									interactions={
+										interactionsEnabled
+											? {
+													cases: caseNames(story),
+													results: caseResults,
+													running: caseRunning,
+													onRun: (name) =>
+														setPanelCaseRequest((current) => ({
+															name,
+															id: (current?.id ?? 0) + 1,
+														})),
+													onRerun: () => {
+														if (lastCase === undefined) return;
+														setPanelCaseRequest((current) => ({
+															name: lastCase,
+															id: (current?.id ?? 0) + 1,
+														}));
+													},
+												}
+											: undefined
+									}
+									docs={
+										docsEnabled
+											? {
+													title: storyKey,
+													description: (story as { description?: unknown } | undefined)?.description,
+													argTypes,
+												}
+											: undefined
+									}
+									a11y={
+										story !== undefined
+											? {
+													findings: a11yFindings,
+													onRescan: () => {
+														const root = mountFrame.current;
+														setA11yFindings(root !== undefined ? scanA11y(root) : []);
 													},
 												}
 											: undefined
