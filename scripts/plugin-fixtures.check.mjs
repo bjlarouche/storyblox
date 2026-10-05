@@ -40,6 +40,7 @@ const needles = [
 	"Components/SplitPane",
 	"Components/Tooltip",
 	"Components/Button",
+	"Components/Checkbox",
 	"Basics/Typed Story",
 	"Layout/Controls",
 	"Layout/Data Types",

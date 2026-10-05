@@ -29,7 +29,16 @@ interface TooltipProps {
 	children?: React.ReactNode;
 }
 
+interface CheckboxProps {
+	value: boolean;
+	onChange: (value: boolean) => void;
+	disabled?: boolean;
+	mixed?: boolean;
+	label?: string;
+}
+
 const kit = Uiblox as unknown as {
+	Checkbox: (props: CheckboxProps) => React.Element;
 	RadioGroup: (props: RadioProps) => React.Element;
 	Select: (props: RadioProps) => React.Element;
 	Tabs: (props: RadioProps) => React.Element;
@@ -37,6 +46,7 @@ const kit = Uiblox as unknown as {
 	Tooltip: (props: TooltipProps) => React.Element;
 };
 
+export const Checkbox = kit.Checkbox;
 export const RadioGroup = kit.RadioGroup;
 export const Select = kit.Select;
 export const Tabs = kit.Tabs;
