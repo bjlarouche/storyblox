@@ -56,7 +56,7 @@
 		"@rbxts/react": "^17.2.1",
 		"@rbxts/react-roblox": "^17.2.1",
 		"@rbxts/services": "^1.5.5",
-		"@rbxts/uiblox": "0.2.0-alpha.3"
+"@rbxts/uiblox": "0.2.0-alpha.3"
 	},
 	"directories": {
 		"doc": "docs"
@@ -68,5 +68,10 @@
 	"bugs": {
 		"url": "https://github.com/bjlarouche/storyblox/issues"
 	},
-	"homepage": "https://github.com/bjlarouche/storyblox#readme"
+	"homepage": "https://github.com/bjlarouche/storyblox#readme",
+	"pnpm": {
+		"minimumReleaseAgeExclude": [
+			"@rbxts/uiblox"
+		]
+	}
 }
