@@ -5,20 +5,22 @@ interface Args {
 	value: boolean;
 	label: string;
 	disabled: boolean;
+	size: "small" | "medium" | "large";
 }
 
 function SwitchStory(args: Args) {
 	const [value, setValue] = useArg(args.value);
-	return <Switch value={value} label={args.label} disabled={args.disabled} onChange={setValue} />;
+	return <Switch value={value} label={args.label} disabled={args.disabled} size={args.size} onChange={setValue} />;
 }
 
 export default {
 	title: "Components/Switch",
-	args: { value: true, label: "Enabled", disabled: false },
+	args: { value: true, label: "Enabled", disabled: false, size: "medium" },
 	argTypes: {
 		value: { type: "boolean", control: "switch" },
 		label: { type: "string" },
 		disabled: { type: "boolean" },
+		size: { type: "enum", options: ["small", "medium", "large"] },
 	},
 	render: (args: Args) => <SwitchStory {...args} />,
 };
