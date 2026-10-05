@@ -22,6 +22,7 @@ interface Spec {
 	max?: number;
 	step?: number;
 	optional?: boolean;
+	disabled?: boolean;
 	enumType?: string;
 	fields?: { [key: string]: Spec };
 	item?: Spec;
@@ -36,25 +37,40 @@ const kit = Uiblox as unknown as {
 		value: boolean;
 		mixed?: boolean;
 		label?: string;
+		disabled?: boolean;
 		onChange: (value: boolean) => void;
 	}) => React.Element;
-	NumberInput: (props: { value: number; onChange: (value: number) => void; width?: UDim }) => React.Element;
+	Switch: (props: {
+		value: boolean;
+		label?: string;
+		disabled?: boolean;
+		onChange: (value: boolean) => void;
+	}) => React.Element;
+	NumberInput: (props: {
+		value: number;
+		onChange: (value: number) => void;
+		width?: UDim;
+		disabled?: boolean;
+	}) => React.Element;
 	Select: (props: {
 		value: string;
 		options: { label: string; value: string }[];
 		onChange: (value: string) => void;
 		className?: { Size?: UDim2 };
+		disabled?: boolean;
 	}) => React.Element;
 	RadioGroup: (props: {
 		value: string;
 		options: { label: string; value: string }[];
 		onChange: (value: string) => void;
+		disabled?: boolean;
 	}) => React.Element;
 	Slider: (props: {
 		value: number;
 		min: number;
 		max: number;
 		step?: number;
+		disabled?: boolean;
 		onChange: (value: number) => void;
 	}) => React.Element;
 };
@@ -143,12 +159,22 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 			if (committed !== undefined) onChange(name, committed);
 		};
 		let editor: React.Element | undefined;
-		if (spec?.type === "boolean") {
+		if (spec?.type === "boolean" && spec.control === "switch") {
+			editor = (
+				<kit.Switch
+					key={name}
+					value={value === true}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => onChange(name, incoming)}
+				/>
+			);
+		} else if (spec?.type === "boolean") {
 			editor = (
 				<kit.Checkbox
 					key={name}
 					value={value === true}
 					mixed={spec.optional === true && value === undefined}
+					disabled={spec.disabled === true}
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
@@ -162,11 +188,20 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					min={min}
 					max={max}
 					step={spec.step}
+					disabled={spec.disabled === true}
 					onChange={commitNumber}
 				/>
 			);
 		} else if (spec?.type === "number" && typeOf(value) === "number") {
-			editor = <kit.NumberInput key={name} value={value as number} width={new UDim(1, 0)} onChange={commitNumber} />;
+			editor = (
+				<kit.NumberInput
+					key={name}
+					value={value as number}
+					width={new UDim(1, 0)}
+					disabled={spec.disabled === true}
+					onChange={commitNumber}
+				/>
+			);
 		} else if (spec?.type === "number") {
 			editor = (
 				<Input
@@ -176,6 +211,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						width: new UDim(1, 0),
 						text: "",
 						placeholder: "number",
+						disabled: spec.disabled === true,
 						onInput: (text: string) => commitNumber(text),
 						onTextChanged: (text: string) => commitNumber(text),
 					} as React.ComponentProps<typeof Input> & { onInput?: (text: string) => void })}
@@ -187,6 +223,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					key={name}
 					value={typeOf(value) === "string" ? (value as string) : ""}
 					options={options}
+					disabled={spec.disabled === true}
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
@@ -197,6 +234,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					value={typeOf(value) === "string" ? (value as string) : ""}
 					options={options}
 					className={fill}
+					disabled={spec.disabled === true}
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
