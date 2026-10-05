@@ -39,7 +39,25 @@ return function(plugin, widget, root)
 			plugin:SetSetting("inspectorOpen", open)
 		end,
 	})))
+	local stopHarness
+	local storybloxRoot = TS.getModule(script, "@rbxts", "storyblox")
+	local fixtures = storybloxRoot:FindFirstChild("fixtures")
+	local harnessMod = fixtures and fixtures:FindFirstChild("automation")
+	if harnessMod then
+		local ok, start = pcall(require, harnessMod)
+		if ok and type(start) == "function" then
+			local okStart, stopper = pcall(start, stories)
+			if okStart and type(stopper) == "function" then
+				stopHarness = stopper
+			elseif not okStart then
+				warn("[Storyblox] viewport harness: ", stopper)
+			end
+		elseif not ok then
+			warn("[Storyblox] viewport harness: ", start)
+		end
+	end
 	return function()
+		if stopHarness then pcall(stopHarness) end
 		handle:unmount()
 	end
 end
