@@ -20,3 +20,5 @@ export { VERSION } from "../constants";
 
 export { collectGuiBoxes, formatMeasure, guiBox, relativeBox } from "./layoutTools";
 export { BoxRect } from "./layoutTools";
+export { contrastRatio, scanA11y } from "./a11yHeuristics";
+export { A11yFinding } from "./a11yHeuristics";

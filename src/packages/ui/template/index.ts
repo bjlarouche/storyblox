@@ -9,3 +9,5 @@ export { ActionLogContext, useActionLog } from "./actionLogContext";
 export { ActionLogApi } from "./actionLogContext";
 export { default as OutlineOverlay } from "./components/OutlineOverlay";
 export { OutlineOverlayProps } from "./components/OutlineOverlay";
+export { default as A11yPanel } from "./components/A11yPanel";
+export { A11yPanelProps } from "./components/A11yPanel";
