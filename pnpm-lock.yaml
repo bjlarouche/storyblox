@@ -21,8 +21,8 @@ importers:
         specifier: ^1.5.5
         version: 1.5.5
       '@rbxts/uiblox':
-        specifier: ^0.1.50
-        version: 0.1.50(@rbxts/reflex@4.3.1)
+        specifier: 0.2.0-alpha.0
+        version: 0.2.0-alpha.0
     devDependencies:
       '@rbxts/attributes':
         specifier: ^1.0.0
@@ -187,8 +187,8 @@ packages:
   '@rbxts/types@1.0.813':
     resolution: {integrity: sha512-Qpsmqnl+TNdl5AYqKFkYHyUrv652r30qK6A3GObOyDz+cvn8i+HE61mO021oq0nu1FcA4pMHbYqLSbv2CMF9Ig==}
 
-  '@rbxts/uiblox@0.1.50':
-    resolution: {integrity: sha512-aH2A/svkIOHPbSoqzOLOs9kpiufOSRGV6dK0PIQOvtxivZSjjJIeWXa2e94C9BVNZotuDkJAPrmVgknNBBumCg==}
+  '@rbxts/uiblox@0.2.0-alpha.0':
+    resolution: {integrity: sha512-jH4VzzjtVPs3xn+YtocTwx+o2r7pCKlaB1ErHur3F2dl031cPjXdK4mS9Iptgn4roA6vGlPRyHD5nX+7OFAg7g==}
 
   '@roblox-ts/luau-ast@2.0.0':
     resolution: {integrity: sha512-cmMi093IdwBOLVxwuordhM8AmtbyTIyRpsTbB0D/JauidW4SXsQRQowSwWjHo4QP0DRJBXvOIlxtqEQi50uNzQ==}
@@ -1010,16 +1010,15 @@ snapshots:
 
   '@rbxts/types@1.0.813': {}
 
-  '@rbxts/uiblox@0.1.50(@rbxts/reflex@4.3.1)':
+  '@rbxts/uiblox@0.2.0-alpha.0':
     dependencies:
       '@rbxts/boat-tween': 1.0.1
       '@rbxts/pretty-react-hooks': 0.6.1
       '@rbxts/react': 17.2.1
       '@rbxts/react-reflex': 0.3.4(@rbxts/react@17.2.1)(@rbxts/reflex@4.3.1)
       '@rbxts/react-roblox': 17.2.1
+      '@rbxts/reflex': 4.3.1
       '@rbxts/services': 1.5.5
-    transitivePeerDependencies:
-      - '@rbxts/reflex'
 
   '@roblox-ts/luau-ast@2.0.0': {}
 

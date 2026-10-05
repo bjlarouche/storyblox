@@ -18,12 +18,12 @@ import useTemplateStyles from "./Template.styles";
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
 const INSPECTOR_ICON = "rbxassetid://94615499225611" as Icons;
 const CONTROLS_MIN = 120;
-const SCENE_BACKDROP = new Color3(0.1, 0.1, 0.12);
 
 function HostScene(props: { yaw: number; onOrbit: (dx: number) => void; children?: React.ReactNode }) {
 	const frame = useRef<ViewportFrame>();
 	const camera = useRef<Camera>();
 	const drag = useRef<number | undefined>(undefined);
+	const { theme } = useTheme();
 	const offset = orbitOffset(props.yaw, CAMERA_PITCH, CAMERA_DISTANCE);
 	useEffect(() => {
 		const current = frame.current;
@@ -35,7 +35,7 @@ function HostScene(props: { yaw: number; onOrbit: (dx: number) => void; children
 			key="HostViewport"
 			ref={frame}
 			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundColor3={SCENE_BACKDROP}
+			BackgroundColor3={theme.palette.surface.canvas}
 			Event={{
 				InputBegan: (_, input) => {
 					if (input.UserInputType === Enum.UserInputType.MouseButton1) drag.current = input.Position.X;
@@ -147,7 +147,7 @@ function storyError(title: string, failure: unknown, theme: Theme) {
 				Position={UDim2.fromScale(0.5, 0.5)}
 				Size={new UDim2(1, -theme.spacing.calc(2), 1, -theme.spacing.calc(2))}
 				BackgroundTransparency={1}
-				TextColor3={theme.palette.error.main}
+				TextColor3={theme.palette.status.error.main}
 				TextScaled={true}
 				TextYAlignment={Enum.TextYAlignment.Top}
 				TextXAlignment={Enum.TextXAlignment.Left}
@@ -309,7 +309,7 @@ function Template({
 				? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y)
 				: 1;
 			const scale = fitScale * zoom;
-			const gridColor = theme.options.constants.colors.textMuted;
+			const gridColor = theme.palette.text.secondary;
 			setFailure(undefined);
 			onRenderError?.(undefined);
 			setTemplate(
@@ -317,7 +317,7 @@ function Template({
 					key={`mount-${epoch}`}
 					ref={mountFrame}
 					Size={declared ? new UDim2(0, logicalWidth, 0, logicalHeight) : new UDim2(1, 0, 1, 0)}
-					BackgroundColor3={background ?? new Color3(0, 0, 0)}
+					BackgroundColor3={background ?? theme.palette.surface.canvas}
 					BackgroundTransparency={background !== undefined ? 0 : 1}
 				>
 					<uiscale key="Scale" Scale={scale} />
@@ -382,7 +382,7 @@ function Template({
 							<IconButton
 								id="Favorite"
 								icon={starred ? stars.Icons.StarFilled : stars.Icons.Star}
-								tint={theme.options.constants.colors.textMuted}
+								tint={theme.palette.text.secondary}
 								onClick={onToggleFavorite}
 								className={
 									{
@@ -435,7 +435,7 @@ function Template({
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.secondary.main}
+								TextColor3={theme.palette.primary.main}
 								Event={{ MouseButton1Click: () => setZoom((current) => stepZoom(current, -1)) }}
 							/>
 							<textlabel
@@ -447,7 +447,7 @@ function Template({
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.secondary.main}
+								TextColor3={theme.palette.primary.main}
 							/>
 							<textbutton
 								key="ZoomIn"
@@ -458,7 +458,7 @@ function Template({
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.secondary.main}
+								TextColor3={theme.palette.primary.main}
 								Event={{ MouseButton1Click: () => setZoom((current) => stepZoom(current, 1)) }}
 							/>
 							<textbutton
@@ -470,7 +470,7 @@ function Template({
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.secondary.main}
+								TextColor3={theme.palette.primary.main}
 								TextTransparency={grid ? 0 : 0.45}
 								Event={{ MouseButton1Click: () => setGrid((current) => !current) }}
 							/>
@@ -483,13 +483,13 @@ function Template({
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.secondary.main}
+								TextColor3={theme.palette.primary.main}
 								Event={{ MouseButton1Click: () => setFit((current) => !current) }}
 							/>
 							<IconButton
 								id="Remount"
 								icon={REMOUNT_ICON}
-								tint={theme.options.constants.colors.textMuted}
+								tint={theme.palette.text.secondary}
 								onClick={() => setEpoch((current) => current + 1)}
 								className={
 									{
@@ -512,7 +512,7 @@ function Template({
 									<IconButton
 										id="Inspector"
 										icon={INSPECTOR_ICON}
-										tint={theme.options.constants.colors.textMuted}
+										tint={theme.palette.text.secondary}
 										onClick={onToggleInspector}
 										className={
 											{
@@ -525,7 +525,7 @@ function Template({
 							<IconButton
 								id="Theme"
 								icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
-								tint={theme.options.constants.colors.textMuted}
+								tint={theme.palette.text.secondary}
 								onClick={onToggleTheme}
 								className={
 									{
@@ -568,7 +568,7 @@ function Template({
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.options.constants.colors.textMuted}
+								TextColor3={theme.palette.text.secondary}
 								TextTransparency={tool.active === false ? 0.45 : 0}
 								Selectable={true}
 								Event={{ MouseButton1Click: tool.onClick }}

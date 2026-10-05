@@ -53,7 +53,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 		} as WriteableStyle<UIListLayout>,
 		resultRow: {
 			Size: new UDim2(1, -theme.padding.calc(2), 0, rowHeight),
-			BackgroundColor3: theme.palette.secondary.main,
+			BackgroundColor3: theme.palette.primary.main,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 			AutoButtonColor: false,
@@ -110,7 +110,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			AnchorPoint: new Vector2(0, 1),
 			FontSize: theme.typography.fontSizes.caption,
 			Font: theme.typography.fontFamilies.light,
-			TextColor3: light ? theme.palette.text.primary : theme.options.constants.colors.textMuted,
+			TextColor3: theme.palette.text.secondary,
 			TextScaled: true,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,

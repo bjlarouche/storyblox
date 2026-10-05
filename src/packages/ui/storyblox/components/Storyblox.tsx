@@ -121,7 +121,7 @@ const useStorybloxStyles = makeStyles((theme: Theme) =>
 			Position: UDim2.fromScale(0.5, 0.5),
 			Size: new UDim2(1, -theme.spacing.calc(2), 1, -theme.spacing.calc(2)),
 			BackgroundTransparency: 1,
-			TextColor3: theme.palette.error.main,
+			TextColor3: theme.palette.status.error.main,
 			TextScaled: true,
 			TextYAlignment: Enum.TextYAlignment.Top,
 			TextXAlignment: Enum.TextXAlignment.Left,
@@ -606,7 +606,7 @@ function Storyblox(props: StorybloxProps) {
 			key="Inspector"
 			ref={setInspectorFrame}
 			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundColor3={theme.options.constants.colors.backgroundUIMuted}
+			BackgroundTransparency={1}
 			BorderSizePixel={0}
 			CanvasSize={new UDim2(0, 0, 0, 0)}
 			AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -636,7 +636,7 @@ function Storyblox(props: StorybloxProps) {
 				BackgroundTransparency={1}
 				Font={theme.typography.fontFamilies.semibold}
 				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.options.constants.colors.textMuted}
+				TextColor3={theme.palette.text.secondary}
 				TextXAlignment={Enum.TextXAlignment.Left}
 			/>
 			<textlabel
@@ -650,7 +650,7 @@ function Storyblox(props: StorybloxProps) {
 				BackgroundTransparency={1}
 				Font={theme.typography.fontFamilies.default}
 				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.palette.text.primary}
+				TextColor3={theme.palette.text.secondary}
 				TextXAlignment={Enum.TextXAlignment.Left}
 			/>
 		</scrollingframe>
@@ -665,7 +665,7 @@ function Storyblox(props: StorybloxProps) {
 			BackgroundTransparency={1}
 			Font={theme.typography.fontFamilies.semibold}
 			TextSize={theme.typography.fontSizes.caption}
-			TextColor3={theme.palette.secondary.main}
+			TextColor3={theme.palette.primary.main}
 			TextTransparency={pane === id ? 0 : 0.45}
 			Event={{ MouseButton1Click: () => setPane(id) }}
 		/>

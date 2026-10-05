@@ -270,7 +270,7 @@ function StoriesSidebar({
 									<Icon
 										icon={Icons.Book}
 										size="xs"
-										tint={theme.palette.secondary.main}
+										tint={theme.palette.primary.main}
 										className={resultIcon}
 									/>
 									<Typography
