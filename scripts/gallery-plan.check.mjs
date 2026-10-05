@@ -46,6 +46,16 @@ if (
 ) {
 	throw new Error("error capture status");
 }
+if (
+	validateViewportCapture({
+		story: "Button/default",
+		theme: "dark",
+		ready: "Button/default@4",
+		stats: { guiObjects: 0, textObjects: 0, issues: [] },
+	}).ok
+) {
+	throw new Error("empty stats capture status");
+}
 
 if (process.env.UIBLOX_SRC !== undefined) {
 	const source = process.env.UIBLOX_SRC.startsWith("file:")
