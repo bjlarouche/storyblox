@@ -14,6 +14,7 @@ import {
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "interfaces";
 import { SplitPane, Template } from "../../template";
+import { withStoryControls } from "../../template/storyControls";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { parseFavorites, toggleFavorite } from "../../storiesSidebar/storyTree";
@@ -639,6 +640,12 @@ function Storyblox(props: StorybloxProps) {
 			}}
 		/>
 	);
+	const onRenderError = (failure: unknown | undefined) => {
+		renderError.current = failure;
+		const marker = controlRoot(root);
+		if (marker === undefined) return;
+		marker.SetAttribute("storyblox-error", failure === undefined ? undefined : `${failure}`);
+	};
 	const canvas = (
 						<ErrorBoundary
 							key={`preview-${previewKey}-${boundaryKey}`}
@@ -658,11 +665,12 @@ function Storyblox(props: StorybloxProps) {
 
 								return (
 									<Template
-										story={{
-											title: selectedStory?.title ?? "Error/Rendering",
-											component: () => errorComponnt,
-											template: () => errorComponnt,
-										}}
+										story={
+											withStoryControls(selectedStory as never, {
+												component: () => errorComponnt,
+												template: () => errorComponnt,
+											}) as Story
+										}
 										primaryThemeEnabled={primaryThemeEnabled}
 										onToggleTheme={toggleTheme}
 										inspectorOpen={inspectorShown}
@@ -688,6 +696,7 @@ function Storyblox(props: StorybloxProps) {
 									pendingCase.current = undefined;
 									respond(marker, { requestId, ok: result.passed, generation: bridgeGeneration.current, result });
 								}}
+								onRenderError={onRenderError}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
 								inspectorOpen={inspectorShown}

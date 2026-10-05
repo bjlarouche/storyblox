@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Story } from "interfaces";
-import { IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import { ErrorBoundary, IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
@@ -9,6 +9,7 @@ import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
+import { hasStoryControls, storyArgs } from "../storyControls";
 import { storyLabel } from "../storyLabel";
 import { CaseResult, createCaseClock, createSeed, runCase } from "packages/storyCases";
 import Controls from "./Controls";
@@ -132,6 +133,28 @@ export interface TemplateProps {
 	caseRequest?: { name: string; id: number };
 	argsRequest?: { args?: { [key: string]: unknown }; id: number };
 	onCaseResult?: (result: CaseResult) => void;
+	onRenderError?: (failure: unknown | undefined) => void;
+}
+
+function storyError(title: string, failure: unknown, theme: Theme) {
+	return (
+		<frame key="Error" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+			<textlabel
+				key="Message"
+				Text={`<u>Unable to render <b>${title}</b>...</u>\n\n${failure}`}
+				AnchorPoint={new Vector2(0.5, 0.5)}
+				Position={UDim2.fromScale(0.5, 0.5)}
+				Size={new UDim2(1, -theme.spacing.calc(2), 1, -theme.spacing.calc(2))}
+				BackgroundTransparency={1}
+				TextColor3={theme.palette.error.main}
+				TextScaled={true}
+				TextYAlignment={Enum.TextYAlignment.Top}
+				TextXAlignment={Enum.TextXAlignment.Left}
+				RichText={true}
+				Font={theme.typography.fontFamilies.semibold}
+			/>
+		</frame>
+	);
 }
 
 function Template({
@@ -146,6 +169,7 @@ function Template({
 	caseRequest,
 	argsRequest,
 	onCaseResult,
+	onRenderError,
 }: TemplateProps) {
 	const { root, container, corner, navBar, storyBar, title, preview, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
@@ -153,6 +177,7 @@ function Template({
 	const [template, setTemplate] = useState<React.Element | undefined>();
 	const [failure, setFailure] = useState<unknown>();
 	const [epoch, setEpoch] = useState(0);
+	const [canvasKey, setCanvasKey] = useState(0);
 	const [split, setSplit] = useState(10000);
 	const [fit, setFit] = useState(true);
 	const [grid, setGrid] = useState(false);
@@ -164,16 +189,12 @@ function Template({
 	const [args, setArgs] = useState<ArgValues>({});
 	if (storyKey !== argsStory) {
 		setArgsStory(storyKey);
-		const described = story as { args?: unknown; props?: unknown } | undefined;
-		setArgs(copyArgs(described?.args ?? described?.props));
+		setArgs(copyArgs(storyArgs(story as never)));
 		setYaw(0);
 	}
 	const previewTheme = theme;
 	const argTypes = (story as { argTypes?: unknown } | undefined)?.argTypes;
-	let controlled = false;
-	if (typeOf(argTypes) === "table") {
-		for (const _ of pairs(argTypes as object)) controlled = true;
-	}
+	const controlled = hasStoryControls(story as never);
 	const native = (story as { renderer?: string } | undefined)?.renderer === "native";
 	const chromeHeight = theme.spacing.calc(2);
 	const storyBarHeight = theme.spacing.calc(1.75);
@@ -207,8 +228,7 @@ function Template({
 			onCaseResult?.({ name, passed: false, failures: ["missing case"] });
 			return;
 		}
-		const described = story as { args?: unknown; props?: unknown };
-		setArgs(copyArgs(described.args ?? described.props));
+		setArgs(copyArgs(storyArgs(story as never)));
 		const key = mounted.current;
 		const clock = createCaseClock();
 		task.spawn(() => {
@@ -235,8 +255,7 @@ function Template({
 		if (argsRequest === undefined || story === undefined) return;
 		const incoming = argsRequest.args;
 		if (incoming === undefined) {
-			const described = story as { args?: unknown; props?: unknown };
-			setArgs(copyArgs(described.args ?? described.props));
+			setArgs(copyArgs(storyArgs(story as never)));
 			return;
 		}
 		setArgs((current) => {
@@ -249,6 +268,8 @@ function Template({
 	useEffect(() => {
 		if (story === undefined) {
 			setTemplate(undefined);
+			setFailure(undefined);
+			onRenderError?.(undefined);
 			gate.replace(undefined);
 			mounted.current = "";
 			themeMounted.current = undefined;
@@ -259,8 +280,11 @@ function Template({
 		if (native && mounted.current === mountKey && themeMounted.current === previewTheme && session?.update !== undefined) {
 			try {
 				session.update(args);
+				setFailure(undefined);
+				onRenderError?.(undefined);
 			} catch (error) {
 				setFailure(error);
+				onRenderError?.(error);
 			}
 			return;
 		}
@@ -285,6 +309,8 @@ function Template({
 				: 1;
 			const scale = fitScale * zoom;
 			const gridColor = theme.options.constants.colors.textMuted;
+			setFailure(undefined);
+			onRenderError?.(undefined);
 			setTemplate(
 				<frame
 					key={`mount-${epoch}`}
@@ -321,12 +347,13 @@ function Template({
 			mounted.current = "";
 			themeMounted.current = undefined;
 			setFailure(error);
+			onRenderError?.(error);
 		}
 	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, zoom, previewTheme, yaw]);
 
-	if (failure !== undefined) {
-		throw failure;
-	}
+	useEffect(() => {
+		setCanvasKey((current) => current + 1);
+	}, [args, storyKey, epoch]);
 
 	const favoriteShown = onToggleFavorite !== undefined && story !== undefined;
 	const favoriteSlot = favoriteShown ? theme.spacing.calc(2) : 0;
@@ -573,19 +600,34 @@ function Template({
 						value={split}
 						min={controlled ? CONTROLS_MIN : theme.spacing.calc(5)}
 						onChange={setSplit}
-						first={<Canvas className={canvas}>{template}</Canvas>}
+						first={
+							<ErrorBoundary
+								key={`canvas-${storyKey}-${canvasKey}`}
+								fallback={(failure) => {
+									onRenderError?.(failure);
+									return (
+										<Canvas className={canvas}>
+											{storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)}
+										</Canvas>
+									);
+								}}
+							>
+								<Canvas className={canvas}>
+									{failure !== undefined
+										? storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)
+										: template}
+								</Canvas>
+							</ErrorBoundary>
+						}
 						second={
 							<Controls
 								theme={theme}
 								args={args}
 								argTypes={argTypes}
-								defaults={(story as { args?: unknown; props?: unknown } | undefined)?.args ?? (story as { props?: unknown } | undefined)?.props}
+								defaults={storyArgs(story as never)}
 								description={(story as { description?: unknown } | undefined)?.description}
 								onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
-								onReset={() => {
-									const described = story as { args?: unknown; props?: unknown } | undefined;
-									setArgs(copyArgs(described?.args ?? described?.props));
-								}}
+								onReset={() => setArgs(copyArgs(storyArgs(story as never)))}
 							/>
 						}
 					/>
