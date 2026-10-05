@@ -22,7 +22,7 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			CornerRadius: new UDim(0, theme.shape.borderRadius),
 		} as WriteableStyle<UICorner>,
 		navBar: {
-			Size: new UDim2(1, 0, 0, theme.spacing.calc(2)),
+			Size: new UDim2(1, 0, 0, theme.spacing.calc(3.5)),
 			Position: new UDim2(0.5, 0, 0, 0),
 			AnchorPoint: new Vector2(0.5, 0),
 			BackgroundColor3: theme.palette.surface.elevated,
@@ -31,15 +31,15 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			ZIndex: 300,
 		} as WriteableStyle<Frame>,
 		storyBar: {
-			Size: new UDim2(1, 0, 0, theme.spacing.calc(1.75)),
+			Size: new UDim2(1, 0, 0, theme.spacing.calc(3)),
 			BackgroundColor3: theme.palette.surface.paper,
 			BorderSizePixel: 0,
 			ClipsDescendants: true,
 			ZIndex: 300,
 		} as WriteableStyle<Frame>,
 		title: {
-			Size: new UDim2(1, -theme.spacing.calc(5), 1, 0),
-			Position: new UDim2(0, theme.spacing.calc(0.5), 0, 0),
+			Size: new UDim2(1, -theme.spacing.calc(7.5), 1, 0),
+			Position: new UDim2(0, theme.spacing.calc(0.75), 0, 0),
 			BackgroundTransparency: 1,
 			TextXAlignment: Enum.TextXAlignment.Left,
 			TextTruncate: Enum.TextTruncate.AtEnd,
@@ -49,8 +49,8 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			ZIndex: 300,
 		} as WriteableStyle<TextLabel>,
 		preview: {
-			Size: new UDim2(1, 0, 1, -theme.spacing.calc(2)),
-			Position: new UDim2(0, 0, 0, theme.spacing.calc(2)),
+			Size: new UDim2(1, 0, 1, -theme.spacing.calc(3.5)),
+			Position: new UDim2(0, 0, 0, theme.spacing.calc(3.5)),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 			ZIndex: 300,

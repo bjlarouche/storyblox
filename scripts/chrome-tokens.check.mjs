@@ -29,4 +29,14 @@ for (const file of walk("src/packages")) {
 	}
 }
 if (hits.length) throw new Error(`stale theme tokens:\n${hits.join("\n")}`);
+
+const styles = readFileSync("src/packages/ui/template/components/Template.styles.ts", "utf8");
+if (!styles.includes("spacing.calc(3.5)")) {
+	throw new Error("navBar/preview must use spacing.calc(3.5) on the 8px grid");
+}
+const template = readFileSync("src/packages/ui/template/components/Template.tsx", "utf8");
+if (!template.includes("spacing.calc(3.5)")) {
+	throw new Error("Template chromeHeight must match navBar (spacing.calc(3.5))");
+}
+
 console.log("chrome tokens ok");
