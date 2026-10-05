@@ -2,7 +2,7 @@ local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("StorybloxI
 local React = TS.import(script, TS.getModule(script, "@rbxts", "react"))
 local ReactRoblox = TS.import(script, TS.getModule(script, "@rbxts", "react-roblox"))
 local Storyblox = TS.import(script, TS.getModule(script, "@rbxts", "storyblox")).Storyblox
-local ErrorBoundary = TS.import(script, TS.getModule(script, "@rbxts", "uiblox")).ErrorBoundary
+local ErrorBoundary = TS.import(script, TS.getModule(script, "@rbxts", "uiblox").out).ErrorBoundary
 
 local function crashed(message)
 	return React.createElement("TextLabel", {
