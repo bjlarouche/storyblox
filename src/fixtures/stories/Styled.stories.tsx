@@ -2,7 +2,7 @@ import React from "@rbxts/react";
 import { Label } from "./Label";
 
 export default {
-	title: "Fixture/Styled",
+	title: "Examples/Styled Labels",
 	component: Label,
 	template: () => (
 		<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>

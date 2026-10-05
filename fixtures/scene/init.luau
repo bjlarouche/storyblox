@@ -22,7 +22,7 @@ end
 
 return {
 	renderer = "native",
-	title = "Fixture/Native Scene",
+	title = "3D/Scene",
 	preview = { kind = "viewport", width = 320, height = 180 },
 	mount = mount,
 }

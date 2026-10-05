@@ -25,7 +25,7 @@ end
 
 return {
 	renderer = "native",
-	title = "Inputs/Button/Native",
+	title = "Examples/Button (Native)",
 	description = "A native button that applies args through update.",
 	args = {
 		label = "Native",
