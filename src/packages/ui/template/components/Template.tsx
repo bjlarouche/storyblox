@@ -327,7 +327,7 @@ function Template({
 				<frame key="NavBar" {...navBar}>
 					{favoriteShown && (
 						<stars.Tooltip
-							text={starred ? "Remove from favorites" : "Add to favorites"}
+							text={starred ? "Remove from starred" : "Add to starred"}
 							className={
 								{
 									Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
@@ -345,8 +345,9 @@ function Template({
 								onClick={onToggleFavorite}
 								className={
 									{
-										Size: new UDim2(1, 0, 1, 0),
-										Position: new UDim2(0, 0, 0, 0),
+										Size: new UDim2(0, theme.spacing.calc(1.25), 0, theme.spacing.calc(1.25)),
+										Position: new UDim2(0.5, 0, 0.5, 0),
+										AnchorPoint: new Vector2(0.5, 0.5),
 									} as WriteableStyle<ImageButton>
 								}
 							/>

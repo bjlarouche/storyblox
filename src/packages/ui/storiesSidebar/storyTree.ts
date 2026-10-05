@@ -18,8 +18,20 @@ export interface StoryBranch {
 
 export interface StoryIcons {
 	folder: string;
-	component: string;
 	story: string;
+	starred: string;
+}
+
+export function sortByTitle<T extends { title: string }>(items: T[]) {
+	for (let i = 1; i < items.size(); i++) {
+		const item = items[i];
+		let j = i;
+		while (j > 0 && items[j - 1].title > item.title) {
+			items[j] = items[j - 1];
+			j -= 1;
+		}
+		items[j] = item;
+	}
 }
 
 function ensureBranch(branches: StoryBranch[], title: string): StoryBranch {
@@ -55,7 +67,7 @@ export function favoriteBranch(stories: StoryNode[], titles: string[], icons: St
 		if (story !== undefined) leaves.push({ title, onClick: story.onClick, icon: icons.story });
 	}
 	if (leaves.size() === 0) return undefined;
-	return { title: "Favorites", leaves, icon: icons.folder };
+	return { title: "Starred", leaves, icon: icons.starred };
 }
 
 export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBranch[] {
@@ -83,10 +95,11 @@ export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBra
 	}
 
 	const paint = (branches: StoryBranch[]) => {
+		sortByTitle(branches);
 		for (const branch of branches) {
-			const nested = branch.branches !== undefined && branch.branches.size() > 0;
-			branch.icon = nested ? icons.folder : icons.component;
-			if (nested && branch.branches !== undefined) paint(branch.branches);
+			branch.icon = icons.folder;
+			sortByTitle(branch.leaves);
+			if (branch.branches !== undefined && branch.branches.size() > 0) paint(branch.branches);
 		}
 	};
 	paint(roots);

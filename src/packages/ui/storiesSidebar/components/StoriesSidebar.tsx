@@ -5,7 +5,7 @@ import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
 import { storyMatches } from "../storySearch";
-import { adoptTree, favoriteBranch, storyBranches } from "../storyTree";
+import { adoptTree, favoriteBranch, sortByTitle, storyBranches } from "../storyTree";
 
 const SEARCH_DELAY = 0.2;
 
@@ -75,6 +75,7 @@ function StoriesSidebar({
 					onClick: () => onClick(story),
 				});
 			});
+			sortByTitle(built.branches);
 			treeRef.current = adoptTree(treeRef.current, built);
 			setTreeRev((n) => n + 1);
 			return;
@@ -89,7 +90,8 @@ function StoriesSidebar({
 			title: story.title,
 			onClick: () => onClick(story),
 		}));
-		const icons = { folder: Icons.OpenBox, component: Icons.ListPrimary, story: Icons.Book };
+		const starredIcon = (Icons as unknown as { Star: typeof Icons.OpenBox }).Star;
+		const icons = { folder: Icons.OpenBox, story: Icons.Book, starred: starredIcon };
 		built.branches = storyBranches(nodes, icons) as Branch[];
 		const favoritesBranch = favoriteBranch(nodes, favorites, icons);
 		if (favoritesBranch !== undefined) built.branches.unshift(favoritesBranch as Branch);
