@@ -2,8 +2,6 @@
 
 # storyblox
 
-> This package is a work in progress.
-
 UI component explorer for roblox-ts developers
 
 <img src=docs/darktheme.png width=60%>
@@ -21,9 +19,39 @@ Release checks and the stop before npm or the Roblox Store are in `RELEASING.md`
 
 ### Installation
 
-Install the package to get started.
+```
+npm install @rbxts/storyblox
+```
 
-`npm install @rbxts/storyblox`
+## Quickstart
+
+1. Mount `<Storyblox />` in a Studio plugin or place UI.
+2. Add `*.stories` modules under `ReplicatedStorage` (or pass `root` / `extension`).
+3. Export `defineStory({ title, args, argTypes, render })` or a compatible story table.
+4. Use the Controls pane to edit args; Favorites and inspector are in the shell chrome.
+
+```tsx
+import React from "@rbxts/react";
+import { Storyblox } from "@rbxts/storyblox";
+
+export function Plugin() {
+	return <Storyblox />;
+}
+```
+
+## Parity checklist
+
+Storyblox is the catalog/test surface for Uiblox capability parity:
+
+- [ ] Story title path unique; args + argTypes stay editable
+- [ ] Controls cover common datatypes (string, number, boolean, enum, color, vector, UDim)
+- [ ] Theme toggle themes chrome and the story
+- [ ] Preview size presets / zoom / fit without breaking mount cleanup
+- [ ] Actions log and interaction cases when a story declares them
+- [ ] Capture helpers for window shots and `stateMatrix` gallery planning
+- [ ] Dev fixtures never ship in the npm tarball (`pack:check`)
+
+Release gates (no publish / Store upload without an explicit version) are in `RELEASING.md`.
 
 ### Example
 
