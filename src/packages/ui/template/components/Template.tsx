@@ -10,12 +10,14 @@ import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from 
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { createActionLog } from "packages/storyActions";
 import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
+import { BoxRect, collectGuiBoxes, guiBox } from "packages/layoutTools";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import { hasStoryControls, storyArgs } from "../storyControls";
 import { storyLabel } from "../storyLabel";
 import { CaseResult, createCaseClock, createSeed, runCase } from "packages/storyCases";
 import { ActionLogContext } from "../actionLogContext";
 import InspectorPane from "./InspectorPane";
+import OutlineOverlay from "./OutlineOverlay";
 import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
@@ -195,6 +197,10 @@ function Template({
 	const [split, setSplit] = useState(10000);
 	const [fit, setFit] = useState(true);
 	const [grid, setGrid] = useState(false);
+	const [outline, setOutline] = useState(false);
+	const [measure, setMeasure] = useState(false);
+	const [outlineBoxes, setOutlineBoxes] = useState<BoxRect[]>([]);
+	const [outlineOrigin, setOutlineOrigin] = useState<BoxRect>();
 	const [zoom, setZoom] = useState(1);
 	const [yaw, setYaw] = useState(0);
 	const [dock, setDock] = useState({ x: 0, y: 0 });
@@ -209,10 +215,16 @@ function Template({
 	const [panelCaseRequest, setPanelCaseRequest] = useState<{ name: string; id: number } | undefined>();
 	const activeCaseRequest = caseRequest ?? panelCaseRequest;
 	const actionLog = useMemo(() => createActionLog(), [storyKey]);
-	const features = (story as { features?: { actions?: boolean; interactions?: boolean; docs?: boolean } } | undefined)?.features;
+	const features = (
+		story as {
+			features?: { actions?: boolean; interactions?: boolean; docs?: boolean; outline?: boolean; measure?: boolean };
+		} | undefined
+	)?.features;
 	const actionsEnabled = features?.actions === true;
 	const interactionsEnabled = features?.interactions === true;
 	const docsEnabled = features?.docs === true;
+	const outlineEnabled = features?.outline === true;
+	const measureEnabled = features?.measure === true;
 	const actionApi = useMemo(
 		() => ({
 			disabled: !actionsEnabled,
@@ -228,6 +240,10 @@ function Template({
 		setArgsStory(storyKey);
 		setArgs(copyArgs(storyArgs(story as never)));
 		setYaw(0);
+		setOutline(false);
+		setMeasure(false);
+		setOutlineBoxes([]);
+		setOutlineOrigin(undefined);
 		setCaseResults([]);
 		setCaseRunning(undefined);
 		setLastCase(undefined);
@@ -259,6 +275,22 @@ function Template({
 	useEffect(() => {
 		if (remount > 0) setEpoch((current) => current + 1);
 	}, [remount]);
+
+	useEffect(() => {
+		if (!outline && !measure) {
+			setOutlineBoxes([]);
+			setOutlineOrigin(undefined);
+			return;
+		}
+		task.defer(() => {
+			const root = mountFrame.current;
+			if (root === undefined) return;
+			const boxes = collectGuiBoxes(root);
+			if (boxes.size() > 0) boxes.shift();
+			setOutlineOrigin(guiBox(root));
+			setOutlineBoxes(boxes.filter((box) => box.name !== "OutlineOverlay"));
+		});
+	}, [outline, measure, storyKey, epoch, args]);
 
 	useEffect(() => {
 		if (activeCaseRequest === undefined || story === undefined) return;
@@ -392,6 +424,9 @@ function Template({
 					) : (
 						(parsed.element as React.Element)
 					)}
+					{(outline || measure) && outlineOrigin !== undefined ? (
+						<OutlineOverlay theme={theme} boxes={outlineBoxes} measure={measure} origin={outlineOrigin} scale={scale} />
+					) : undefined}
 				</frame>,
 			);
 			themeMounted.current = previewTheme;
@@ -407,7 +442,7 @@ function Template({
 			setFailure(error);
 			onRenderError?.(error);
 		}
-	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, zoom, previewTheme, yaw]);
+	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, outline, measure, outlineBoxes, outlineOrigin, zoom, previewTheme, yaw]);
 
 	useEffect(() => {
 		setCanvasKey((current) => current + 1);
@@ -543,6 +578,48 @@ function Template({
 								TextColor3={theme.palette.primary.main}
 								Event={{ MouseButton1Click: () => setFit((current) => !current) }}
 							/>
+							{outlineEnabled && (
+								<textbutton
+									key="Outline"
+									Text={outline ? "Outline on" : "Outline"}
+									LayoutOrder={6}
+									AutomaticSize={Enum.AutomaticSize.X}
+									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.palette.primary.main}
+									TextTransparency={outline ? 0 : 0.45}
+									Event={{
+										MouseButton1Click: () =>
+											setOutline((current) => {
+												if (current) setMeasure(false);
+												return !current;
+											}),
+									}}
+								/>
+							)}
+							{measureEnabled && (
+								<textbutton
+									key="Measure"
+									Text={measure ? "Measure on" : "Measure"}
+									LayoutOrder={7}
+									AutomaticSize={Enum.AutomaticSize.X}
+									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.palette.primary.main}
+									TextTransparency={measure ? 0 : 0.45}
+									Event={{
+										MouseButton1Click: () =>
+											setMeasure((current) => {
+												if (!current) setOutline(true);
+												return !current;
+											}),
+									}}
+								/>
+							)}
 							<IconButton
 								id="Remount"
 								icon={REMOUNT_ICON}
@@ -551,7 +628,7 @@ function Template({
 								className={
 									{
 										Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
-										LayoutOrder: 6,
+										LayoutOrder: 8,
 									} as WriteableStyle<ImageButton>
 								}
 							/>
@@ -562,7 +639,7 @@ function Template({
 										{
 											Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
 											AutomaticSize: Enum.AutomaticSize.None,
-											LayoutOrder: 7,
+											LayoutOrder: 9,
 										} as WriteableStyle<Frame>
 									}
 								>
@@ -587,7 +664,7 @@ function Template({
 								className={
 									{
 										Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
-										LayoutOrder: 8,
+										LayoutOrder: 10,
 									} as WriteableStyle<ImageButton>
 								}
 							/>
