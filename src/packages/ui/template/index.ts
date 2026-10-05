@@ -11,3 +11,5 @@ export { default as OutlineOverlay } from "./components/OutlineOverlay";
 export { OutlineOverlayProps } from "./components/OutlineOverlay";
 export { default as A11yPanel } from "./components/A11yPanel";
 export { A11yPanelProps } from "./components/A11yPanel";
+export { default as DocsPanel } from "./components/DocsPanel";
+export { DocsPanelProps } from "./components/DocsPanel";
