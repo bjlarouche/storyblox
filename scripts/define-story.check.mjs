@@ -10,7 +10,9 @@ String.prototype.sub = function sub(start, finish) {
 	return this.slice(from, to);
 };
 
-const { defineStory, controls, claimStoryId, releaseStoryId } = await import("../src/packages/defineStory.ts");
+const { defineStory, controls, claimStoryId, releaseStoryId, resolveStoryTools } = await import(
+	"../src/packages/defineStory.ts"
+);
 const { normalizeExport } = await import("../src/packages/ui/storyblox/normalizeStory.ts");
 
 const descriptor = {
@@ -101,5 +103,43 @@ if (claimStoryId(seen, "inputs/button/default", "Examples/Button/Other")) throw 
 if (!claimStoryId(seen, "inputs/button/default", "Examples/Button")) throw new Error("same title");
 const released = releaseStoryId(seen, "Examples/Button");
 if (!claimStoryId(released, "inputs/button/default", "Examples/Button/Other")) throw new Error("released id");
+
+if (resolveStoryTools(undefined, { orbit: () => {}, resetCamera: () => {} }).length !== 0) {
+	throw new Error("empty tools");
+}
+let orbits = 0;
+let resets = 0;
+const hostTools = resolveStoryTools(
+	(host) => [
+		{ id: "orbit", label: "Orbit", onClick: () => host.orbit() },
+		{ id: "cam-reset", label: "Cam reset", onClick: () => host.resetCamera() },
+	],
+	{
+		orbit: () => {
+			orbits += 1;
+		},
+		resetCamera: () => {
+			resets += 1;
+		},
+	},
+);
+if (hostTools.length !== 2 || hostTools[0].label !== "Orbit") throw new Error("host tools");
+hostTools[0].onClick();
+hostTools[1].onClick();
+if (orbits !== 1 || resets !== 1) throw new Error("host tool clicks");
+
+const withTools = normalizeExport(
+	{
+		default: {
+			title: "Fixture/Viewport Host",
+			preview: { kind: "viewport" },
+			tools: (host) => [{ id: "orbit", label: "Orbit", onClick: () => host.orbit() }],
+			render: () => "ok",
+		},
+	},
+	"ViewportHost.stories",
+	".stories",
+);
+if (withTools.kind !== "react" || typeof withTools.story.tools !== "function") throw new Error("tools passthrough");
 
 console.log("define story ok");

@@ -30,6 +30,13 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			ClipsDescendants: true,
 			ZIndex: 300,
 		} as WriteableStyle<Frame>,
+		storyBar: {
+			Size: new UDim2(1, 0, 0, theme.spacing.calc(1.75)),
+			BackgroundColor3: theme.options.constants.colors.backgroundUIMuted,
+			BorderSizePixel: 0,
+			ClipsDescendants: true,
+			ZIndex: 300,
+		} as WriteableStyle<Frame>,
 		title: {
 			Size: new UDim2(1, -theme.spacing.calc(5), 1, 0),
 			Position: new UDim2(0, theme.spacing.calc(0.5), 0, 0),

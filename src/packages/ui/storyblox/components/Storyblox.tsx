@@ -102,6 +102,7 @@ function storyFromExport(normalized: NormalizedStory): Story | undefined {
 		argTypes: normalized.argTypes,
 		props: normalized.args,
 		preview: normalized.preview,
+		tools: normalized.tools,
 		cases: normalized.cases,
 		description: normalized.description,
 		nativeSession: session,
