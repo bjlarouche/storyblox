@@ -16,5 +16,6 @@ end
 return {
 	renderer = "native",
 	title = "Basics/Native Label",
+	tags = { "dev", "native" },
 	mount = mount,
 }
