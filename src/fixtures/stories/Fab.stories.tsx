@@ -4,6 +4,7 @@ import { Fab } from "./kitBreadth";
 
 interface Args {
 	size: "small" | "medium" | "large";
+	label: string;
 	loading: boolean;
 	disabled: boolean;
 	reducedMotion: boolean;
@@ -11,9 +12,10 @@ interface Args {
 
 export default {
 	title: "Components/Fab",
-	args: { size: "medium", loading: false, disabled: false, reducedMotion: false },
+	args: { size: "medium", label: "", loading: false, disabled: false, reducedMotion: false },
 	argTypes: {
 		size: { type: "enum", options: ["small", "medium", "large"] },
+		label: { type: "string" },
 		loading: { type: "boolean" },
 		disabled: { type: "boolean" },
 		reducedMotion: { type: "boolean" },
@@ -21,6 +23,7 @@ export default {
 	render: (args: Args) => (
 		<Fab
 			icon={Icons.Save}
+			label={args.label === "" ? undefined : args.label}
 			size={args.size}
 			loading={args.loading}
 			disabled={args.disabled}
