@@ -12,6 +12,8 @@ import {
 	Icon,
 	IconButton,
 	Typography,
+	VirtualList,
+	VirtualListHandle,
 	WriteableStyle,
 	useTheme,
 } from "@rbxts/uiblox";
@@ -49,7 +51,6 @@ function StoriesSidebar({
 		filterInput,
 		storiesTree,
 		resultsList,
-		resultsLayout,
 		resultRow,
 		resultRowActive,
 		resultIcon,
@@ -62,6 +63,7 @@ function StoriesSidebar({
 	} = useStoriesSidebarStyles();
 	const { theme } = useTheme();
 	const sidebar = useRef<Frame>();
+	const resultsRef = useRef<VirtualListHandle>();
 	const searchingRef = useRef(false);
 	const hitsRef = useRef<StorySearchHit[]>([]);
 	const activeRef = useRef(0);
@@ -131,6 +133,10 @@ function StoriesSidebar({
 		setActive(0);
 		setHover(undefined);
 	}, [query]);
+
+	useEffect(() => {
+		if (searching) resultsRef.current?.ensureVisible(active);
+	}, [active, searching]);
 
 	const openHit = (hit: StorySearchHit) => {
 		const story = storiesRef.current.find((item) => item.title === hit.title);
@@ -244,25 +250,27 @@ function StoriesSidebar({
 				)}
 
 				{searching && hits.size() > 0 && (
-					<scrollingframe
+					<VirtualList
 						key="Results"
-						{...resultsList}
-						CanvasSize={new UDim2(0, 0, 0, hits.size() * (theme.spacing.calc(2) + theme.padding.calc(2)))}
-					>
-						<uilistlayout {...resultsLayout} />
-						{hits.map((hit, index) => {
+						className={resultsList}
+						items={hits}
+						getKey={(hit) => hit.title}
+						itemHeight={theme.spacing.calc(2) + theme.padding.calc(2)}
+						listRef={resultsRef}
+						renderItem={(hit, index) => {
 							const emphasized = index === active || index === hover || hit.title === selected;
 							const rowStyle = {
 								...resultRow,
 								...(emphasized ? resultRowActive : {}),
-								LayoutOrder: index,
 							} as WriteableStyle<TextButton>;
 							return (
 								<textbutton
-									key={hit.title}
 									{...rowStyle}
 									Event={{
-										MouseButton1Click: () => openHit(hit),
+										MouseButton1Click: () => {
+											if (resultsRef.current?.suppressClick()) return;
+											openHit(hit);
+										},
 										MouseEnter: () => setHover(index),
 										MouseLeave: () => setHover(undefined),
 									}}
@@ -290,8 +298,8 @@ function StoriesSidebar({
 									)}
 								</textbutton>
 							);
-						})}
-					</scrollingframe>
+						}}
+					/>
 				)}
 			</frame>
 

@@ -44,15 +44,10 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ClipsDescendants: true,
 			ZIndex: 5100,
 		} as WriteableStyle<ScrollingFrame>,
-		resultsLayout: {
-			FillDirection: Enum.FillDirection.Vertical,
-			HorizontalAlignment: Enum.HorizontalAlignment.Center,
-			VerticalAlignment: Enum.VerticalAlignment.Top,
-			SortOrder: Enum.SortOrder.LayoutOrder,
-			Padding: new UDim(0, 0),
-		} as WriteableStyle<UIListLayout>,
 		resultRow: {
 			Size: new UDim2(1, -theme.padding.calc(2), 0, rowHeight),
+			Position: UDim2.fromScale(0.5, 0),
+			AnchorPoint: new Vector2(0.5, 0),
 			BackgroundColor3: theme.palette.primary.main,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
