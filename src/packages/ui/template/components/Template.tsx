@@ -501,39 +501,22 @@ function Template({
 							PaddingLeft={new UDim(0, theme.spacing.calc(0.5))}
 							PaddingRight={new UDim(0, theme.spacing.calc(0.5))}
 						/>
-						{storyTools.map((tool, index) =>
-							tool.icon !== undefined && tool.icon.size() > 0 ? (
-								<IconButton
-									id={tool.id}
-									key={tool.id}
-									icon={tool.icon as Icons}
-									tint={theme.options.constants.colors.textMuted}
-									onClick={tool.onClick}
-									className={
-										{
-											Size: new UDim2(0, theme.spacing.calc(1.25), 0, theme.spacing.calc(1.25)),
-											LayoutOrder: index,
-											BackgroundTransparency: tool.active ? 0.85 : 1,
-										} as WriteableStyle<ImageButton>
-									}
-								/>
-							) : (
-								<textbutton
-									key={tool.id}
-									Text={tool.label}
-									LayoutOrder={index}
-									AutomaticSize={Enum.AutomaticSize.X}
-									Size={new UDim2(0, 0, 0, theme.spacing.calc(1.25))}
-									BackgroundTransparency={1}
-									Font={theme.typography.fontFamilies.semibold}
-									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.options.constants.colors.textMuted}
-									TextTransparency={tool.active === false ? 0.45 : 0}
-									Selectable={true}
-									Event={{ MouseButton1Click: tool.onClick }}
-								/>
-							),
-						)}
+						{storyTools.map((tool, index) => (
+							<textbutton
+								key={tool.id}
+								Text={tool.label}
+								LayoutOrder={index}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.25))}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.options.constants.colors.textMuted}
+								TextTransparency={tool.active === false ? 0.45 : 0}
+								Selectable={true}
+								Event={{ MouseButton1Click: tool.onClick }}
+							/>
+						))}
 					</frame>
 				)}
 

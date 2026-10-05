@@ -131,7 +131,7 @@ if (orbits !== 1 || resets !== 1) throw new Error("host tool clicks");
 const withTools = normalizeExport(
 	{
 		default: {
-			title: "Fixture/Viewport Host",
+			title: "3D/Camera",
 			preview: { kind: "viewport" },
 			tools: (host) => [{ id: "orbit", label: "Orbit", onClick: () => host.orbit() }],
 			render: () => "ok",
