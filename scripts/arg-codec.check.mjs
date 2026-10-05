@@ -119,6 +119,32 @@ globalThis.NumberSequence = class NumberSequence {
 	}
 };
 
+globalThis.BrickColor = class BrickColor {
+	constructor(key) {
+		const byName = {
+			"Bright red": 21,
+			"Bright blue": 23,
+			"Medium stone grey": 194,
+		};
+		const byNumber = {
+			21: "Bright red",
+			23: "Bright blue",
+			194: "Medium stone grey",
+		};
+		if (typeof key === "number" && key in byNumber) {
+			this.Name = byNumber[key];
+			this.Number = key;
+		} else if (typeof key === "string" && key in byName) {
+			this.Name = key;
+			this.Number = byName[key];
+		} else {
+			this.Name = "Medium stone grey";
+			this.Number = 194;
+		}
+		kinds.set(this, "BrickColor");
+	}
+};
+
 String.prototype.size = function size() {
 	return this.length;
 };
@@ -223,5 +249,13 @@ const fade = new NumberSequence([
 ]);
 const decodedFade = roundTrip(fade);
 if (decodedFade.Keypoints.length !== 2 || decodedFade.Keypoints[1].Value !== 1) throw new Error("numberSequence");
+
+const brick = new BrickColor("Bright red");
+const decodedBrick = roundTrip(brick);
+if (decodedBrick.Name !== "Bright red" || decodedBrick.Number !== 21) throw new Error("brickColor");
+const paintedBrick = parseDatatype({ type: "brickColor" }, formatDatatype(brick));
+if (!paintedBrick.ok || paintedBrick.value.Name !== "Bright red") throw new Error("brickColor editor");
+const badBrick = parseDatatype({ type: "brickColor" }, "Nope");
+if (badBrick.ok || badBrick.reason !== "brickColor") throw new Error("brickColor editor reject");
 
 console.log("arg codec ok");
