@@ -7,9 +7,10 @@ export interface OutlineOverlayProps {
 	boxes: BoxRect[];
 	measure?: boolean;
 	origin?: BoxRect;
+	scale?: number;
 }
 
-function OutlineOverlay({ theme, boxes, measure, origin }: OutlineOverlayProps) {
+function OutlineOverlay({ theme, boxes, measure, origin, scale = 1 }: OutlineOverlayProps) {
 	const stroke = theme.palette.primary.main;
 	const labelColor = theme.palette.text.primary;
 	const rows = new Array<React.Element>();
@@ -18,10 +19,10 @@ function OutlineOverlay({ theme, boxes, measure, origin }: OutlineOverlayProps) 
 		const box =
 			origin !== undefined
 				? {
-						x: raw.x - origin.x,
-						y: raw.y - origin.y,
-						width: raw.width,
-						height: raw.height,
+						x: (raw.x - origin.x) / scale,
+						y: (raw.y - origin.y) / scale,
+						width: raw.width / scale,
+						height: raw.height / scale,
 						name: raw.name,
 						className: raw.className,
 					}
