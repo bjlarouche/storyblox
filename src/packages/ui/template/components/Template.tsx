@@ -124,6 +124,8 @@ export interface TemplateProps {
 	story?: Story;
 	primaryThemeEnabled?: boolean;
 	onToggleTheme?: () => void;
+	inspectorOpen?: boolean;
+	onToggleInspector?: () => void;
 	starred?: boolean;
 	onToggleFavorite?: () => void;
 	remount?: number;
@@ -136,6 +138,8 @@ function Template({
 	story,
 	primaryThemeEnabled,
 	onToggleTheme,
+	inspectorOpen = true,
+	onToggleInspector,
 	starred,
 	onToggleFavorite,
 	remount = 0,
@@ -466,6 +470,30 @@ function Template({
 									} as WriteableStyle<ImageButton>
 								}
 							/>
+							{onToggleInspector !== undefined && (
+								<stars.Tooltip
+									text={inspectorOpen ? "Hide inspector" : "Show inspector"}
+									className={
+										{
+											Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+											AutomaticSize: Enum.AutomaticSize.None,
+											LayoutOrder: 7,
+										} as WriteableStyle<Frame>
+									}
+								>
+									<IconButton
+										id="Inspector"
+										icon={Icons.NewspaperVariant1}
+										tint={theme.options.constants.colors.textMuted}
+										onClick={onToggleInspector}
+										className={
+											{
+												Size: new UDim2(1, 0, 1, 0),
+											} as WriteableStyle<ImageButton>
+										}
+									/>
+								</stars.Tooltip>
+							)}
 							<IconButton
 								id="Theme"
 								icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
@@ -474,7 +502,7 @@ function Template({
 								className={
 									{
 										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
-										LayoutOrder: 7,
+										LayoutOrder: 8,
 									} as WriteableStyle<ImageButton>
 								}
 							/>
