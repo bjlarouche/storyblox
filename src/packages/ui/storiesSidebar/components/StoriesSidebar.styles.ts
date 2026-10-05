@@ -2,9 +2,11 @@ import { createStyles, makeStyles, Theme, WriteableStyle } from "@rbxts/uiblox";
 
 const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 	const filterOffset = theme.spacing.calc(3) + theme.padding.calc(2);
-	const storiesOffset = filterOffset + theme.spacing.calc(2) + theme.padding.calc(2);
+	const filterHeight = theme.spacing.calc(2) + theme.padding.calc(1);
+	const storiesOffset = filterOffset + filterHeight + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(4) + theme.padding.calc(2);
 	const light = theme.type === "Light";
+	const rowHeight = theme.spacing.calc(2) + theme.padding.calc(2);
 
 	return createStyles({
 		logo: {
@@ -21,6 +23,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 		filterInput: {
 			Position: new UDim2(0.5, 0, 0, filterOffset),
 			AnchorPoint: new Vector2(0.5, 0),
+			Size: new UDim2(1, -theme.padding.calc(4), 0, filterHeight),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 		} as WriteableStyle<Frame>,
@@ -32,6 +35,70 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ClipsDescendants: true,
 			ZIndex: 5100,
 		} as WriteableStyle<Frame>,
+		resultsList: {
+			Size: new UDim2(1, 0, 1, 0),
+			BackgroundTransparency: 1,
+			BorderSizePixel: 0,
+			ScrollBarThickness: theme.spacing.calc(0.5),
+			ScrollBarImageTransparency: 0.75,
+			ClipsDescendants: true,
+			ZIndex: 5100,
+		} as WriteableStyle<ScrollingFrame>,
+		resultsLayout: {
+			FillDirection: Enum.FillDirection.Vertical,
+			HorizontalAlignment: Enum.HorizontalAlignment.Center,
+			VerticalAlignment: Enum.VerticalAlignment.Top,
+			SortOrder: Enum.SortOrder.LayoutOrder,
+			Padding: new UDim(0, 0),
+		} as WriteableStyle<UIListLayout>,
+		resultRow: {
+			Size: new UDim2(1, -theme.padding.calc(2), 0, rowHeight),
+			BackgroundColor3: theme.palette.secondary.main,
+			BackgroundTransparency: 1,
+			BorderSizePixel: 0,
+			AutoButtonColor: false,
+			Text: "",
+			ZIndex: 5200,
+		} as WriteableStyle<TextButton>,
+		resultRowActive: {
+			BackgroundTransparency: light ? 0.92 : 0.85,
+		} as WriteableStyle<TextButton>,
+		resultIcon: {
+			Position: new UDim2(0, theme.padding.calc(2), 0.5, 0),
+			AnchorPoint: new Vector2(0, 0.5),
+			ZIndex: 5210,
+		} as WriteableStyle<ImageLabel>,
+		resultLeaf: {
+			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(1)),
+			Position: new UDim2(0, theme.spacing.calc(1.5) + theme.padding.calc(3), 0, theme.padding.calc(1)),
+			BackgroundTransparency: 1,
+			BorderSizePixel: 0,
+			TextXAlignment: Enum.TextXAlignment.Left,
+			TextTruncate: Enum.TextTruncate.AtEnd,
+			ZIndex: 5210,
+		} as WriteableStyle<TextLabel>,
+		resultPath: {
+			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(1)),
+			Position: new UDim2(
+				0,
+				theme.spacing.calc(1.5) + theme.padding.calc(3),
+				0,
+				theme.padding.calc(1) + theme.spacing.calc(1),
+			),
+			BackgroundTransparency: 1,
+			BorderSizePixel: 0,
+			TextXAlignment: Enum.TextXAlignment.Left,
+			TextTruncate: Enum.TextTruncate.AtEnd,
+			ZIndex: 5210,
+		} as WriteableStyle<TextLabel>,
+		emptyLabel: {
+			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(1)),
+			Position: new UDim2(0, theme.padding.calc(2), 0, theme.padding.calc(2)),
+			BackgroundTransparency: 1,
+			BorderSizePixel: 0,
+			TextXAlignment: Enum.TextXAlignment.Left,
+			ZIndex: 5100,
+		} as WriteableStyle<TextLabel>,
 		divider: {
 			Position: new UDim2(0.5, 0, 1, -(moreOffset + theme.padding.calc(1))),
 			AnchorPoint: new Vector2(0.5, 0),
