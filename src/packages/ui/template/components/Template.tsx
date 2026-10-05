@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "@rbxts/react";
+import React, { useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { Story } from "interfaces";
 import { ErrorBoundary, IconButton, Icons, Shadow, Theme, ThemeProvider, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
@@ -8,11 +8,13 @@ import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
 import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
+import { createActionLog } from "packages/storyActions";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import { hasStoryControls, storyArgs } from "../storyControls";
 import { storyLabel } from "../storyLabel";
 import { CaseResult, createCaseClock, createSeed, runCase } from "packages/storyCases";
-import Controls from "./Controls";
+import { ActionLogContext } from "../actionLogContext";
+import InspectorPane from "./InspectorPane";
 import useTemplateStyles from "./Template.styles";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
@@ -188,6 +190,20 @@ function Template({
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
 	const [args, setArgs] = useState<ArgValues>({});
+	const [actionVersion, setActionVersion] = useState(0);
+	const actionLog = useMemo(() => createActionLog(), [storyKey]);
+	const actionsEnabled = (story as { features?: { actions?: boolean } } | undefined)?.features?.actions === true;
+	const actionApi = useMemo(
+		() => ({
+			disabled: !actionsEnabled,
+			record: (name: string, ...values: unknown[]) => {
+				if (!actionsEnabled) return;
+				actionLog.record(name, ...values);
+				setActionVersion((current) => current + 1);
+			},
+		}),
+		[actionLog, actionsEnabled],
+	);
 	if (storyKey !== argsStory) {
 		setArgsStory(storyKey);
 		setArgs(copyArgs(storyArgs(story as never)));
@@ -614,15 +630,18 @@ function Template({
 								}}
 							>
 								<Canvas className={canvas}>
-									{failure !== undefined
-										? storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)
-										: template}
+									<ActionLogContext.Provider value={actionApi}>
+										{failure !== undefined
+											? storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)
+											: template}
+									</ActionLogContext.Provider>
 								</Canvas>
 							</ErrorBoundary>
 						}
 						second={
 							<ThemeProvider theme={{ ...theme, density: "compact" }}>
-								<Controls
+								<InspectorPane
+									key={`inspector-${actionVersion}`}
 									theme={{ ...theme, density: "compact" }}
 									args={args}
 									argTypes={argTypes}
@@ -630,6 +649,17 @@ function Template({
 									description={(story as { description?: unknown } | undefined)?.description}
 									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
 									onReset={() => setArgs(copyArgs(storyArgs(story as never)))}
+									actions={
+										actionsEnabled
+											? {
+													events: actionLog.events,
+													onReset: () => {
+														actionLog.reset();
+														setActionVersion((current) => current + 1);
+													},
+												}
+											: undefined
+									}
 								/>
 							</ThemeProvider>
 						}
