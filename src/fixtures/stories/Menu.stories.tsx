@@ -4,6 +4,7 @@ import { Menu, useArg } from "./kitBreadth";
 interface Args {
 	open: boolean;
 	empty: boolean;
+	dense: boolean;
 }
 
 function MenuStory(args: Args) {
@@ -20,6 +21,7 @@ function MenuStory(args: Args) {
 			<Menu
 				anchor={anchor}
 				open={open}
+				dense={args.dense}
 				items={
 					args.empty
 						? []
@@ -38,10 +40,11 @@ function MenuStory(args: Args) {
 
 export default {
 	title: "Components/Menu",
-	args: { open: false, empty: false },
+	args: { open: false, empty: false, dense: false },
 	argTypes: {
 		open: { type: "boolean" },
 		empty: { type: "boolean" },
+		dense: { type: "boolean" },
 	},
 	render: (args: Args) => <MenuStory {...args} />,
 };
