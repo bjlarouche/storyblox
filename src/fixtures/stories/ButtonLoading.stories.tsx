@@ -55,7 +55,7 @@ export default {
 		text: "Save",
 		variant: "contained",
 		size: "medium",
-		loading: false,
+		loading: true,
 		loadingLabel: "",
 		loadingPosition: "center",
 		reducedMotion: false,
