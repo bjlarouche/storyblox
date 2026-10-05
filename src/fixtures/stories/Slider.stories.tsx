@@ -7,6 +7,7 @@ interface Args {
 	max: number;
 	step: number;
 	disabled: boolean;
+	marks: boolean;
 }
 
 function SliderStory(args: Args) {
@@ -18,6 +19,7 @@ function SliderStory(args: Args) {
 			max={args.max}
 			step={args.step}
 			disabled={args.disabled}
+			marks={args.marks}
 			onChange={setValue}
 		/>
 	);
@@ -25,13 +27,14 @@ function SliderStory(args: Args) {
 
 export default {
 	title: "Components/Slider",
-	args: { value: 40, min: 0, max: 100, step: 5, disabled: false },
+	args: { value: 40, min: 0, max: 100, step: 5, disabled: false, marks: true },
 	argTypes: {
 		value: { type: "number", control: "slider", min: 0, max: 100, step: 5 },
 		min: { type: "number" },
 		max: { type: "number" },
 		step: { type: "number" },
 		disabled: { type: "boolean" },
+		marks: { type: "boolean" },
 	},
 	render: (args: Args) => <SliderStory {...args} />,
 };

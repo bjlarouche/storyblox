@@ -43,6 +43,7 @@ interface SliderProps {
 	max: number;
 	step?: number;
 	disabled?: boolean;
+	marks?: boolean | ReadonlyArray<number>;
 }
 
 interface SplitProps {
