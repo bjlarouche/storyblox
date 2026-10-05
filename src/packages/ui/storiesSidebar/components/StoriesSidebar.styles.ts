@@ -3,7 +3,8 @@ import { createStyles, makeStyles, Theme, WriteableStyle } from "@rbxts/uiblox";
 const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 	const filterOffset = theme.spacing.calc(4) + theme.padding.calc(2);
 	const filterHeight = theme.spacing.calc(3) + theme.padding.calc(1);
-	const storiesOffset = filterOffset + filterHeight + theme.padding.calc(2);
+	const tagOffset = filterOffset + filterHeight + theme.padding.calc(1);
+	const storiesOffset = tagOffset + filterHeight + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(5) + theme.padding.calc(2);
 	const light = theme.type === "Light";
 	const rowHeight = theme.spacing.calc(3);
@@ -22,6 +23,13 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 		} as WriteableStyle<ImageLabel>,
 		filterInput: {
 			Position: new UDim2(0.5, 0, 0, filterOffset),
+			AnchorPoint: new Vector2(0.5, 0),
+			Size: new UDim2(1, -theme.padding.calc(4), 0, filterHeight),
+			BackgroundTransparency: 1,
+			BorderSizePixel: 0,
+		} as WriteableStyle<Frame>,
+		tagFilters: {
+			Position: new UDim2(0.5, 0, 0, tagOffset),
 			AnchorPoint: new Vector2(0.5, 0),
 			Size: new UDim2(1, -theme.padding.calc(4), 0, filterHeight),
 			BackgroundTransparency: 1,
