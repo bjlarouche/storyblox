@@ -1,10 +1,12 @@
 import React from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
 import { CircularProgress, LinearProgress } from "./kit";
 
 interface Args {
 	kind: "linear" | "circular";
 	value: number;
 	indeterminate: boolean;
+	tone: "primary" | "text" | "inverse";
 	reducedMotion: boolean;
 	disabled: boolean;
 	size: number;
@@ -24,12 +26,45 @@ function fillScale(root: Instance | undefined) {
 	return found;
 }
 
+function ProgressStory(args: Args) {
+	const { theme } = useTheme();
+	const color =
+		args.tone === "text"
+			? theme.palette.text.primary
+			: args.tone === "inverse"
+				? theme.palette.text.inverse
+				: theme.palette.primary.main;
+
+	return (
+		<frame key="ProgressHost" Size={new UDim2(0, 220, 0, 72)} BackgroundTransparency={1}>
+			{args.kind === "circular" ? (
+				<CircularProgress
+					value={args.indeterminate ? undefined : args.value}
+					size={args.size}
+					color={color}
+					reducedMotion={args.reducedMotion}
+					disabled={args.disabled}
+				/>
+			) : (
+				<LinearProgress
+					value={args.value}
+					indeterminate={args.indeterminate}
+					reducedMotion={args.reducedMotion}
+					disabled={args.disabled}
+					className={{ Size: new UDim2(1, 0, 0, 8) }}
+				/>
+			)}
+		</frame>
+	);
+}
+
 export default {
 	title: "Feedback/Progress",
 	args: {
-		kind: "linear",
+		kind: "circular",
 		value: 0.4,
-		indeterminate: false,
+		indeterminate: true,
+		tone: "primary",
 		reducedMotion: false,
 		disabled: false,
 		size: 36,
@@ -38,6 +73,7 @@ export default {
 		kind: { type: "enum", options: ["linear", "circular"] },
 		value: { type: "number", control: "slider", min: 0, max: 1, step: 0.05 },
 		indeterminate: { type: "boolean" },
+		tone: { type: "enum", options: ["primary", "text", "inverse"] },
 		reducedMotion: { type: "boolean" },
 		disabled: { type: "boolean" },
 		size: { type: "number", control: "slider", min: 16, max: 72, step: 4 },
@@ -81,24 +117,5 @@ export default {
 			env.expect(position === 0, "reduced motion holds the bar");
 		},
 	},
-	render: (args: Args) => (
-		<frame key="ProgressHost" Size={new UDim2(0, 220, 0, 48)} BackgroundTransparency={1}>
-			{args.kind === "circular" ? (
-				<CircularProgress
-					value={args.indeterminate ? undefined : args.value}
-					size={args.size}
-					reducedMotion={args.reducedMotion}
-					disabled={args.disabled}
-				/>
-			) : (
-				<LinearProgress
-					value={args.value}
-					indeterminate={args.indeterminate}
-					reducedMotion={args.reducedMotion}
-					disabled={args.disabled}
-					className={{ Size: new UDim2(1, 0, 0, 8) }}
-				/>
-			)}
-		</frame>
-	),
+	render: (args: Args) => <ProgressStory {...args} />,
 };
