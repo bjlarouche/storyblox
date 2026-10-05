@@ -10,6 +10,7 @@ const options = [
 interface Args {
 	value: string;
 	orientation: "horizontal" | "vertical";
+	centered: boolean;
 }
 
 function TabsStory(args: Args) {
@@ -20,17 +21,18 @@ function TabsStory(args: Args) {
 			BackgroundTransparency={1}
 			BorderSizePixel={0}
 		>
-			<Tabs value={value} options={options} orientation={args.orientation} onChange={setValue} />
+			<Tabs value={value} options={options} orientation={args.orientation} centered={args.centered} onChange={setValue} />
 		</frame>
 	);
 }
 
 export default {
 	title: "Components/Tabs",
-	args: { value: "left", orientation: "horizontal" },
+	args: { value: "left", orientation: "horizontal", centered: false },
 	argTypes: {
 		value: { type: "enum", options: ["left", "center", "right"], control: "radio" },
 		orientation: { type: "enum", options: ["horizontal", "vertical"] },
+		centered: { type: "boolean" },
 	},
 	render: (args: Args) => <TabsStory {...args} />,
 };

@@ -15,6 +15,7 @@ interface RadioProps {
 	row?: boolean;
 	size?: "small" | "medium" | "large";
 	orientation?: "horizontal" | "vertical";
+	centered?: boolean;
 	searchable?: boolean;
 	defaultOpen?: boolean;
 	defaultQuery?: string;
