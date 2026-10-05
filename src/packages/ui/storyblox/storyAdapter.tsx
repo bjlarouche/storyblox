@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { DarkTheme } from "@rbxts/uiblox";
 import { Workspace } from "@rbxts/services";
 import { Story } from "interfaces";
 import { mountNative } from "./nativeMount";
@@ -43,7 +44,7 @@ export function storyFromExport(normalized: NormalizedStory, options?: StoryAdap
 						Size={new UDim2(1, 0, 0, 48)}
 						TextWrapped={true}
 						BackgroundTransparency={1}
-						TextColor3={new Color3(1, 0.7, 0.3)}
+						TextColor3={DarkTheme.palette.status.warning.main}
 					/>,
 					() => {},
 				] as LuaTuple<[ReturnType<Story["template"]>, () => void]>;
@@ -104,7 +105,7 @@ export function storyFromExport(normalized: NormalizedStory, options?: StoryAdap
 							Position={new UDim2(0, 0, 1, -32)}
 							TextWrapped={true}
 							BackgroundTransparency={1}
-							TextColor3={new Color3(1, 0.7, 0.3)}
+							TextColor3={DarkTheme.palette.status.warning.main}
 						/>
 					) : undefined}
 				</frame>
