@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		canvas: {
 			Size: new UDim2(1, 0, 1, 0),
-			BackgroundColor3: theme.options.constants.colors.backgroundUIMuted,
+			BackgroundColor3: theme.palette.surface.paper,
 			BorderSizePixel: 0,
 		} as WriteableStyle<Frame>,
 		ball: {

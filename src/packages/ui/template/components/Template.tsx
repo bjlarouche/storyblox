@@ -23,6 +23,7 @@ function HostScene(props: { yaw: number; onOrbit: (dx: number) => void; children
 	const frame = useRef<ViewportFrame>();
 	const camera = useRef<Camera>();
 	const drag = useRef<number | undefined>(undefined);
+	const { theme } = useTheme();
 	const offset = orbitOffset(props.yaw, CAMERA_PITCH, CAMERA_DISTANCE);
 	useEffect(() => {
 		const current = frame.current;
