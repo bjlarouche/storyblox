@@ -36,6 +36,7 @@ interface SwitchProps {
 	disabled?: boolean;
 	label?: string;
 	size?: "small" | "medium" | "large";
+	color?: "primary" | "accent";
 }
 
 interface SliderProps {
