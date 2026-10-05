@@ -4,9 +4,9 @@ const FRAME_SIZE = 64;
 
 type ContentApi = { fromObject: (object: EditableImage) => unknown };
 type ImageWithContent = ImageLabel & { ImageContent: unknown };
-type AssetServiceCreate = AssetService & {
-	CreateEditableImage: (options: { Size: Vector2 }) => EditableImage;
-};
+interface AssetServiceCreate extends AssetService {
+	CreateEditableImage(this: AssetService, options: { Size: Vector2 }): EditableImage;
+}
 
 declare const Content: ContentApi;
 
