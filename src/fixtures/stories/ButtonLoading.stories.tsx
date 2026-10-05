@@ -1,6 +1,5 @@
 import React, { useState } from "@rbxts/react";
-import { Icons } from "@rbxts/uiblox";
-import { Button, IconButton } from "./kit";
+import { Button } from "./kit";
 
 interface Args {
 	text: string;
@@ -17,7 +16,11 @@ function LoadingStory(args: Args) {
 	const [clicks, setClicks] = useState(0);
 	return (
 		<frame Size={new UDim2(0, 280, 0, 72)} BackgroundTransparency={1}>
-			<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, 12)} VerticalAlignment={Enum.VerticalAlignment.Center} />
+			<uilistlayout
+				FillDirection={Enum.FillDirection.Horizontal}
+				Padding={new UDim(0, 12)}
+				VerticalAlignment={Enum.VerticalAlignment.Center}
+			/>
 			<Button
 				id="LoadButton"
 				text={args.text}
@@ -29,13 +32,6 @@ function LoadingStory(args: Args) {
 				reducedMotion={args.reducedMotion}
 				disabled={args.disabled}
 				onLeftClick={() => setClicks(clicks + 1)}
-			/>
-			<IconButton
-				icon={Icons.Save}
-				tint={Color3.fromRGB(90, 140, 220)}
-				loading={args.loading}
-				reducedMotion={args.reducedMotion}
-				disabled={args.disabled}
 			/>
 			<textlabel
 				key="ClickCount"

@@ -68,6 +68,7 @@ interface CircularProgressProps {
 	value?: number;
 	size?: number;
 	thickness?: number;
+	color?: Color3;
 	disabled?: boolean;
 	reducedMotion?: boolean;
 }
