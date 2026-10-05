@@ -37,6 +37,7 @@ export const Link = kit.Link;
 export const Rating = kit.Rating;
 export const Stack = kit.Stack;
 export const Box = kit.Box;
+export const Container = kit.Container;
 export const ImageList = kit.ImageList;
 export const SpeedDial = kit.SpeedDial;
 export const FormLabel = kit.FormLabel;
