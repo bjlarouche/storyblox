@@ -26,7 +26,7 @@ function ActionsDemo(args: Args) {
 					key="Click"
 					Text="click"
 					Size={new UDim2(0, 64, 1, 0)}
-					BackgroundColor3={theme.palette.secondary.main}
+					BackgroundColor3={theme.palette.primary.main}
 					TextColor3={theme.palette.text.primary}
 					Event={{ Activated: () => record("click", "primary") }}
 				/>
@@ -34,7 +34,7 @@ function ActionsDemo(args: Args) {
 					key="Press"
 					Text="press"
 					Size={new UDim2(0, 64, 1, 0)}
-					BackgroundColor3={theme.palette.secondary.main}
+					BackgroundColor3={theme.palette.primary.main}
 					TextColor3={theme.palette.text.primary}
 					Event={{ Activated: () => record("press", 1) }}
 				/>

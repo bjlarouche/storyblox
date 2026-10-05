@@ -15,7 +15,7 @@ function ActionsPanel({ theme, events, disabled, onReset }: ActionsPanelProps) {
 	const [listFrame, setListFrame] = useState<ScrollingFrame>();
 	const drag = useDragScroll(listFrame);
 	const gap = new UDim(0, theme.padding.calc(1));
-	const muted = theme.options.constants.colors.textMuted;
+	const muted = theme.palette.text.secondary;
 	const rows = new Array<React.Element>();
 	for (let index = events.size() - 1; index >= 0; index--) {
 		const event = events[index];
@@ -41,7 +41,7 @@ function ActionsPanel({ theme, events, disabled, onReset }: ActionsPanelProps) {
 			key="ActionsList"
 			ref={setListFrame}
 			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundColor3={theme.options.constants.colors.backgroundUIMuted}
+			BackgroundColor3={theme.palette.surface.paper}
 			BorderSizePixel={0}
 			CanvasSize={new UDim2(0, 0, 0, 0)}
 			AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -74,7 +74,7 @@ function ActionsPanel({ theme, events, disabled, onReset }: ActionsPanelProps) {
 						BackgroundTransparency={1}
 						Font={theme.typography.fontFamilies.semibold}
 						TextSize={theme.typography.fontSizes.caption}
-						TextColor3={theme.palette.secondary.main}
+						TextColor3={theme.palette.primary.main}
 						TextXAlignment={Enum.TextXAlignment.Right}
 						Event={{
 							MouseButton1Click: () => {
