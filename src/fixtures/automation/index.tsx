@@ -188,11 +188,18 @@ export = function (storiesRoot: Instance) {
 			</ThemeProvider>,
 		);
 
+		let settleAttempts = 0;
 		const settle = () => {
 			if (token !== generation) return;
 			const camera = Workspace.CurrentCamera;
 			const viewport = camera?.ViewportSize ?? new Vector2(0, 0);
 			if (host.AbsoluteSize.X <= 0 || host.AbsoluteSize.Y <= 0) {
+				task.delay(0.05, settle);
+				return;
+			}
+			// ReactRoblox render is async; host size is ready before children exist.
+			settleAttempts += 1;
+			if (host.FindFirstChildWhichIsA("GuiObject", true) === undefined && settleAttempts < 40) {
 				task.delay(0.05, settle);
 				return;
 			}

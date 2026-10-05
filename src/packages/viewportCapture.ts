@@ -18,8 +18,8 @@ export function validateViewportCapture(status: ViewportCaptureStatus) {
 		return { ok: false as const, error: "not ready" };
 	}
 	if (status.stats === undefined) return { ok: false as const, error: "missing stats" };
-	if (status.stats.guiObjects < 0 || status.stats.textObjects < 0)
-		return { ok: false as const, error: "invalid stats" };
+	if (status.stats.guiObjects < 1 || status.stats.textObjects < 0)
+		return { ok: false as const, error: "empty stats" };
 	return { ok: true as const, issueCount: status.stats.issues.size() };
 }
 
