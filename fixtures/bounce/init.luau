@@ -12,13 +12,12 @@ end
 
 local function mount(target, context)
 	local palette = context.theme.palette
-	local colors = context.theme.options.constants.colors
 	local args = context.args
 
 	local canvas = Instance.new("Frame")
 	canvas.Name = "BounceCanvas"
 	canvas.Size = UDim2.fromScale(1, 1)
-	canvas.BackgroundColor3 = colors.backgroundUIMuted
+	canvas.BackgroundColor3 = palette.surface.paper
 	canvas.BorderSizePixel = 0
 	canvas.Parent = target
 	context.own(canvas)
