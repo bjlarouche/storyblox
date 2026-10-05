@@ -37,6 +37,9 @@
           },
           "Defined.stories": {
             "$path": "../fixtures/defined"
+          },
+          "EditableImageReelNative.stories": {
+            "$path": "../fixtures/editableImageReel"
           }
         },
         "node_modules": {
