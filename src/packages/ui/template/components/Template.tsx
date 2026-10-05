@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
 import { Story } from "interfaces";
-import { ErrorBoundary, IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import { ErrorBoundary, IconButton, Icons, Shadow, Theme, ThemeProvider, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
@@ -621,15 +621,17 @@ function Template({
 							</ErrorBoundary>
 						}
 						second={
-							<Controls
-								theme={theme}
-								args={args}
-								argTypes={argTypes}
-								defaults={storyArgs(story as never)}
-								description={(story as { description?: unknown } | undefined)?.description}
-								onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
-								onReset={() => setArgs(copyArgs(storyArgs(story as never)))}
-							/>
+							<ThemeProvider theme={{ ...theme, density: "compact" }}>
+								<Controls
+									theme={{ ...theme, density: "compact" }}
+									args={args}
+									argTypes={argTypes}
+									defaults={storyArgs(story as never)}
+									description={(story as { description?: unknown } | undefined)?.description}
+									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
+									onReset={() => setArgs(copyArgs(storyArgs(story as never)))}
+								/>
+							</ThemeProvider>
 						}
 					/>
 				</frame>

@@ -1,21 +1,32 @@
 import React from "@rbxts/react";
-import { Checkbox, useArg } from "./kit";
+import * as Uiblox from "@rbxts/uiblox";
+import { useArg } from "./kit";
 
 interface Args {
 	value: boolean;
 	disabled: boolean;
 	label: string;
 	size: "small" | "medium" | "large";
-	mixed?: boolean;
 }
 
-function CheckboxStory(args: Args) {
+const Switch = (
+	Uiblox as unknown as {
+		Switch: (props: {
+			value: boolean;
+			onChange: (value: boolean) => void;
+			disabled?: boolean;
+			label?: string;
+			size?: "small" | "medium" | "large";
+		}) => React.Element;
+	}
+).Switch;
+
+function SwitchStory(args: Args) {
 	const [value, setValue] = useArg(args.value);
 	return (
-		<Checkbox
+		<Switch
 			value={value}
 			disabled={args.disabled}
-			mixed={args.mixed}
 			label={args.label}
 			size={args.size}
 			onChange={setValue}
@@ -24,14 +35,13 @@ function CheckboxStory(args: Args) {
 }
 
 export default {
-	title: "Components/Checkbox",
-	args: { value: false, disabled: false, label: "Checkbox", size: "medium" },
+	title: "Components/Switch",
+	args: { value: false, disabled: false, label: "Enabled", size: "medium" },
 	argTypes: {
 		value: { type: "boolean" },
 		disabled: { type: "boolean" },
 		label: { type: "string" },
 		size: { type: "enum", options: ["small", "medium", "large"] },
-		mixed: { type: "boolean", optional: true },
 	},
-	render: (args: Args) => <CheckboxStory {...args} />,
+	render: (args: Args) => <SwitchStory {...args} />,
 };
