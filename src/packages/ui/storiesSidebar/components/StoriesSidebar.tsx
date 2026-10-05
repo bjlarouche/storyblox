@@ -33,6 +33,10 @@ export interface StoriesSidebarProps {
 	selected?: string;
 	focusSearch?: number;
 	favorites?: string[];
+	includeTags?: string;
+	excludeTags?: string;
+	onIncludeTagsChange?: (value: string) => void;
+	onExcludeTagsChange?: (value: string) => void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onClick: (story: Story<any>) => void;
 }
@@ -44,11 +48,16 @@ function StoriesSidebar({
 	selected,
 	focusSearch = 0,
 	favorites = [],
+	includeTags = "",
+	excludeTags = "",
+	onIncludeTagsChange,
+	onExcludeTagsChange,
 	onClick,
 }: StoriesSidebarProps) {
 	const {
 		logo,
 		filterInput,
+		tagFilters,
 		storiesTree,
 		resultsList,
 		resultRow,
@@ -226,6 +235,43 @@ function StoriesSidebar({
 					endAdornment?: React.Element;
 				})}
 			/>
+
+			<frame key="TagFilters" {...tagFilters}>
+				<Input
+					{...({
+						variant: "outlined",
+						rounded: true,
+						placeholder: "Include tags",
+						width: new UDim(0.5, -theme.padding.calc(0.5)),
+						text: includeTags,
+						className: {
+							Size: new UDim2(0.5, -theme.padding.calc(0.5), 1, 0),
+							Position: UDim2.fromScale(0, 0),
+						},
+						onInput: onIncludeTagsChange,
+						onTextChanged: onIncludeTagsChange,
+					} as React.ComponentProps<typeof Input> & {
+						onInput?: (text: string) => void;
+					})}
+				/>
+				<Input
+					{...({
+						variant: "outlined",
+						rounded: true,
+						placeholder: "Exclude tags",
+						width: new UDim(0.5, -theme.padding.calc(0.5)),
+						text: excludeTags,
+						className: {
+							Size: new UDim2(0.5, -theme.padding.calc(0.5), 1, 0),
+							Position: new UDim2(0.5, theme.padding.calc(0.5), 0, 0),
+						},
+						onInput: onExcludeTagsChange,
+						onTextChanged: onExcludeTagsChange,
+					} as React.ComponentProps<typeof Input> & {
+						onInput?: (text: string) => void;
+					})}
+				/>
+			</frame>
 
 			<frame key="StoriesTree" ref={sidebar} {...storiesTree}>
 				{tree !== undefined && (

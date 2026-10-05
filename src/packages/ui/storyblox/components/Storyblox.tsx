@@ -550,6 +550,16 @@ function Storyblox(props: StorybloxProps) {
 			selected={selectedStory?.title}
 			focusSearch={focusSearch}
 			favorites={favoriteList}
+			includeTags={includeTags.join(",")}
+			excludeTags={excludeTags.join(",")}
+			onIncludeTagsChange={(value) => {
+				setIncludeTags(parseTagList(value));
+				controlRoot(root)?.SetAttribute("storyblox-include-tags", value.size() > 0 ? value : undefined);
+			}}
+			onExcludeTagsChange={(value) => {
+				setExcludeTags(parseTagList(value));
+				controlRoot(root)?.SetAttribute("storyblox-exclude-tags", value.size() > 0 ? value : undefined);
+			}}
 			onClick={(story: Story) => {
 				controlRoot(root)?.SetAttribute("storyblox-select", story.title);
 				setSelectedStory(story);
