@@ -49,6 +49,10 @@ const needles = [
 	"SceneOverlay",
 	"Examples/Mount Adapter",
 	"3D/Workspace",
+	"Examples/EditableImage Reel",
+	"Examples/EditableImage Reel (Native)",
+	"EditableImageReel",
+	"ReelFrame",
 	"hostColor",
 	"defined story",
 ];
