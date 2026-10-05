@@ -20,7 +20,6 @@ function InputStory(args: Args) {
 			variant="outlined"
 			width={new UDim(1, 0)}
 			onTextChanged={setText}
-			onInput={setText}
 		/>
 	);
 }
