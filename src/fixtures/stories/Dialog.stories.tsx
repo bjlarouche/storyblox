@@ -4,23 +4,53 @@ import { Dialog, useArg } from "./kitBreadth";
 interface Args {
 	open: boolean;
 	title: string;
+	showActions: boolean;
 }
 
 function DialogStory(args: Args) {
 	const [open, setOpen] = useArg(args.open);
 	return (
-		<Dialog open={open} title={args.title} onClose={() => setOpen(false)}>
-			<textlabel Size={new UDim2(1, 0, 0, 24)} BackgroundTransparency={1} Text="Body" TextSize={16} Font={Enum.Font.SourceSans} />
-		</Dialog>
+		<>
+			{!open && (
+				<textbutton
+					Size={new UDim2(0, 120, 0, 28)}
+					Text="Open dialog"
+					Event={{ Activated: () => setOpen(true) }}
+				/>
+			)}
+			<Dialog
+				open={open}
+				title={args.title === "" ? undefined : args.title}
+				onClose={() => setOpen(false)}
+				actions={
+					args.showActions ? (
+						<textbutton
+							Size={new UDim2(0, 72, 0, 28)}
+							Text="Close"
+							Event={{ Activated: () => setOpen(false) }}
+						/>
+					) : undefined
+				}
+			>
+				<textlabel
+					Size={new UDim2(1, 0, 0, 24)}
+					BackgroundTransparency={1}
+					Text="Body"
+					TextSize={16}
+					Font={Enum.Font.SourceSans}
+				/>
+			</Dialog>
+		</>
 	);
 }
 
 export default {
 	title: "Components/Dialog",
-	args: { open: true, title: "Confirm" },
+	args: { open: true, title: "Confirm", showActions: true },
 	argTypes: {
 		open: { type: "boolean" },
 		title: { type: "string" },
+		showActions: { type: "boolean" },
 	},
 	render: (args: Args) => <DialogStory {...args} />,
 };
