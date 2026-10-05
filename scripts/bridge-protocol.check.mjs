@@ -8,7 +8,7 @@ const { checkRequest, MAX_BRIDGE_ARGS } = await import("../src/packages/bridgePr
 
 const base = { protocolVersion: 1, requestId: "r1" };
 const expectError = (value, error, label) => {
-	const result = checkRequest(value, 3, "Fixture/Controls");
+	const result = checkRequest(value, 3, "Layout/Controls");
 	if (result.ok || result.error !== error) throw new Error(`${label}: ${JSON.stringify(result)}`);
 	return result;
 };
@@ -37,13 +37,13 @@ expectError({ ...base, command: "setArgs", expectedGeneration: 3, payload: { arg
 for (const request of [
 	{ ...base, command: "getStatus" },
 	{ ...base, command: "listStories" },
-	{ ...base, command: "selectStory", payload: { storyId: "Fixture/Controls" } },
-	{ ...base, command: "setArgs", expectedGeneration: 3, storyId: "Fixture/Controls", payload: { args: { count: 4, on: true } } },
+	{ ...base, command: "selectStory", payload: { storyId: "Layout/Controls" } },
+	{ ...base, command: "setArgs", expectedGeneration: 3, storyId: "Layout/Controls", payload: { args: { count: 4, on: true } } },
 	{ ...base, command: "resetArgs", expectedGeneration: 3 },
 	{ ...base, command: "runCase", expectedGeneration: 3, payload: { name: "count" } },
 	{ ...base, command: "getCaptureBounds", expectedGeneration: 3 },
 ]) {
-	const result = checkRequest(request, 3, "Fixture/Controls");
+	const result = checkRequest(request, 3, "Layout/Controls");
 	if (!result.ok) throw new Error(`${request.command}: ${result.error}`);
 }
 

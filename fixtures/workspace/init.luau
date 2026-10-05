@@ -12,7 +12,7 @@ end
 
 return {
 	renderer = "native",
-	title = "Fixture/Workspace Scene",
+	title = "3D/Workspace",
 	preview = { kind = "workspace" },
 	mount = mount,
 }

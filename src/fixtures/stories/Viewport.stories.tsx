@@ -44,7 +44,7 @@ function SpinningPart() {
 }
 
 export default {
-	title: "Fixture/Viewport React",
+	title: "3D/Rotating Part (React)",
 	component: SpinningPart,
 	template: () => <SpinningPart />,
 };

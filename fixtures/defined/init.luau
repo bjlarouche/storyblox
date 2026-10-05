@@ -4,7 +4,7 @@ local React = TS.import(script, TS.getModule(script, "@rbxts", "react"))
 return {
 	default = {
 		id = "fixture/defined",
-		title = "Fixture/Defined",
+		title = "Basics/Typed Story",
 		args = { label = "defined story" },
 		argTypes = { label = { type = "string" } },
 		render = function(args)

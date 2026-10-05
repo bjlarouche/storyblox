@@ -32,6 +32,6 @@ end
 
 return {
 	renderer = "native",
-	title = "Fixture/Viewport",
+	title = "3D/Rotating Part",
 	mount = mount,
 }
