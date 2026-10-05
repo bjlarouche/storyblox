@@ -7,17 +7,19 @@ interface Args {
 	selected: boolean;
 	disabled: boolean;
 	dense: boolean;
+	divider: boolean;
 }
 
 export default {
 	title: "Components/List Item",
-	args: { text: "Primary", secondary: "Secondary", selected: false, disabled: false, dense: false },
+	args: { text: "Primary", secondary: "Secondary", selected: false, disabled: false, dense: false, divider: true },
 	argTypes: {
 		text: { type: "string" },
 		secondary: { type: "string" },
 		selected: { type: "boolean" },
 		disabled: { type: "boolean" },
 		dense: { type: "boolean" },
+		divider: { type: "boolean" },
 	},
 	render: (args: Args) => (
 		<ListItem
@@ -26,6 +28,7 @@ export default {
 			selected={args.selected}
 			disabled={args.disabled}
 			dense={args.dense}
+			divider={args.divider}
 		/>
 	),
 };
