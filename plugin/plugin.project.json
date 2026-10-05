@@ -40,6 +40,9 @@
           },
           "EditableImageReelNative.stories": {
             "$path": "../fixtures/editableImageReel"
+          },
+          "BounceNative.stories": {
+            "$path": "../fixtures/bounce"
           }
         },
         "node_modules": {

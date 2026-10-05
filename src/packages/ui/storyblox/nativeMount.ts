@@ -1,15 +1,15 @@
 type Cleanup = () => void;
 
 interface Owned {
-	Destroy: () => void;
+	Destroy(): void;
 }
 
 interface Connection {
-	Disconnect: () => void;
+	Disconnect(): void;
 }
 
 interface Signal {
-	Connect: (handler: (...args: unknown[]) => void) => Connection;
+	Connect(handler: (...args: unknown[]) => void): Connection;
 }
 
 export interface NativeContext {
@@ -114,10 +114,10 @@ export function mountNative(
 	let returned: unknown;
 	try {
 		returned = mount(target, context);
-	} catch (error) {
+	} catch (failure) {
 		cancelled = true;
 		scope.dispose();
-		throw error;
+		throw failure;
 	}
 
 	let update: ((args: unknown) => void) | undefined;

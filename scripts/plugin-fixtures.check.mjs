@@ -57,6 +57,9 @@ const needles = [
 	"Examples/EditableImage Reel (Native)",
 	"EditableImageReel",
 	"ReelFrame",
+	"Animation/Bouncing Ball",
+	"Animation/Bouncing Ball (Native)",
+	"BounceBall",
 	"hostColor",
 	"defined story",
 ];
