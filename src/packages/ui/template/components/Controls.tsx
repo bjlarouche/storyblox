@@ -161,7 +161,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 				BackgroundTransparency={1}
 				Font={theme.typography.fontFamilies.default}
 				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.options.constants.colors.textMuted}
+				TextColor3={theme.palette.text.secondary}
 				TextXAlignment={Enum.TextXAlignment.Left}
 			/>,
 		);
@@ -354,7 +354,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					BackgroundTransparency={1}
 					Font={theme.typography.fontFamilies.default}
 					TextSize={theme.typography.fontSizes.caption}
-					TextColor3={theme.options.constants.colors.textMuted}
+					TextColor3={theme.palette.text.secondary}
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
 			);
@@ -402,7 +402,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						BackgroundTransparency={1}
 						Font={theme.typography.fontFamilies.semibold}
 						TextSize={theme.typography.fontSizes.caption}
-						TextColor3={theme.palette.secondary.main}
+						TextColor3={theme.palette.primary.main}
 						TextXAlignment={Enum.TextXAlignment.Left}
 						Event={{
 							MouseButton1Click: click(() => {
@@ -420,7 +420,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						BackgroundTransparency={1}
 						Font={theme.typography.fontFamilies.semibold}
 						TextSize={theme.typography.fontSizes.caption}
-						TextColor3={theme.palette.secondary.main}
+						TextColor3={theme.palette.primary.main}
 						TextXAlignment={Enum.TextXAlignment.Left}
 						Event={{
 							MouseButton1Click: click(() => {
@@ -438,7 +438,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						BackgroundTransparency={1}
 						Font={theme.typography.fontFamilies.semibold}
 						TextSize={theme.typography.fontSizes.caption}
-						TextColor3={theme.palette.secondary.main}
+						TextColor3={theme.palette.primary.main}
 						TextXAlignment={Enum.TextXAlignment.Left}
 						Event={{
 							MouseButton1Click: click(() => {
@@ -540,7 +540,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						BackgroundTransparency={1}
 						Font={theme.typography.fontFamilies.default}
 						TextSize={theme.typography.fontSizes.caption}
-						TextColor3={theme.options.constants.colors.textMuted}
+						TextColor3={theme.palette.text.secondary}
 						TextXAlignment={Enum.TextXAlignment.Left}
 					/>
 					{spec?.description !== undefined && (
@@ -554,7 +554,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 							BackgroundTransparency={1}
 							Font={theme.typography.fontFamilies.default}
 							TextSize={theme.typography.fontSizes.caption}
-							TextColor3={theme.options.constants.colors.textMuted}
+							TextColor3={theme.palette.text.secondary}
 							TextXAlignment={Enum.TextXAlignment.Left}
 						/>
 					)}
@@ -569,7 +569,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 							BackgroundTransparency={1}
 							Font={theme.typography.fontFamilies.default}
 							TextSize={theme.typography.fontSizes.caption}
-							TextColor3={theme.palette.error.main}
+							TextColor3={theme.palette.status.error.main}
 							TextXAlignment={Enum.TextXAlignment.Left}
 						/>
 					)}
@@ -583,7 +583,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 							BackgroundTransparency={1}
 							Font={theme.typography.fontFamilies.semibold}
 							TextSize={theme.typography.fontSizes.caption}
-							TextColor3={theme.palette.secondary.main}
+							TextColor3={theme.palette.primary.main}
 							TextXAlignment={Enum.TextXAlignment.Left}
 							Event={{ MouseButton1Click: click(() => onChange(name, undefined)) }}
 						/>
@@ -599,7 +599,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 			key="ControlsList"
 			ref={setListFrame}
 			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundColor3={theme.options.constants.colors.backgroundUIMuted}
+			BackgroundColor3={theme.palette.surface.paper}
 			BorderSizePixel={0}
 			CanvasSize={new UDim2(0, 0, 0, 0)}
 			AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -642,7 +642,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 						BackgroundTransparency={1}
 						Font={theme.typography.fontFamilies.semibold}
 						TextSize={theme.typography.fontSizes.caption}
-						TextColor3={theme.palette.secondary.main}
+						TextColor3={theme.palette.primary.main}
 						TextXAlignment={Enum.TextXAlignment.Right}
 						Event={{ MouseButton1Click: click(onReset) }}
 					/>
@@ -660,7 +660,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					BackgroundTransparency={1}
 					Font={theme.typography.fontFamilies.default}
 					TextSize={theme.typography.fontSizes.caption}
-					TextColor3={theme.options.constants.colors.textMuted}
+					TextColor3={theme.palette.text.secondary}
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
 			)}

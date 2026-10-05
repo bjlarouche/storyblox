@@ -4,7 +4,7 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 	return createStyles({
 		root: {
 			Size: new UDim2(1, 0, 1, 0),
-			BackgroundColor3: theme.options.constants.colors.backgroundUIMuted,
+			BackgroundColor3: theme.palette.surface.paper,
 			BorderSizePixel: 0,
 			ClipsDescendants: true,
 			ZIndex: 100,
@@ -13,7 +13,7 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			Size: new UDim2(1, -theme.padding.calc(2), 1, -theme.padding.calc(2)),
 			Position: new UDim2(0.5, 0, 0.5, 0),
 			AnchorPoint: new Vector2(0.5, 0.5),
-			BackgroundColor3: theme.options.constants.colors.backgroundUIDefault,
+			BackgroundColor3: theme.palette.surface.canvas,
 			BorderSizePixel: 0,
 			ClipsDescendants: true,
 			ZIndex: 200,
@@ -25,14 +25,14 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			Size: new UDim2(1, 0, 0, theme.spacing.calc(2)),
 			Position: new UDim2(0.5, 0, 0, 0),
 			AnchorPoint: new Vector2(0.5, 0),
-			BackgroundColor3: theme.options.constants.colors.navigationBar,
+			BackgroundColor3: theme.palette.surface.elevated,
 			BorderSizePixel: 0,
 			ClipsDescendants: true,
 			ZIndex: 300,
 		} as WriteableStyle<Frame>,
 		storyBar: {
 			Size: new UDim2(1, 0, 0, theme.spacing.calc(1.75)),
-			BackgroundColor3: theme.options.constants.colors.backgroundUIMuted,
+			BackgroundColor3: theme.palette.surface.paper,
 			BorderSizePixel: 0,
 			ClipsDescendants: true,
 			ZIndex: 300,
@@ -45,7 +45,7 @@ const useTemplateStyles = makeStyles((theme: Theme) => {
 			TextTruncate: Enum.TextTruncate.AtEnd,
 			Font: theme.typography.fontFamilies.semibold,
 			TextSize: theme.typography.fontSizes.caption,
-			TextColor3: theme.options.constants.colors.textMuted,
+			TextColor3: theme.palette.text.secondary,
 			ZIndex: 300,
 		} as WriteableStyle<TextLabel>,
 		preview: {
