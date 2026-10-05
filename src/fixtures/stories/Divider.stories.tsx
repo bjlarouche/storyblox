@@ -3,13 +3,15 @@ import { Divider } from "./kitBreadth";
 
 interface Args {
 	orientation: "Horizontal" | "Vertical";
+	text: string;
 }
 
 export default {
 	title: "Layout/Divider",
-	args: { orientation: "Horizontal" },
+	args: { orientation: "Horizontal", text: "Or" },
 	argTypes: {
 		orientation: { type: "enum", options: ["Horizontal", "Vertical"] },
+		text: { type: "string" },
 	},
 	render: (args: Args) => (
 		<frame Size={new UDim2(0, 240, 0, 120)} BackgroundTransparency={1} BorderSizePixel={0}>
@@ -24,13 +26,13 @@ export default {
 				Size={
 					args.orientation === "Vertical"
 						? new UDim2(0, 4, 1, -48)
-						: new UDim2(1, 0, 0, 8)
+						: new UDim2(1, 0, 0, args.text === "" ? 8 : 28)
 				}
 				Position={new UDim2(0, 0, 0, 28)}
 				BackgroundTransparency={1}
 				BorderSizePixel={0}
 			>
-				<Divider orientation={args.orientation} />
+				<Divider orientation={args.orientation} text={args.text === "" ? undefined : args.text} />
 			</frame>
 			<textlabel
 				Size={new UDim2(1, 0, 0, 24)}
