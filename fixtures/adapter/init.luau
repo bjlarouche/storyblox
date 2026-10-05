@@ -27,7 +27,7 @@ end
 
 return {
 	renderer = "native",
-	title = "Fixture/Adapter",
+	title = "Examples/Mount Adapter",
 	args = { text = "adapter" },
 	argTypes = { text = { type = "string" } },
 	mount = adapt(render),

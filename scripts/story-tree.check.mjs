@@ -11,41 +11,41 @@ const click = () => {};
 const icons = { folder: "folder", component: "component", story: "story" };
 const branches = storyBranches(
 	[
-		{ title: "Fixture/Styled", onClick: click },
-		{ title: "Inputs/Button/Primary", onClick: click },
-		{ title: "Inputs/Button/Secondary", onClick: click },
+		{ title: "Layout/Controls", onClick: click },
+		{ title: "Examples/Button/Primary", onClick: click },
+		{ title: "Examples/Button/Secondary", onClick: click },
 	],
 	icons,
 );
 
-const fixture = branches.find((branch) => branch.title === "Fixture");
-if (fixture?.icon !== "component" || fixture.leaves?.[0]?.title !== "Styled") {
+const layout = branches.find((branch) => branch.title === "Layout");
+if (layout?.icon !== "component" || layout.leaves?.[0]?.title !== "Controls") {
 	throw new Error("component row");
 }
-if (fixture.leaves[0].icon !== "story") throw new Error("story icon");
+if (layout.leaves[0].icon !== "story") throw new Error("story icon");
 
-const inputs = branches.find((branch) => branch.title === "Inputs");
-const button = inputs?.branches?.find((branch) => branch.title === "Button");
-if (inputs?.icon !== "folder") throw new Error("folder icon");
+const examples = branches.find((branch) => branch.title === "Examples");
+const button = examples?.branches?.find((branch) => branch.title === "Button");
+if (examples?.icon !== "folder") throw new Error("folder icon");
 if (button?.icon !== "component") throw new Error("nested component");
 const titles = (button?.leaves ?? []).map((leaf) => leaf.title);
 if (titles[0] !== "Primary" || titles[1] !== "Secondary") throw new Error("nested stories");
 
 if (parseFavorites(undefined).length !== 0 || parseFavorites("").length !== 0) throw new Error("empty favorites");
-const starred = toggleFavorite(toggleFavorite(parseFavorites("Fixture/Styled"), "Inputs/Button/Primary"), "Fixture/Styled");
-if (starred.length !== 1 || starred[0] !== "Inputs/Button/Primary") throw new Error("toggle favorite");
+const starred = toggleFavorite(toggleFavorite(parseFavorites("Layout/Controls"), "Examples/Button/Primary"), "Layout/Controls");
+if (starred.length !== 1 || starred[0] !== "Examples/Button/Primary") throw new Error("toggle favorite");
 const fav = favoriteBranch(
 	[
-		{ title: "Fixture/Styled", onClick: click },
-		{ title: "Inputs/Button/Primary", onClick: click },
+		{ title: "Layout/Controls", onClick: click },
+		{ title: "Examples/Button/Primary", onClick: click },
 	],
 	starred,
 	icons,
 );
-if (fav?.title !== "Favorites" || fav.leaves[0]?.title !== "Inputs/Button/Primary" || fav.icon !== "folder") {
+if (fav?.title !== "Favorites" || fav.leaves[0]?.title !== "Examples/Button/Primary" || fav.icon !== "folder") {
 	throw new Error("favorites branch");
 }
-if (favoriteBranch([{ title: "Fixture/Styled", onClick: click }], ["Missing/Story"], icons) !== undefined) {
+if (favoriteBranch([{ title: "Layout/Controls", onClick: click }], ["Missing/Story"], icons) !== undefined) {
 	throw new Error("missing favorite");
 }
 

@@ -1,7 +1,7 @@
 import React from "@rbxts/react";
 
 export default {
-	title: "Fixture/Controls",
+	title: "Layout/Controls",
 	args: { tone: "low", amount: 20 },
 	argTypes: {
 		tone: { type: "enum", options: ["low", "high"], control: "radio" },

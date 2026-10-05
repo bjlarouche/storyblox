@@ -3,7 +3,7 @@ import React from "@rbxts/react";
 const onClick = () => {};
 
 export default {
-	title: "Fixture/Nested",
+	title: "Layout/Nested Args",
 	preview: { kind: "gui", width: 320, height: 48, background: new Color3(0.12, 0.14, 0.18) },
 	args: {
 		items: ["a", "b"],

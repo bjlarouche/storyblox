@@ -20,10 +20,10 @@ const { argDoc, argHint, storyLabel, storyLanguage, storyInspector } = await imp
 
 if (storyLanguage("-- Compiled with roblox-ts v3.0.0\nlocal TS") !== "TS") throw new Error("ts header");
 if (storyLanguage("local function mount() end") !== "Luau") throw new Error("luau source");
-if (storyLabel("Inputs/Button/Primary", undefined, "TS") !== "Inputs › Button › Primary  ·  react · TS") {
+if (storyLabel("Examples/Button", undefined, "TS") !== "Examples › Button  ·  react · TS") {
 	throw new Error("react label");
 }
-if (storyLabel("Fixture/Native Scene", "native", "Luau") !== "Fixture › Native Scene  ·  native · Luau") {
+if (storyLabel("3D/Scene", "native", "Luau") !== "3D › Scene  ·  native · Luau") {
 	throw new Error("native label");
 }
 if (storyLabel("Canvas") !== "Canvas  ·  react") throw new Error("no language");
