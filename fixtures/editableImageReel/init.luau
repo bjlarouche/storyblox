@@ -155,14 +155,23 @@ local function mount(target, context)
 		end)
 	end
 
+	local destroyed = false
+
 	apply(args)
 	context.ready()
 
 	return {
 		update = function(nextArgs)
+			if destroyed then
+				return
+			end
 			apply(nextArgs)
 		end,
 		destroy = function()
+			if destroyed then
+				return
+			end
+			destroyed = true
 			if conn then
 				conn:Disconnect()
 				conn = nil

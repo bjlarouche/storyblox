@@ -10,7 +10,7 @@ type AssetServiceCreate = AssetService & {
 
 declare const Content: ContentApi;
 
-export function createBlankEditableImage(size = FRAME_SIZE): EditableImage {
+function createBlankEditableImage(size = FRAME_SIZE): EditableImage {
 	return (AssetService as AssetServiceCreate).CreateEditableImage({ Size: new Vector2(size, size) });
 }
 
