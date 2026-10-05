@@ -79,6 +79,16 @@ const kit = Uiblox as unknown as {
 		onChange: (value: Color3) => void;
 		disabled?: boolean;
 	}) => React.Element;
+	VectorEditor: (props: {
+		value: Vector2 | Vector3;
+		onChange: (value: Vector2 | Vector3) => void;
+		disabled?: boolean;
+	}) => React.Element;
+	UDimEditor: (props: {
+		value: UDim | UDim2;
+		onChange: (value: UDim | UDim2) => void;
+		disabled?: boolean;
+	}) => React.Element;
 };
 
 export interface ControlsProps {
@@ -101,15 +111,11 @@ function writeFault(current: { [key: string]: string }, key: string, reason: str
 }
 
 function datatype(kind?: string) {
-	return (
-		kind === "vector2" ||
-		kind === "vector3" ||
-		kind === "udim" ||
-		kind === "udim2" ||
-		kind === "EnumItem" ||
-		kind === "asset" ||
-		kind === "cframe"
-	);
+	return kind === "EnumItem" || kind === "asset" || kind === "cframe";
+}
+
+function hasKit(name: "ColorPicker" | "VectorEditor" | "UDimEditor") {
+	return typeOf((Uiblox as unknown as { [key: string]: unknown })[name]) === "function";
 }
 
 let rowSerial = 0;
@@ -249,7 +255,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					onChange={(incoming) => onChange(name, incoming)}
 				/>
 			);
-		} else if (spec?.type === "color" && typeOf((Uiblox as unknown as { ColorPicker?: unknown }).ColorPicker) === "function") {
+		} else if (spec?.type === "color" && hasKit("ColorPicker")) {
 			const color = typeOf(value) === "Color3" ? (value as Color3) : new Color3();
 			editor = (
 				<kit.ColorPicker
@@ -262,7 +268,54 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					}}
 				/>
 			);
-		} else if (datatype(spec?.type) || spec?.type === "color") {
+		} else if ((spec?.type === "vector2" || spec?.type === "vector3") && hasKit("VectorEditor")) {
+			const vector =
+				spec.type === "vector3"
+					? typeOf(value) === "Vector3"
+						? (value as Vector3)
+						: new Vector3()
+					: typeOf(value) === "Vector2"
+						? (value as Vector2)
+						: new Vector2();
+			editor = (
+				<kit.VectorEditor
+					key={name}
+					value={vector}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if ((spec?.type === "udim" || spec?.type === "udim2") && hasKit("UDimEditor")) {
+			const dim =
+				spec.type === "udim2"
+					? typeOf(value) === "UDim2"
+						? (value as UDim2)
+						: new UDim2()
+					: typeOf(value) === "UDim"
+						? (value as UDim)
+						: new UDim();
+			editor = (
+				<kit.UDimEditor
+					key={name}
+					value={dim}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (
+			datatype(spec?.type) ||
+			spec?.type === "color" ||
+			spec?.type === "vector2" ||
+			spec?.type === "vector3" ||
+			spec?.type === "udim" ||
+			spec?.type === "udim2"
+		) {
 			const commitText = (text: string) => {
 				const parsed = parseDatatype(spec ?? {}, text);
 				if (!parsed.ok) {
