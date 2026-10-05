@@ -546,7 +546,7 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 			key="ControlsList"
 			ref={setListFrame}
 			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundTransparency={1}
+			BackgroundColor3={theme.options.constants.colors.backgroundUIMuted}
 			BorderSizePixel={0}
 			CanvasSize={new UDim2(0, 0, 0, 0)}
 			AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -595,7 +595,6 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 					/>
 				)}
 			</frame>
-			<frame key="ControlsRule" LayoutOrder={-2} Size={new UDim2(1, 0, 0, 1)} BackgroundColor3={theme.palette.divider} BorderSizePixel={0} />
 			{rows}
 			{order <= 1 && (
 				<textlabel
