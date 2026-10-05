@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
-import { Story } from "../../../../interfaces";
+import { Story } from "interfaces";
 import { IconButton, Icons, Shadow, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
-import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "../../../previewCamera";
-import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "../../../previewScale";
+import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
+import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import { storyLabel } from "../storyLabel";
-import { CaseResult, createCaseClock, createSeed, runCase } from "../../../storyCases";
+import { CaseResult, createCaseClock, createSeed, runCase } from "packages/storyCases";
 import Controls from "./Controls";
 import useTemplateStyles from "./Template.styles";
 
