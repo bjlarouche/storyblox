@@ -14,6 +14,7 @@ interface RadioProps {
 	placeholder?: string;
 	row?: boolean;
 	size?: "small" | "medium" | "large";
+	orientation?: "horizontal" | "vertical";
 }
 
 interface CheckboxProps {

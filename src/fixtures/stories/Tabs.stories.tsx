@@ -3,17 +3,34 @@ import { Tabs, useArg } from "./kit";
 
 const options = [
 	{ label: "Left", value: "left" },
+	{ label: "Center", value: "center" },
 	{ label: "Right", value: "right" },
 ];
 
-function TabsStory(args: { value: string }) {
+interface Args {
+	value: string;
+	orientation: "horizontal" | "vertical";
+}
+
+function TabsStory(args: Args) {
 	const [value, setValue] = useArg(args.value);
-	return <Tabs value={value} options={options} onChange={setValue} />;
+	return (
+		<frame
+			Size={args.orientation === "vertical" ? new UDim2(0, 160, 0, 160) : new UDim2(0, 320, 0, 40)}
+			BackgroundTransparency={1}
+			BorderSizePixel={0}
+		>
+			<Tabs value={value} options={options} orientation={args.orientation} onChange={setValue} />
+		</frame>
+	);
 }
 
 export default {
 	title: "Components/Tabs",
-	args: { value: "left" },
-	argTypes: { value: { type: "enum", options: ["left", "right"], control: "radio" } },
-	render: (args: { value: string }) => <TabsStory {...args} />,
+	args: { value: "left", orientation: "horizontal" },
+	argTypes: {
+		value: { type: "enum", options: ["left", "center", "right"], control: "radio" },
+		orientation: { type: "enum", options: ["horizontal", "vertical"] },
+	},
+	render: (args: Args) => <TabsStory {...args} />,
 };
