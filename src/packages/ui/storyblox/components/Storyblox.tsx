@@ -704,7 +704,7 @@ function Storyblox(props: StorybloxProps) {
 			key="Inspector"
 			ref={setInspectorFrame}
 			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundTransparency={1}
+			BackgroundColor3={theme.options.constants.colors.backgroundUIMuted}
 			BorderSizePixel={0}
 			CanvasSize={new UDim2(0, 0, 0, 0)}
 			AutomaticCanvasSize={Enum.AutomaticSize.Y}
@@ -748,7 +748,7 @@ function Storyblox(props: StorybloxProps) {
 				BackgroundTransparency={1}
 				Font={theme.typography.fontFamilies.default}
 				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.options.constants.colors.textMuted}
+				TextColor3={theme.palette.text.primary}
 				TextXAlignment={Enum.TextXAlignment.Left}
 			/>
 		</scrollingframe>
