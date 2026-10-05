@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
-import { Input, Theme } from "@rbxts/uiblox";
+import { controlMetrics, Input, Theme } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { formatDatatype, parseDatatype } from "packages/argCodec";
 import {
@@ -132,7 +132,7 @@ function CustomEditor(props: { editor: string; value: unknown; onChange: (value:
 	useEffect(() => {
 		return mountControlEditor(props.editor, props.value, (incoming) => change.current(incoming));
 	}, [props.editor, props.value]);
-	return <frame ref={host} Size={new UDim2(1, 0, 0, 24)} BackgroundTransparency={1} />;
+	return <frame ref={host} Size={new UDim2(1, 0, 0, 22)} BackgroundTransparency={1} />;
 }
 
 function Controls({ theme, args, argTypes, defaults, description, onChange, onReset }: ControlsProps) {
@@ -146,7 +146,8 @@ function Controls({ theme, args, argTypes, defaults, description, onChange, onRe
 	};
 	const specs = typeOf(argTypes) === "table" ? (argTypes as { [key: string]: Spec }) : {};
 	const fallbacks = typeOf(defaults) === "table" ? (defaults as ArgValues) : {};
-	const fill = { Size: new UDim2(1, 0, 0, theme.spacing.calc(2)) };
+	const row = controlMetrics(theme.density).height;
+	const fill = { Size: new UDim2(1, 0, 0, row) };
 	const gap = new UDim(0, theme.padding.calc(1));
 	const rows: React.Element[] = [];
 	if (typeOf(description) === "string") {

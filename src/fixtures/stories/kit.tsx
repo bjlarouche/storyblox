@@ -20,6 +20,7 @@ interface CheckboxProps {
 	disabled?: boolean;
 	mixed?: boolean;
 	label?: string;
+	size?: "small" | "medium" | "large";
 }
 
 interface SwitchProps {
