@@ -12,6 +12,8 @@ interface RadioProps {
 	onChange: (value: string) => void;
 	disabled?: boolean;
 	placeholder?: string;
+	row?: boolean;
+	size?: "small" | "medium" | "large";
 }
 
 interface CheckboxProps {
