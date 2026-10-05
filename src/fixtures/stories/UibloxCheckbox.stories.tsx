@@ -1,6 +1,5 @@
 import React from "@rbxts/react";
-import { Checkbox } from "@rbxts/uiblox";
-import { useArg } from "./kit";
+import { Checkbox, useArg } from "./kit";
 
 interface Args {
 	value: boolean;
