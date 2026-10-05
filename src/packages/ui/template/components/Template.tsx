@@ -371,8 +371,8 @@ function Template({
 							text={starred ? "Remove from starred" : "Add to starred"}
 							className={
 								{
-									Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
-									Position: new UDim2(0, theme.spacing.calc(0.5), 0.5, 0),
+									Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
+									Position: new UDim2(0, theme.spacing.calc(0.75), 0.5, 0),
 									AnchorPoint: new Vector2(0, 0.5),
 									AutomaticSize: Enum.AutomaticSize.None,
 									ZIndex: 300,
@@ -386,7 +386,7 @@ function Template({
 								onClick={onToggleFavorite}
 								className={
 									{
-										Size: new UDim2(0, theme.spacing.calc(1.25), 0, theme.spacing.calc(1.25)),
+										Size: new UDim2(0, theme.spacing.calc(1.75), 0, theme.spacing.calc(1.75)),
 										Position: new UDim2(0.5, 0, 0.5, 0),
 										AnchorPoint: new Vector2(0.5, 0.5),
 									} as WriteableStyle<ImageButton>
@@ -406,8 +406,8 @@ function Template({
 								: "Canvas"
 						}
 						{...title}
-						Position={new UDim2(0, theme.spacing.calc(0.5) + favoriteSlot, 0, 0)}
-						Size={new UDim2(1, -(theme.spacing.calc(5) + favoriteSlot), 1, 0)}
+						Position={new UDim2(0, theme.spacing.calc(0.75) + favoriteSlot, 0, 0)}
+						Size={new UDim2(1, -(theme.spacing.calc(7.5) + favoriteSlot), 1, 0)}
 					/>
 					{onToggleTheme && (
 						<frame
@@ -415,7 +415,7 @@ function Template({
 							Size={new UDim2(0, 0, 1, 0)}
 							AutomaticSize={Enum.AutomaticSize.X}
 							AnchorPoint={new Vector2(1, 0.5)}
-							Position={new UDim2(1, -theme.spacing.calc(0.5), 0.5, 0)}
+							Position={new UDim2(1, -theme.spacing.calc(0.75), 0.5, 0)}
 							BackgroundTransparency={1}
 						>
 							<uilistlayout
@@ -431,7 +431,7 @@ function Template({
 								Text="-"
 								LayoutOrder={1}
 								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -443,7 +443,7 @@ function Template({
 								Text={`${math.floor(zoom * 100)}%`}
 								LayoutOrder={2}
 								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -454,7 +454,7 @@ function Template({
 								Text="+"
 								LayoutOrder={3}
 								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -466,7 +466,7 @@ function Template({
 								Text={grid ? "Grid on" : "Grid"}
 								LayoutOrder={4}
 								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -479,7 +479,7 @@ function Template({
 								Text={fit ? "Fit" : "100%"}
 								LayoutOrder={5}
 								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -493,7 +493,7 @@ function Template({
 								onClick={() => setEpoch((current) => current + 1)}
 								className={
 									{
-										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+										Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
 										LayoutOrder: 6,
 									} as WriteableStyle<ImageButton>
 								}
@@ -503,7 +503,7 @@ function Template({
 									text={inspectorOpen ? "Hide inspector" : "Show inspector"}
 									className={
 										{
-											Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+											Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
 											AutomaticSize: Enum.AutomaticSize.None,
 											LayoutOrder: 7,
 										} as WriteableStyle<Frame>
@@ -529,7 +529,7 @@ function Template({
 								onClick={onToggleTheme}
 								className={
 									{
-										Size: new UDim2(0, theme.spacing.calc(1.5), 0, theme.spacing.calc(1.5)),
+										Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
 										LayoutOrder: 8,
 									} as WriteableStyle<ImageButton>
 								}
@@ -555,8 +555,8 @@ function Template({
 						/>
 						<uipadding
 							key="StoryToolsPad"
-							PaddingLeft={new UDim(0, theme.spacing.calc(0.5))}
-							PaddingRight={new UDim(0, theme.spacing.calc(0.5))}
+							PaddingLeft={new UDim(0, theme.spacing.calc(0.75))}
+							PaddingRight={new UDim(0, theme.spacing.calc(0.75))}
 						/>
 						{storyTools.map((tool, index) => (
 							<textbutton
@@ -564,7 +564,7 @@ function Template({
 								Text={tool.label}
 								LayoutOrder={index}
 								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.25))}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.75))}
 								BackgroundTransparency={1}
 								Font={theme.typography.fontFamilies.semibold}
 								TextSize={theme.typography.fontSizes.caption}
@@ -599,7 +599,7 @@ function Template({
 					<SplitPane
 						vertical
 						value={split}
-						min={controlled ? CONTROLS_MIN : theme.spacing.calc(5)}
+						min={controlled ? CONTROLS_MIN : theme.spacing.calc(7.5)}
 						onChange={setSplit}
 						first={
 							<ErrorBoundary
