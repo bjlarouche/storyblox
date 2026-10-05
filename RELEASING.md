@@ -26,4 +26,4 @@ That writes `~/Documents/Roblox/Plugins/storyblox-plugin.rbxm`. The shell loads 
 - A Roblox Store upload
 - A version bump
 
-Uiblox `0.1.53` (`0519a3d`) is installed from a local tarball for the dev plugin only. That path is not committed. `node scripts/state-gallery.mjs` reads `stateMatrix` from the sibling uiblox checkout.
+Dev plugin uses published `@rbxts/uiblox@0.2.0-alpha.3` (`next`). `latest` stays `0.1.53`. `node scripts/state-gallery.mjs` can still read `stateMatrix` from a sibling uiblox checkout.

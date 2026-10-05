@@ -21,8 +21,8 @@ importers:
         specifier: ^1.5.5
         version: 1.5.5
       '@rbxts/uiblox':
-        specifier: 0.2.0-alpha.0
-        version: 0.2.0-alpha.0
+        specifier: 0.2.0-alpha.3
+        version: 0.2.0-alpha.3
     devDependencies:
       '@rbxts/attributes':
         specifier: ^1.0.0
@@ -154,11 +154,14 @@ packages:
   '@rbxts/message-templates@0.3.2':
     resolution: {integrity: sha512-79onYskH3pgrBT73Zs+biQ31vAVvupKQaxGNWGjyGsxwNhO2YaN/qkut0bvOshaGa+ZzqAXApRVrN8ifIMPiMQ==}
 
-  '@rbxts/pretty-react-hooks@0.6.1':
-    resolution: {integrity: sha512-dnHS1z2Emq2ZC1dqKtcYmuhu04xkFgN25J/rnWYL4UnX9LuGXGrG4qF3kBlNRyTQXjGf+pXVlX6mLQmwfsSxOQ==}
+  '@rbxts/pretty-react-hooks@0.6.4':
+    resolution: {integrity: sha512-yiuM3kOD0s2x0GFCUVfFdeSDJRX2ZycS88WOvqydaYwPIZ5rYDjzHjOzRgSpAzGcTVOFXsO64QOtD6svAdadzg==}
+    peerDependencies:
+      '@rbxts/react': '*'
+      '@rbxts/react-roblox': '*'
 
-  '@rbxts/react-reflex@0.3.4':
-    resolution: {integrity: sha512-GCXd7PjS/ovxD5v2oWqKMrxXROL5k49DiQC2M4UOUKHp+rGJeRGTlGcThnS7uqg6GZpSaCbPPsDZAx1hm7E2Yw==}
+  '@rbxts/react-reflex@0.3.7':
+    resolution: {integrity: sha512-2hSMSdhJweGi0l5/NkGrxw6rE8gAePb4cD1G6u8DW/9a93CBYEbiFevSkMRP0MqnNQAkyqWg048wSvJBcS0H/g==}
     peerDependencies:
       '@rbxts/react': '*'
       '@rbxts/reflex': '*'
@@ -175,8 +178,8 @@ packages:
   '@rbxts/reflex@4.3.1':
     resolution: {integrity: sha512-S5MbEpHKeRh9NWhwGJ789WbUsmlAlpQziWaNK4+kz1EpaaQ7uHQMZAuN1DYl4+QkqmOSuPlj04COwmArBGWH1Q==}
 
-  '@rbxts/ripple@0.9.1':
-    resolution: {integrity: sha512-gLjKYy+mJO67NoN/9d7/8kBy6+SNG1/09GNNnh89DYWT5iHYdxC0/XKbKrKZpx7Fcsz5iY9Sl6vOvSnFwFbQuw==}
+  '@rbxts/ripple@0.9.3':
+    resolution: {integrity: sha512-GmwjQl7a8pvGPGQYLmaAcf2RBPpneOL5P1+U8CzTHt9tBhCdk0TEJ/MQoTv9JnHD62RMBE1jogQBvuGgl9VXAg==}
 
   '@rbxts/services@1.5.5':
     resolution: {integrity: sha512-Hu7QH2ecefS60zpakKG3T2vgABydoOJqpSG7nXr59wFAbPk/cA+OcsntYPHUWyHAat0VFGZ5jNZLTLdiqfssvg==}
@@ -187,8 +190,8 @@ packages:
   '@rbxts/types@1.0.813':
     resolution: {integrity: sha512-Qpsmqnl+TNdl5AYqKFkYHyUrv652r30qK6A3GObOyDz+cvn8i+HE61mO021oq0nu1FcA4pMHbYqLSbv2CMF9Ig==}
 
-  '@rbxts/uiblox@0.2.0-alpha.0':
-    resolution: {integrity: sha512-jH4VzzjtVPs3xn+YtocTwx+o2r7pCKlaB1ErHur3F2dl031cPjXdK4mS9Iptgn4roA6vGlPRyHD5nX+7OFAg7g==}
+  '@rbxts/uiblox@0.2.0-alpha.3':
+    resolution: {integrity: sha512-AU5hyTCe0zoFyDAMLXMlXKD392h99xT8AecnoqLgcNimNLU9LuXTSx0XE4zZgJxSSjWa0GIpfPAtA3Fn3PZgAw==}
 
   '@roblox-ts/luau-ast@2.0.0':
     resolution: {integrity: sha512-cmMi093IdwBOLVxwuordhM8AmtbyTIyRpsTbB0D/JauidW4SXsQRQowSwWjHo4QP0DRJBXvOIlxtqEQi50uNzQ==}
@@ -974,15 +977,15 @@ snapshots:
 
   '@rbxts/message-templates@0.3.2': {}
 
-  '@rbxts/pretty-react-hooks@0.6.1':
+  '@rbxts/pretty-react-hooks@0.6.4(@rbxts/react-roblox@17.2.1)(@rbxts/react@17.2.1)':
     dependencies:
       '@rbxts/react': 17.2.1
       '@rbxts/react-roblox': 17.2.1
-      '@rbxts/ripple': 0.9.1
+      '@rbxts/ripple': 0.9.3
       '@rbxts/services': 1.5.5
       '@rbxts/set-timeout': 1.1.2
 
-  '@rbxts/react-reflex@0.3.4(@rbxts/react@17.2.1)(@rbxts/reflex@4.3.1)':
+  '@rbxts/react-reflex@0.3.7(@rbxts/react@17.2.1)(@rbxts/reflex@4.3.1)':
     dependencies:
       '@rbxts/react': 17.2.1
       '@rbxts/reflex': 4.3.1
@@ -1000,7 +1003,7 @@ snapshots:
 
   '@rbxts/reflex@4.3.1': {}
 
-  '@rbxts/ripple@0.9.1': {}
+  '@rbxts/ripple@0.9.3': {}
 
   '@rbxts/services@1.5.5': {}
 
@@ -1010,12 +1013,12 @@ snapshots:
 
   '@rbxts/types@1.0.813': {}
 
-  '@rbxts/uiblox@0.2.0-alpha.0':
+  '@rbxts/uiblox@0.2.0-alpha.3':
     dependencies:
       '@rbxts/boat-tween': 1.0.1
-      '@rbxts/pretty-react-hooks': 0.6.1
+      '@rbxts/pretty-react-hooks': 0.6.4(@rbxts/react-roblox@17.2.1)(@rbxts/react@17.2.1)
       '@rbxts/react': 17.2.1
-      '@rbxts/react-reflex': 0.3.4(@rbxts/react@17.2.1)(@rbxts/reflex@4.3.1)
+      '@rbxts/react-reflex': 0.3.7(@rbxts/react@17.2.1)(@rbxts/reflex@4.3.1)
       '@rbxts/react-roblox': 17.2.1
       '@rbxts/reflex': 4.3.1
       '@rbxts/services': 1.5.5
