@@ -5,6 +5,7 @@ interface Args {
 	open: boolean;
 	empty: boolean;
 	dense: boolean;
+	selected: string;
 }
 
 function MenuStory(args: Args) {
@@ -22,6 +23,7 @@ function MenuStory(args: Args) {
 				anchor={anchor}
 				open={open}
 				dense={args.dense}
+				selected={args.selected === "" ? undefined : args.selected}
 				items={
 					args.empty
 						? []
@@ -40,11 +42,12 @@ function MenuStory(args: Args) {
 
 export default {
 	title: "Components/Menu",
-	args: { open: false, empty: false, dense: false },
+	args: { open: true, empty: false, dense: false, selected: "a" },
 	argTypes: {
 		open: { type: "boolean" },
 		empty: { type: "boolean" },
 		dense: { type: "boolean" },
+		selected: { type: "string" },
 	},
 	render: (args: Args) => <MenuStory {...args} />,
 };
