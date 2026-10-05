@@ -5,6 +5,7 @@ interface Args {
 	label: string;
 	selected: boolean;
 	disabled: boolean;
+	size: "small" | "medium" | "large";
 }
 
 function ToggleButtonStory(args: Args) {
@@ -14,6 +15,7 @@ function ToggleButtonStory(args: Args) {
 			label={args.label}
 			selected={selected}
 			disabled={args.disabled}
+			size={args.size}
 			onActivated={() => setSelected(!selected)}
 		/>
 	);
@@ -21,11 +23,12 @@ function ToggleButtonStory(args: Args) {
 
 export default {
 	title: "Components/Toggle Button",
-	args: { label: "Bold", selected: false, disabled: false },
+	args: { label: "Bold", selected: false, disabled: false, size: "medium" },
 	argTypes: {
 		label: { type: "string" },
 		selected: { type: "boolean" },
 		disabled: { type: "boolean" },
+		size: { type: "enum", options: ["small", "medium", "large"] },
 	},
 	render: (args: Args) => <ToggleButtonStory {...args} />,
 };
