@@ -8,6 +8,7 @@ interface Args {
 	step: number;
 	disabled: boolean;
 	marks: boolean;
+	color: "primary" | "accent";
 }
 
 function SliderStory(args: Args) {
@@ -20,6 +21,7 @@ function SliderStory(args: Args) {
 			step={args.step}
 			disabled={args.disabled}
 			marks={args.marks}
+			color={args.color}
 			onChange={setValue}
 		/>
 	);
@@ -27,7 +29,7 @@ function SliderStory(args: Args) {
 
 export default {
 	title: "Components/Slider",
-	args: { value: 40, min: 0, max: 100, step: 5, disabled: false, marks: true },
+	args: { value: 40, min: 0, max: 100, step: 5, disabled: false, marks: true, color: "accent" },
 	argTypes: {
 		value: { type: "number", control: "slider", min: 0, max: 100, step: 5 },
 		min: { type: "number" },
@@ -35,6 +37,7 @@ export default {
 		step: { type: "number" },
 		disabled: { type: "boolean" },
 		marks: { type: "boolean" },
+		color: { type: "enum", options: ["primary", "accent"] },
 	},
 	render: (args: Args) => <SliderStory {...args} />,
 };

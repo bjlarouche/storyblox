@@ -47,6 +47,7 @@ interface SliderProps {
 	step?: number;
 	disabled?: boolean;
 	marks?: boolean | ReadonlyArray<number>;
+	color?: "primary" | "accent";
 }
 
 interface SplitProps {
