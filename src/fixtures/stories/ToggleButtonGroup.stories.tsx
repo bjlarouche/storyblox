@@ -30,7 +30,7 @@ function ToggleButtonGroupStory(args: Args) {
 
 export default {
 	title: "Components/Toggle Button Group",
-	args: { value: "left", disabled: false, orientation: "vertical", size: "small" },
+	args: { value: "left", disabled: false, orientation: "vertical", size: "medium" },
 	argTypes: {
 		value: { type: "enum", options: ["left", "center", "right"] },
 		disabled: { type: "boolean" },
