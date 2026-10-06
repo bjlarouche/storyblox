@@ -26,7 +26,7 @@ function RadioStory(args: Args) {
 
 export default {
 	title: "Components/RadioGroup",
-	args: { options: ["alpha", "beta", "gamma"], value: "alpha", disabled: false, row: false, size: "small" },
+	args: { options: ["alpha", "beta", "gamma"], value: "alpha", disabled: false, row: true, size: "small" },
 	argTypes: {
 		options: { type: "array", item: { type: "string" } },
 		value: { type: "string" },
