@@ -19,6 +19,7 @@ function VirtualListStory(args: Args) {
 		listRef.current?.ensureVisible(args.scrollTo, args.align);
 	}, [args.scrollTo, args.align, args.count]);
 
+	const inset = new UDim(0, theme.padding.calc(2));
 	return (
 		<frame Size={new UDim2(0, 240, 0, 320)} BackgroundTransparency={1}>
 			<VirtualList
@@ -27,7 +28,11 @@ function VirtualListStory(args: Args) {
 				itemHeight={args.itemHeight}
 				overscan={args.overscan}
 				listRef={listRef}
-				empty={<textlabel Size={UDim2.fromScale(1, 1)} BackgroundTransparency={1} Text="No rows" TextSize={16} TextColor3={theme.palette.text.primary} />}
+				empty={
+					<textlabel Size={UDim2.fromScale(1, 1)} BackgroundTransparency={1} Text="No rows" TextSize={16} TextColor3={theme.palette.text.primary}>
+						<uipadding PaddingLeft={inset} PaddingRight={inset} />
+					</textlabel>
+				}
 				renderItem={(item) => (
 					<textlabel
 						Size={UDim2.fromScale(1, 1)}
@@ -36,7 +41,9 @@ function VirtualListStory(args: Args) {
 						TextSize={16}
 						TextColor3={theme.palette.text.primary}
 						TextXAlignment={Enum.TextXAlignment.Left}
-					/>
+					>
+						<uipadding PaddingLeft={inset} PaddingRight={inset} />
+					</textlabel>
 				)}
 			/>
 		</frame>
