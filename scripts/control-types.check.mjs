@@ -10,6 +10,7 @@ const defineStory = readFileSync(join(root, "src/packages/defineStory.ts"), "utf
 const argCodec = readFileSync(join(root, "src/packages/argCodec.ts"), "utf8");
 const controls = readFileSync(join(root, "src/packages/ui/template/components/Controls.tsx"), "utf8");
 const datatypes = readFileSync(join(root, "src/fixtures/stories/Datatypes.stories.tsx"), "utf8");
+const nestedFixture = readFileSync(join(root, "src/fixtures/stories/NestedControls.stories.tsx"), "utf8");
 
 const matrix = [
 	{ type: "string", status: "rich", codecKind: null, editor: 'type === "string"', fixture: false },
@@ -37,6 +38,7 @@ const matrix = [
 	{ type: "array", status: "nested", codecKind: null, editor: 'type === "array"', fixture: false },
 	{ type: "dictionary", status: "nested", codecKind: null, editor: 'type === "dictionary"', fixture: false },
 	{ type: "union", status: "nested", codecKind: null, editor: 'type === "union"', fixture: false },
+	{ type: "tuple", status: "nested", codecKind: null, editor: 'type === "tuple"', fixture: false },
 	{ type: "readonly", status: "readonly", codecKind: null, editor: 'type === "readonly"', fixture: false },
 	{ type: "custom", status: "rich", codecKind: null, editor: 'type === "custom"', fixture: false },
 ];
@@ -69,9 +71,21 @@ for (const row of matrix) {
 }
 
 if (rich < 21) throw new Error(`expected >=21 rich types, got ${rich}`);
-if (nested !== 4) throw new Error(`expected 4 nested types, got ${nested}`);
+if (nested !== 5) throw new Error(`expected 5 nested types, got ${nested}`);
 if (readonly !== 1) throw new Error(`expected 1 readonly type, got ${readonly}`);
 if (unsupported.length < 5) throw new Error("unsupported list incomplete");
+if (!controls.includes("const controlEditor =")) throw new Error("missing controlEditor resolver");
+if (!controls.includes("controlEditor(childPath")) throw new Error("nested fields do not recurse");
+if (!controls.includes("controlFaultPath(")) throw new Error("missing field-path faults");
+if (/tostring\(items\[index/.test(controls) || /tostring\(record\[fieldName\]/.test(controls)) {
+	throw new Error("nested text fallback where a schema exists");
+}
+for (const kind of ["array", "object", "dictionary", "union", "tuple"]) {
+	if (!nestedFixture.includes(`type: "${kind}"`)) throw new Error(`nested fixture missing ${kind}`);
+}
+for (const row of unsupported) {
+	if (row.reason.length === 0) throw new Error(`unsupported ${row.type} missing rationale`);
+}
 
 console.log(
 	`control types ok rich=${rich} nested=${nested} readonly=${readonly} unsupported=${unsupported.length}`,

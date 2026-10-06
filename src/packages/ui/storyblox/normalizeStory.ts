@@ -87,7 +87,9 @@ function argValueMatches(value: unknown, kind: unknown): boolean {
 	if (kind === "asset") {
 		return typeOf(value) === "number" && (value as number) === value && (value as number) >= 0 && (value as number) % 1 === 0;
 	}
-	if (kind === "object" || kind === "array" || kind === "dictionary" || kind === "union") return typeOf(value) === "table";
+	if (kind === "object" || kind === "array" || kind === "dictionary" || kind === "union" || kind === "tuple") {
+		return typeOf(value) === "table";
+	}
 	if (kind === "readonly") {
 		const kindOf = typeOf(value);
 		return kindOf === "function" || kindOf === "Instance" || kindOf === "table";

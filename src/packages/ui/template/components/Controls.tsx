@@ -6,6 +6,7 @@ import {
 	insertItem,
 	mountControlEditor,
 	moveItem,
+	controlFaultPath,
 	patchField,
 	readOnlyKind,
 	removeItem,
@@ -36,6 +37,7 @@ interface Spec {
 	enumType?: string;
 	fields?: { [key: string]: Spec };
 	item?: Spec;
+	items?: Spec[];
 	tag?: string;
 	variants?: { [key: string]: { [key: string]: Spec } };
 	editor?: string;
@@ -227,6 +229,15 @@ function freshKey(name: string) {
 	return `${name}-${rowSerial}`;
 }
 
+function blankValue(spec?: Spec): defined {
+	const kind = spec?.type;
+	if (kind === "number") return 0;
+	if (kind === "boolean") return false;
+	if (kind === "array" || kind === "tuple") return [] as unknown as defined;
+	if (kind === "object" || kind === "dictionary") return {} as unknown as defined;
+	return "" as defined;
+}
+
 function CustomEditor(props: { editor: string; value: unknown; onChange: (value: unknown) => void }) {
 	const host = useRef<Frame>();
 	const change = useRef(props.onChange);
@@ -270,22 +281,87 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 		);
 	}
 	let order = 1;
-	for (const [key, spec] of pairs(specs)) {
-		const name = key as string;
-		const value = args[name];
+	const controlEditor = (
+		path: string,
+		spec: Spec | undefined,
+		value: unknown,
+		commit: (incoming: unknown) => void,
+	): React.Element | undefined => {
+		const name = path;
 		const options = spec?.type === "EnumItem" ? enumItemOptions(spec?.enumType, spec?.options) : choiceOptions(spec?.options);
 		const commitNumber = (incoming: unknown) => {
 			const committed = commitNumberText(tostring(incoming));
-			if (committed !== undefined) onChange(name, committed);
+			if (committed !== undefined) commit(committed);
 		};
 		let editor: React.Element | undefined;
+		const nestedField = (
+			label: string,
+			childPath: string,
+			childSpec: Spec | undefined,
+			childValue: unknown,
+			childCommit: (incoming: unknown) => void,
+		) => (
+			<frame key={label} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+				<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={gap} SortOrder={Enum.SortOrder.LayoutOrder} />
+				<textlabel
+					key="Name"
+					Text={label}
+					LayoutOrder={1}
+					Size={new UDim2(1, 0, 0, 0)}
+					AutomaticSize={Enum.AutomaticSize.Y}
+					BackgroundTransparency={1}
+					Font={theme.typography.fontFamilies.default}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={theme.palette.text.secondary}
+					TextXAlignment={Enum.TextXAlignment.Left}
+				/>
+				<frame key="Editor" LayoutOrder={2} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+					{controlEditor(childPath, childSpec, childValue, childCommit)}
+				</frame>
+				{faults[childPath] !== undefined && faults[childPath].size() > 0 && (
+					<textlabel
+						key="Fault"
+						Text={faults[childPath]}
+						LayoutOrder={3}
+						Size={new UDim2(1, 0, 0, 0)}
+						AutomaticSize={Enum.AutomaticSize.Y}
+						TextWrapped={true}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.default}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.status.error.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+					/>
+				)}
+				{childSpec?.optional === true && childValue !== undefined && (
+					<textbutton
+						key="Clear"
+						Text="Clear"
+						LayoutOrder={4}
+						AutomaticSize={Enum.AutomaticSize.X}
+						Size={new UDim2(0, 0, 0, theme.spacing.calc(1.5))}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.primary.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+						Event={{
+							MouseButton1Click: click(() => {
+								setFaults((current) => writeFault(current, childPath, ""));
+								childCommit(undefined);
+							}),
+						}}
+					/>
+				)}
+			</frame>
+		);
 		if (spec?.type === "boolean" && spec.control === "switch") {
 			editor = (
 				<kit.Switch
 					key={name}
 					value={value === true}
 					disabled={spec.disabled === true}
-					onChange={(incoming) => onChange(name, incoming)}
+					onChange={(incoming) => commit(incoming)}
 				/>
 			);
 		} else if (spec?.type === "boolean") {
@@ -295,7 +371,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					value={value === true}
 					mixed={spec.optional === true && value === undefined}
 					disabled={spec.disabled === true}
-					onChange={(incoming) => onChange(name, incoming)}
+					onChange={(incoming) => commit(incoming)}
 				/>
 			);
 		} else if (spec?.type === "number" && spec.control === "slider") {
@@ -344,7 +420,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					value={typeOf(value) === "string" ? (value as string) : ""}
 					options={options}
 					disabled={spec.disabled === true}
-					onChange={(incoming) => onChange(name, incoming)}
+					onChange={(incoming) => commit(incoming)}
 				/>
 			);
 		} else if (spec?.type === "enum") {
@@ -355,7 +431,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					options={options}
 					className={fill}
 					disabled={spec.disabled === true}
-					onChange={(incoming) => onChange(name, incoming)}
+					onChange={(incoming) => commit(incoming)}
 				/>
 			);
 		} else if (spec?.type === "color" && hasKit("ColorPicker")) {
@@ -367,7 +443,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -380,7 +456,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -400,7 +476,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -413,7 +489,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -427,7 +503,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -441,7 +517,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -461,7 +537,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -474,7 +550,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -487,7 +563,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -500,7 +576,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -514,7 +590,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -530,7 +606,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -552,7 +628,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					disabled={spec.disabled === true}
 					onChange={(incoming) => {
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, incoming);
+						commit(incoming);
 					}}
 				/>
 			);
@@ -569,7 +645,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 							return;
 						}
 						setFaults((current) => writeFault(current, name, ""));
-						onChange(name, id);
+						commit(id);
 					}}
 				/>
 			);
@@ -585,7 +661,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 						disabled={spec.disabled === true}
 						onChange={(incoming) => {
 							setFaults((current) => writeFault(current, name, ""));
-							onChange(name, incoming);
+							commit(incoming);
 						}}
 					/>
 				);
@@ -614,7 +690,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					return;
 				}
 				setFaults((current) => writeFault(current, name, ""));
-				onChange(name, parsed.value);
+				commit(parsed.value);
 			};
 			if (spec?.type === "EnumItem" && options.size() > 0) {
 				const selected = typeOf(value) === "EnumItem" ? (value as { Name: string }).Name : "";
@@ -650,7 +726,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 				/>
 			);
 		} else if (editor === undefined && spec?.type === "custom") {
-			editor = <CustomEditor key={name} editor={spec.editor ?? ""} value={value} onChange={(incoming) => onChange(name, incoming)} />;
+			editor = <CustomEditor key={name} editor={spec.editor ?? ""} value={value} onChange={(incoming) => commit(incoming)} />;
 		} else if (editor === undefined && spec?.type === "array") {
 			const items = (typeOf(value) === "table" ? value : []) as Array<defined>;
 			let keys = rowKeys[name];
@@ -666,20 +742,17 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			const itemRows: Array<React.Element> = [];
 			for (let index = 0; index < items.size(); index++) {
 				const rowKey = keys[index];
+				const childPath = controlFaultPath(name, tostring(index));
 				itemRows.push(
-					<Input
-						key={rowKey}
-						{...({
-							variant: "standard",
-							width: new UDim(1, 0),
-							text: tostring(items[index] ?? ""),
-							onTextChanged: (text: string) => {
-								const written = spec.item?.type === "number" ? commitNumberText(text) : text;
-								if (written === undefined) return;
-								onChange(name, insertItem(removeItem(items, index), index, written as defined));
-							},
-						} as React.ComponentProps<typeof Input> & { onTextChanged?: (text: string) => void })}
-					/>,
+					<frame key={rowKey} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+						{nestedField(tostring(index), childPath, spec.item, items[index], (incoming) => {
+							if (incoming === undefined) {
+								commit(removeItem(items, index));
+								return;
+							}
+							commit(insertItem(removeItem(items, index), index, incoming as defined));
+						})}
+					</frame>,
 				);
 			}
 			editor = (
@@ -699,7 +772,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 							MouseButton1Click: click(() => {
 								const last = items.size() - 1;
 								if (last < 1) return;
-								onChange(name, moveItem(items, last, last - 1));
+								commit(moveItem(items, last, last - 1));
 								setRowKeys((current) => patchField(current, name, moveItem(keys, last, last - 1)) as { [key: string]: Array<string> });
 							}),
 						}}
@@ -717,7 +790,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 							MouseButton1Click: click(() => {
 								const last = items.size() - 1;
 								if (last < 0) return;
-								onChange(name, removeItem(items, last));
+								commit(removeItem(items, last));
 								setRowKeys((current) => patchField(current, name, removeItem(keys, last)) as { [key: string]: Array<string> });
 							}),
 						}}
@@ -733,12 +806,35 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 						TextXAlignment={Enum.TextXAlignment.Left}
 						Event={{
 							MouseButton1Click: click(() => {
-								const blank = spec.item?.type === "number" ? 0 : "";
-								onChange(name, insertItem(items, items.size(), blank));
+								commit(insertItem(items, items.size(), blankValue(spec.item)));
 								setRowKeys((current) => patchField(current, name, insertItem(keys, keys.size(), freshKey(name))) as { [key: string]: Array<string> });
 							}),
 						}}
 					/>
+				</frame>
+			);
+		} else if (editor === undefined && spec?.type === "tuple") {
+			const slots = spec.items ?? [];
+			const list = (typeOf(value) === "table" ? value : []) as Array<defined>;
+			const fieldRows: Array<React.Element> = [];
+			for (let index = 0; index < slots.size(); index++) {
+				const childPath = controlFaultPath(name, tostring(index));
+				fieldRows.push(
+					nestedField(tostring(index), childPath, slots[index], list[index], (incoming) => {
+						if (incoming === undefined) return;
+						const written: Array<defined> = [];
+						const count = math.max(list.size(), index + 1);
+						for (let slot = 0; slot < count; slot++) {
+							written.push(slot === index ? (incoming as defined) : (list[slot] ?? blankValue(slots[slot])));
+						}
+						commit(written);
+					}),
+				);
+			}
+			editor = (
+				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
+					{fieldRows}
 				</frame>
 			);
 		} else if (editor === undefined && spec?.type === "union") {
@@ -747,38 +843,109 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			const selected = tostring(record[tag] ?? "");
 			const variantNames: Array<{ label: string; value: string }> = [];
 			for (const [variant] of pairs(spec.variants ?? {})) variantNames.push({ label: variant as string, value: variant as string });
+			const variantFields = spec.variants?.[selected] ?? {};
+			const fieldRows: Array<React.Element> = [];
+			for (const [field, child] of pairs(variantFields)) {
+				const fieldName = field as string;
+				const childPath = controlFaultPath(name, fieldName);
+				fieldRows.push(
+					nestedField(fieldName, childPath, child, record[fieldName], (incoming) => {
+						commit(patchField(record, fieldName, incoming));
+					}),
+				);
+			}
 			editor = (
-				<kit.Select
-					key={name}
-					value={selected}
-					options={variantNames}
-					className={fill}
-					onChange={(incoming) => onChange(name, switchUnion(tag, incoming, {}))}
-				/>
+				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+					<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={gap} />
+					<kit.Select
+						key="Tag"
+						value={selected}
+						options={variantNames}
+						className={fill}
+						onChange={(incoming) => {
+							const seed: { [key: string]: unknown } = {};
+							for (const [field, child] of pairs(spec.variants?.[incoming] ?? {})) {
+								seed[field as string] = blankValue(child);
+							}
+							commit(switchUnion(tag, incoming, seed));
+						}}
+					/>
+					{fieldRows}
+				</frame>
 			);
-		} else if (editor === undefined && (spec?.type === "object" || spec?.type === "dictionary")) {
+		} else if (editor === undefined && spec?.type === "object") {
 			const record = typeOf(value) === "table" ? (value as { [key: string]: unknown }) : {};
 			const fieldRows: Array<React.Element> = [];
-			const entries = spec.type === "object" ? spec.fields ?? {} : record;
-			for (const [field] of pairs(entries)) {
+			for (const [field, child] of pairs(spec.fields ?? {})) {
 				const fieldName = field as string;
+				const childPath = controlFaultPath(name, fieldName);
 				fieldRows.push(
-					<Input
-						key={fieldName}
-						{...({
-							variant: "standard",
-							width: new UDim(1, 0),
-							text: tostring(record[fieldName] ?? ""),
-							placeholder: fieldName,
-							onTextChanged: (text: string) => onChange(name, patchField(record, fieldName, text)),
-						} as React.ComponentProps<typeof Input> & { onTextChanged?: (text: string) => void })}
-					/>,
+					nestedField(fieldName, childPath, child, record[fieldName], (incoming) => {
+						commit(patchField(record, fieldName, incoming));
+					}),
 				);
 			}
 			editor = (
 				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
 					{fieldRows}
+				</frame>
+			);
+		} else if (editor === undefined && spec?.type === "dictionary") {
+			const record = typeOf(value) === "table" ? (value as { [key: string]: unknown }) : {};
+			const fieldRows: Array<React.Element> = [];
+			const keyNames: Array<string> = [];
+			for (const [field] of pairs(record)) keyNames.push(field as string);
+			for (const fieldName of keyNames) {
+				const childPath = controlFaultPath(name, fieldName);
+				fieldRows.push(
+					nestedField(fieldName, childPath, spec.item, record[fieldName], (incoming) => {
+						commit(patchField(record, fieldName, incoming));
+					}),
+				);
+			}
+			editor = (
+				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
+					{fieldRows}
+					<textbutton
+						key="Delete"
+						Text="Delete"
+						Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.primary.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+						Event={{
+							MouseButton1Click: click(() => {
+								const last = keyNames.size() - 1;
+								if (last < 0) return;
+								commit(patchField(record, keyNames[last], undefined));
+							}),
+						}}
+					/>
+					<textbutton
+						key="Add"
+						Text="Add"
+						Size={new UDim2(0, theme.spacing.calc(4), 0, theme.spacing.calc(1.5))}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.primary.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+						Event={{
+							MouseButton1Click: click(() => {
+								let keyName = "key";
+								let serial = 1;
+								while (record[keyName] !== undefined) {
+									serial += 1;
+									keyName = `key${serial}`;
+								}
+								commit(patchField(record, keyName, blankValue(spec.item)));
+							}),
+						}}
+					/>
 				</frame>
 			);
 		} else if (editor === undefined && spec?.type === "string") {
@@ -789,12 +956,18 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 						variant: "standard",
 						width: new UDim(1, 0),
 						text: typeOf(value) === "string" ? (value as string) : "",
-						onInput: (text: string) => onChange(name, text),
-						onTextChanged: (text: string) => onChange(name, text),
+						onInput: (text: string) => commit(text),
+						onTextChanged: (text: string) => commit(text),
 					} as React.ComponentProps<typeof Input> & { onInput?: (text: string) => void })}
 				/>
 			);
 		}
+		return editor;
+	};
+	for (const [key, spec] of pairs(specs)) {
+		const name = key as string;
+		const value = args[name];
+		const editor = controlEditor(name, spec, value, (incoming) => onChange(name, incoming));
 		if (editor !== undefined) {
 			rows.push(
 				<frame
