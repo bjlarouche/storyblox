@@ -134,6 +134,7 @@ export interface ModernStory<T> {
 		preset?: "phone" | "tablet" | "desktop" | "console";
 		width?: number;
 		height?: number;
+		orientation?: "portrait" | "landscape";
 		background?: Color3;
 	};
 	tools?: StoryTools;

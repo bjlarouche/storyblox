@@ -7,7 +7,7 @@ import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
-import { GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
+import { flipOrientation, GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { createActionLog } from "packages/storyActions";
 import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
 import { BoxRect, collectGuiBoxes, guiBox } from "packages/layoutTools";
@@ -204,6 +204,8 @@ function Template({
 	const [outlineOrigin, setOutlineOrigin] = useState<BoxRect>();
 	const [zoom, setZoom] = useState(1);
 	const [yaw, setYaw] = useState(0);
+	const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
+	const [bgStep, setBgStep] = useState(0);
 	const [dock, setDock] = useState({ x: 0, y: 0 });
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
@@ -249,6 +251,9 @@ function Template({
 		setCaseRunning(undefined);
 		setLastCase(undefined);
 		setA11yFindings([]);
+		setBgStep(0);
+		const previewOrientation = (story as { preview?: { orientation?: unknown } } | undefined)?.preview?.orientation;
+		setOrientation(previewOrientation === "landscape" ? "landscape" : "portrait");
 	}
 	const previewTheme = theme;
 	const argTypes = (story as { argTypes?: unknown } | undefined)?.argTypes;
@@ -394,14 +399,20 @@ function Template({
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
 			const logical = (
-				story as { preview?: { kind?: unknown; width?: unknown; height?: unknown; background?: unknown } }
+				story as {
+					preview?: { kind?: unknown; width?: unknown; height?: unknown; background?: unknown; orientation?: unknown };
+				}
 			).preview;
 			const viewport = logical?.kind === "viewport" && !native;
-			const size = previewSize(logical);
+			const size = previewSize(logical, orientation);
 			const declared = size !== undefined;
 			const logicalWidth = size?.width ?? dock.x;
 			const logicalHeight = size?.height ?? dock.y;
-			const background = typeOf(logical?.background) === "Color3" ? (logical?.background as Color3) : undefined;
+			const storyBackground =
+				typeOf(logical?.background) === "Color3" ? (logical?.background as Color3) : undefined;
+			const chromeBackground =
+				bgStep === 1 ? theme.palette.surface.paper : bgStep === 2 ? theme.palette.surface.canvas : undefined;
+			const background = chromeBackground ?? storyBackground;
 			const fitScale = declared
 				? previewScale(fit ? "fit" : "actual", logicalWidth, logicalHeight, dock.x, dock.y)
 				: 1;
@@ -450,7 +461,27 @@ function Template({
 			setFailure(error);
 			onRenderError?.(error);
 		}
-	}, [story, gate, theme, epoch, args, native, mountKey, fit, dock, grid, outline, measure, outlineBoxes, outlineOrigin, zoom, previewTheme, yaw]);
+	}, [
+		story,
+		gate,
+		theme,
+		epoch,
+		args,
+		native,
+		mountKey,
+		fit,
+		dock,
+		grid,
+		outline,
+		measure,
+		outlineBoxes,
+		outlineOrigin,
+		zoom,
+		previewTheme,
+		yaw,
+		orientation,
+		bgStep,
+	]);
 
 	useEffect(() => {
 		setCanvasKey((current) => current + 1);
@@ -586,6 +617,33 @@ function Template({
 								TextSize={theme.typography.fontSizes.caption}
 								TextColor3={theme.palette.primary.main}
 								Event={{ MouseButton1Click: () => setFit((current) => !current) }}
+							/>
+							{previewSize((story as { preview?: unknown } | undefined)?.preview) !== undefined && (
+								<textbutton
+									key="Orientation"
+									Text={orientation === "portrait" ? "Portrait" : "Landscape"}
+									LayoutOrder={11}
+									AutomaticSize={Enum.AutomaticSize.X}
+									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.palette.primary.main}
+									Event={{ MouseButton1Click: () => setOrientation((current) => flipOrientation(current)) }}
+								/>
+							)}
+							<textbutton
+								key="Background"
+								Text={bgStep === 0 ? "Bg" : bgStep === 1 ? "Bg paper" : "Bg canvas"}
+								LayoutOrder={12}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.primary.main}
+								TextTransparency={bgStep === 0 ? 0.45 : 0}
+								Event={{ MouseButton1Click: () => setBgStep((current) => (current + 1) % 3) }}
 							/>
 							{outlineEnabled && (
 								<textbutton
