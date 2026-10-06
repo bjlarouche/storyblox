@@ -10,7 +10,7 @@ if (!safe.includes("resetKey") || !safe.includes("Retry") || !safe.includes("Err
 }
 
 const panel = read("src/packages/ui/template/components/ErrorPanel.tsx");
-for (const needle of ["<textbox", "TextEditable={false}", "ClearTextOnFocus={false}", "MultiLine={true}", "<scrollingframe"]) {
+for (const needle of ["<textbox", "TextEditable={false}", "ClearTextOnFocus={false}", "MultiLine={true}", "<scrollingframe", "setclipboard"]) {
 	if (!panel.includes(needle)) throw new Error(`ErrorPanel must keep ${needle}`);
 }
 if (panel.includes("TextScaled") || panel.indexOf('"Retry"') > panel.indexOf("<scrollingframe")) {

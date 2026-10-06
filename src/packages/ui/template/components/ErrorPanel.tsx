@@ -1,6 +1,12 @@
 import React, { useRef } from "@rbxts/react";
 import { useTheme } from "@rbxts/uiblox";
 
+declare function setclipboard(value: string): void;
+
+function copyError(text: string) {
+	return pcall(() => setclipboard(text))[0];
+}
+
 export interface ErrorPanelProps {
 	message: string;
 	title?: string;
@@ -52,7 +58,8 @@ function ErrorPanel({ message, title = "Error", compact = false, onRetry }: Erro
 					TextSize={theme.typography.fontSizes.caption}
 					TextColor3={theme.palette.status.error.main}
 				/>
-				{action("SelectAll", "Select all", 2, () => {
+				{action("Copy", "Copy", 2, () => {
+					if (copyError(message)) return;
 					const rbx = box.current;
 					if (rbx === undefined) return;
 					rbx.CaptureFocus();
