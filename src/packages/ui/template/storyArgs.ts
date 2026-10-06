@@ -50,9 +50,9 @@ export function choiceOptions(options: unknown): Array<{ label: string; value: s
 export function enumItems(enumType?: string, options?: unknown): EnumItem[] {
 	const items = new Array<EnumItem>();
 	if (typeOf(enumType) === "string") {
-		const enumObj = (Enum as unknown as { [key: string]: { GetEnumItems?: () => EnumItem[] } })[enumType as string];
-		if (enumObj !== undefined && typeOf(enumObj.GetEnumItems) === "function") {
-			for (const item of enumObj.GetEnumItems!()) items.push(item);
+		const [found, enumObj] = pcall(() => (Enum as unknown as { [key: string]: unknown })[enumType as string]);
+		if (found && typeOf(enumObj) === "Enum") {
+			for (const item of (enumObj as Enum).GetEnumItems()) items.push(item);
 		}
 	}
 	if (typeOf(options) !== "table" || (options as Array<unknown>).size() === 0) return items;

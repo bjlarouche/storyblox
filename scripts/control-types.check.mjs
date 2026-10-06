@@ -96,6 +96,10 @@ for (const kind of ["array", "object", "dictionary", "union", "tuple"]) {
 for (const row of unsupported) {
 	if (row.reason.length === 0) throw new Error(`unsupported ${row.type} missing rationale`);
 }
+const storyArgs = readFileSync(join(root, "src/packages/ui/template/storyArgs.ts"), "utf8");
+if (/GetEnumItems\?\s*:/.test(`${storyArgs}\n${controls}`) || !storyArgs.includes("(enumObj as Enum).GetEnumItems()")) {
+	throw new Error("EnumItem controls must call Enum:GetEnumItems as a method");
+}
 
 assertInstalledTypes();
 console.log(

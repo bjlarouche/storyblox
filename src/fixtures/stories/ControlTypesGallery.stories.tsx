@@ -1,6 +1,7 @@
 import React, { useState } from "@rbxts/react";
 import { controlMetrics, Input, useTheme } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
+import { enumItems } from "packages/ui/template/storyArgs";
 import {
 	AssetField,
 	BrickColorPicker,
@@ -40,15 +41,8 @@ function attempt<T>(run: () => T): T | undefined {
 	return ok ? (value as T) : undefined;
 }
 
-function enumList(enumType: string) {
-	const items = new Array<EnumItem>();
-	const enumObj = (Enum as unknown as { [key: string]: { GetEnumItems?: () => EnumItem[] } })[enumType];
-	if (enumObj?.GetEnumItems) for (const item of enumObj.GetEnumItems()) items.push(item);
-	return items;
-}
-
 function enumNamed(enumType: string, name: string) {
-	for (const item of enumList(enumType)) if (item.Name === name) return item;
+	for (const item of enumItems(enumType)) if (item.Name === name) return item;
 	return undefined;
 }
 
@@ -134,7 +128,7 @@ function numberBox(label: string, order: number, value: number, theme: Theme, on
 
 function enumSelect(label: string, order: number, enumType: string, value: string, theme: Theme, fill: { Size: UDim2 }, onCommit: (value: string) => void) {
 	const options = new Array<{ label: string; value: string }>();
-	for (const item of enumList(enumType)) options.push({ label: item.Name, value: item.Name });
+	for (const item of enumItems(enumType)) options.push({ label: item.Name, value: item.Name });
 	return (
 		<frame key={label} LayoutOrder={order} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 			<uilistlayout FillDirection={Enum.FillDirection.Vertical} SortOrder={Enum.SortOrder.LayoutOrder} />
