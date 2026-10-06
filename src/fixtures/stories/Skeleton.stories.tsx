@@ -7,6 +7,7 @@ interface Args {
 	width: number;
 	height: number;
 	lines: number;
+	gap: number;
 	reducedMotion: boolean;
 }
 
@@ -18,6 +19,7 @@ export default {
 		width: 180,
 		height: 14,
 		lines: 3,
+		gap: 16,
 		reducedMotion: false,
 	},
 	argTypes: {
@@ -26,6 +28,7 @@ export default {
 		width: { type: "number", control: "slider", min: 40, max: 280, step: 10 },
 		height: { type: "number", control: "slider", min: 8, max: 80, step: 2 },
 		lines: { type: "number", control: "slider", min: 1, max: 5, step: 1 },
+		gap: { type: "number", control: "slider", min: 0, max: 32, step: 2 },
 		reducedMotion: { type: "boolean" },
 	},
 	cases: {
@@ -56,6 +59,7 @@ export default {
 				width={args.width}
 				height={args.height}
 				lines={args.variant === "text" ? args.lines : 1}
+				gap={args.gap}
 				animation={args.animation === "still" ? false : args.animation}
 				reducedMotion={args.reducedMotion}
 			/>
