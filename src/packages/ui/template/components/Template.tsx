@@ -8,6 +8,7 @@ import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
 import { flipOrientation, GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
+import { extraGlobalEntries, mergeGlobals } from "packages/storyGlobals";
 import { createActionLog } from "packages/storyActions";
 import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
 import { BoxRect, collectGuiBoxes, guiBox } from "packages/layoutTools";
@@ -142,6 +143,8 @@ export interface TemplateProps {
 	story?: Story;
 	primaryThemeEnabled?: boolean;
 	onToggleTheme?: () => void;
+	density?: "compact" | "comfortable";
+	onToggleDensity?: () => void;
 	inspectorOpen?: boolean;
 	onToggleInspector?: () => void;
 	starred?: boolean;
@@ -179,6 +182,8 @@ function Template({
 	story,
 	primaryThemeEnabled,
 	onToggleTheme,
+	density = "compact",
+	onToggleDensity,
 	inspectorOpen = true,
 	onToggleInspector,
 	starred,
@@ -208,6 +213,7 @@ function Template({
 	const [yaw, setYaw] = useState(0);
 	const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
 	const [bgStep, setBgStep] = useState(0);
+	const [globalPatch, setGlobalPatch] = useState<{ [key: string]: unknown }>({});
 	const [dock, setDock] = useState({ x: 0, y: 0 });
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
@@ -254,6 +260,7 @@ function Template({
 		setLastCase(undefined);
 		setA11yFindings([]);
 		setBgStep(0);
+		setGlobalPatch({});
 		const previewOrientation = (story as { preview?: { orientation?: unknown } } | undefined)?.preview?.orientation;
 		setOrientation(previewOrientation === "landscape" ? "landscape" : "portrait");
 	}
@@ -404,9 +411,11 @@ function Template({
 				context: { theme: Theme; globals?: { [key: string]: unknown }; parameters?: { [key: string]: unknown } },
 			) => unknown;
 			const props = args;
+			const themeName = primaryThemeEnabled ? "dark" : "light";
+			const globals = mergeGlobals(story.globals, globalPatch, themeName, density);
 			const [element, callback] = render(props, {
 				theme: previewTheme,
-				globals: story.globals,
+				globals,
 				parameters: story.parameters,
 			}) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
@@ -494,6 +503,9 @@ function Template({
 		yaw,
 		orientation,
 		bgStep,
+		globalPatch,
+		density,
+		primaryThemeEnabled,
 	]);
 
 	useEffect(() => {
@@ -748,6 +760,84 @@ function Template({
 									} as WriteableStyle<ImageButton>
 								}
 							/>
+							<textbutton
+								key="Density"
+								Text={density === "compact" ? "Compact" : "Comfort"}
+								LayoutOrder={13}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.primary.main}
+								Event={{ MouseButton1Click: () => onToggleDensity?.() }}
+							/>
+							{extraGlobalEntries(story?.globals).map((entry, index) => {
+								const shown = globalPatch[entry.name] !== undefined ? globalPatch[entry.name] : entry.value;
+								if (typeOf(shown) === "boolean" || typeOf(entry.value) === "boolean") {
+									const on = shown === true;
+									return (
+										<textbutton
+											key={`global-${entry.name}`}
+											Text={`${entry.name} ${on ? "on" : "off"}`}
+											LayoutOrder={20 + index}
+											AutomaticSize={Enum.AutomaticSize.X}
+											Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+											BackgroundTransparency={1}
+											Font={theme.typography.fontFamilies.semibold}
+											TextSize={theme.typography.fontSizes.caption}
+											TextColor3={theme.palette.primary.main}
+											Event={{
+												MouseButton1Click: () =>
+													setGlobalPatch((current) => {
+														const patched: { [key: string]: unknown } = {};
+														for (const [key, value] of pairs(current)) patched[key as string] = value;
+														patched[entry.name] = !on;
+														return patched;
+													}),
+											}}
+										/>
+									);
+								}
+								return (
+									<textbox
+										key={`global-${entry.name}`}
+										Text={tostring(shown)}
+										PlaceholderText={entry.name}
+										LayoutOrder={20 + index}
+										Size={new UDim2(0, theme.spacing.calc(8), 0, theme.spacing.calc(2))}
+										BackgroundTransparency={0.5}
+										BackgroundColor3={theme.palette.surface.paper}
+										ClearTextOnFocus={false}
+										Font={theme.typography.fontFamilies.default}
+										TextSize={theme.typography.fontSizes.caption}
+										TextColor3={theme.palette.text.primary}
+										Event={{
+											FocusLost: (box) =>
+												setGlobalPatch((current) => {
+													const patched: { [key: string]: unknown } = {};
+													for (const [key, value] of pairs(current)) patched[key as string] = value;
+													patched[entry.name] = box.Text;
+													return patched;
+												}),
+										}}
+									/>
+								);
+							})}
+							{extraGlobalEntries(story?.globals).size() > 0 && (
+								<textbutton
+									key="ResetGlobals"
+									Text="Reset"
+									LayoutOrder={40}
+									AutomaticSize={Enum.AutomaticSize.X}
+									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.palette.primary.main}
+									Event={{ MouseButton1Click: () => setGlobalPatch({}) }}
+								/>
+							)}
 						</frame>
 					)}
 				</frame>
@@ -838,11 +928,11 @@ function Template({
 							</ErrorBoundary>
 						}
 						second={
-							<ThemeProvider theme={{ ...theme, density: "compact" }}>
+							<ThemeProvider theme={theme}>
 								<SafeBoundary resetKey={`inspector:${storyKey}`}>
 								<InspectorPane
 									key={`inspector-${actionVersion}`}
-									theme={{ ...theme, density: "compact" }}
+									theme={theme}
 									args={args}
 									argTypes={argTypes}
 									defaults={storyArgs(story as never)}
