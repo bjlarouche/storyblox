@@ -82,6 +82,13 @@ const required = [
 		check: "scripts/preview-camera.check.mjs",
 		needles: [],
 	},
+	{
+		id: "globals",
+		title: "Shell/Globals",
+		check: "scripts/define-story.check.mjs",
+		needles: [],
+		templateNeedles: ["globals: story.globals", "parameters: story.parameters"],
+	},
 ];
 
 for (const pane of required) {

@@ -124,7 +124,7 @@ export interface ModernStory<T> {
 	description?: string;
 	args?: T;
 	argTypes?: { [key: string]: ControlSpec };
-	render: (args: T) => unknown;
+	render: (args: T, context?: { theme?: unknown; globals?: { [key: string]: unknown }; parameters?: { [key: string]: unknown } }) => unknown;
 	preview?: {
 		kind: string;
 		preset?: "phone" | "tablet" | "desktop" | "console";

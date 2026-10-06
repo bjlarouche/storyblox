@@ -35,6 +35,8 @@ export type NormalizedStory =
 			cases?: unknown;
 			description?: unknown;
 			tags?: unknown;
+			parameters?: unknown;
+			globals?: unknown;
 	  }
 	| { kind: "reject"; reason: string };
 
@@ -212,6 +214,8 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 			cases?: unknown;
 			description?: unknown;
 			tags?: unknown;
+			parameters?: unknown;
+			globals?: unknown;
 		};
 		if (!argsMatch(described.args, described.argTypes)) return { kind: "reject", reason: "args" };
 		return {
@@ -225,6 +229,8 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 			cases: described.cases,
 			description: described.description,
 			tags: typeOf(described.tags) === "table" ? described.tags : undefined,
+			parameters: typeOf(described.parameters) === "table" ? described.parameters : undefined,
+			globals: typeOf(described.globals) === "table" ? described.globals : undefined,
 		};
 	}
 	return { kind: "reject", reason: "export" };
