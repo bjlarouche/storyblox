@@ -72,6 +72,7 @@ const required = [
 			'id="Remount"',
 			'key="Density"',
 			'id="Theme"',
+			'id="Settings"',
 		],
 	},
 	{
@@ -98,6 +99,13 @@ const required = [
 		check: "scripts/define-story.check.mjs",
 		needles: [],
 		templateNeedles: ["mergeGlobals", "parameters: story.parameters"],
+	},
+	{
+		id: "settings",
+		title: "Shell/Settings",
+		check: "scripts/story-roots.check.mjs",
+		needles: [],
+		templateNeedles: ['id="Settings"'],
 	},
 	{
 		id: "chrome-shortcuts",

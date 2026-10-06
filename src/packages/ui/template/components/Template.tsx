@@ -149,6 +149,8 @@ export interface TemplateProps {
 	onToggleDensity?: () => void;
 	inspectorOpen?: boolean;
 	onToggleInspector?: () => void;
+	settingsOpen?: boolean;
+	onToggleSettings?: () => void;
 	starred?: boolean;
 	onToggleFavorite?: () => void;
 	remount?: number;
@@ -187,6 +189,8 @@ function Template({
 	onToggleDensity,
 	inspectorOpen = true,
 	onToggleInspector,
+	settingsOpen,
+	onToggleSettings,
 	starred,
 	onToggleFavorite,
 	remount = 0,
@@ -834,6 +838,30 @@ function Template({
 										icon={INSPECTOR_ICON}
 										tint={theme.palette.text.secondary}
 										onClick={onToggleInspector}
+										className={
+											{
+												Size: new UDim2(1, 0, 1, 0),
+											} as WriteableStyle<ImageButton>
+										}
+									/>
+								</stars.Tooltip>
+							)}
+							{onToggleSettings !== undefined && (
+								<stars.Tooltip
+									text={settingsOpen ? "Close settings" : "Settings"}
+									className={
+										{
+											Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
+											AutomaticSize: Enum.AutomaticSize.None,
+											LayoutOrder: 14,
+										} as WriteableStyle<Frame>
+									}
+								>
+									<IconButton
+										id="Settings"
+										icon={Icons.Settings}
+										tint={theme.palette.text.secondary}
+										onClick={onToggleSettings}
 										className={
 											{
 												Size: new UDim2(1, 0, 1, 0),

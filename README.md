@@ -30,7 +30,7 @@ the optional props for further customization.
 
 ```javascript
 // root?: Instance;
-//  default -> ReplicatedStorage
+//  extra scan root; defaults include ReplicatedStorage, ServerStorage, StarterPlayer.StarterPlayerScripts
 // extension?: `.${string}`;
 //  default -> "*.stories"
 // primaryTheme?: Theme;
@@ -42,9 +42,9 @@ the optional props for further customization.
 <Storyblox />
 ```
 
-Next, just start writing stories for your components! By default, it will look for
-Modulescripts in `ReplicatedStorage` named as `*.stories`, but you can change
-this by passing in a `root?: Instance` prop to the `Storyblox` component.
+Next, just start writing stories for your components! By default it lists `*.stories`
+modules under ReplicatedStorage, ServerStorage, and StarterPlayer.StarterPlayerScripts
+(plus the plugin stories folder). Extra folders are in Settings; `root` is still an extra scan root.
 
 `defineStory({ title, args, argTypes, render })` works too if you want controls without a `template`.
 
