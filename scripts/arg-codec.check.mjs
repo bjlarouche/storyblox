@@ -4,7 +4,14 @@ globalThis.typeOf = (value) => {
 	if (typeof value === "object" && value !== null) return "table";
 	return typeof value;
 };
-globalThis.math = { huge: Infinity };
+globalThis.math = { huge: Infinity, abs: Math.abs, round: Math.round, floor: Math.floor };
+globalThis.pcall = (fn) => {
+	try {
+		return [true, fn()];
+	} catch (error) {
+		return [false, String(error)];
+	}
+};
 globalThis.tonumber = (text) => {
 	if (typeof text !== "string" || text.trim() === "") return undefined;
 	const value = Number(text);
@@ -323,6 +330,143 @@ if (!encodedWash.ok || encodedWash.value.kind !== "gradient") throw new Error("g
 const decodedWash = decodeValue(encodedWash.value);
 if (decodedWash.rotation !== 45 || decodedWash.enabled !== true || decodedWash.offset.X !== 0) {
 	throw new Error("gradient decode");
+}
+
+function enumItem(name) {
+	return asType("EnumItem", { Name: name });
+}
+globalThis.Enum.Axis = { X: enumItem("X"), Y: enumItem("Y"), Z: enumItem("Z") };
+globalThis.Enum.NormalId = {
+	Top: enumItem("Top"),
+	Bottom: enumItem("Bottom"),
+	Left: enumItem("Left"),
+	Right: enumItem("Right"),
+	Front: enumItem("Front"),
+	Back: enumItem("Back"),
+};
+globalThis.Enum.EasingStyle = { Quad: enumItem("Quad"), Linear: enumItem("Linear") };
+globalThis.Enum.EasingDirection = { Out: enumItem("Out") };
+globalThis.Enum.InitialDockState = { Right: enumItem("Right") };
+globalThis.Enum.PathWaypointAction = { Walk: enumItem("Walk") };
+
+globalThis.Region3 = class Region3 {
+	constructor(min, max) {
+		this.CFrame = { Position: new Vector3((min.X + max.X) / 2, (min.Y + max.Y) / 2, (min.Z + max.Z) / 2) };
+		this.Size = new Vector3(Math.abs(max.X - min.X), Math.abs(max.Y - min.Y), Math.abs(max.Z - min.Z));
+		kinds.set(this, "Region3");
+	}
+};
+globalThis.Vector2int16 = class Vector2int16 {
+	constructor(x, y) {
+		this.X = x;
+		this.Y = y;
+		kinds.set(this, "Vector2int16");
+	}
+};
+globalThis.Vector3int16 = class Vector3int16 {
+	constructor(x, y, z) {
+		this.X = x;
+		this.Y = y;
+		this.Z = z;
+		kinds.set(this, "Vector3int16");
+	}
+};
+globalThis.Region3int16 = class Region3int16 {
+	constructor(min, max) {
+		this.Min = min;
+		this.Max = max;
+		kinds.set(this, "Region3int16");
+	}
+};
+globalThis.Axes = class Axes {
+	constructor(...parts) {
+		for (const name of ["X", "Y", "Z", "Top", "Bottom", "Left", "Right", "Front", "Back"]) this[name] = false;
+		for (const part of parts) this[part.Name] = true;
+		kinds.set(this, "Axes");
+	}
+};
+globalThis.Faces = class Faces {
+	constructor(...parts) {
+		for (const name of ["Top", "Bottom", "Left", "Right", "Front", "Back"]) this[name] = false;
+		for (const part of parts) this[part.Name] = true;
+		kinds.set(this, "Faces");
+	}
+};
+globalThis.DateTime = {
+	fromUnixTimestamp(unix) {
+		if (!Number.isInteger(unix)) throw new Error("unix");
+		const value = { UnixTimestamp: unix, ToIsoDate: () => "1970-01-01T00:00:00Z" };
+		kinds.set(value, "DateTime");
+		return value;
+	},
+};
+globalThis.TweenInfo = class TweenInfo {
+	constructor(time, style, direction, repeatCount, reverses, delayTime) {
+		this.Time = time;
+		this.EasingStyle = style;
+		this.EasingDirection = direction;
+		this.RepeatCount = repeatCount;
+		this.Reverses = reverses;
+		this.DelayTime = delayTime;
+		kinds.set(this, "TweenInfo");
+	}
+};
+globalThis.DockWidgetPluginGuiInfo = class DockWidgetPluginGuiInfo {
+	constructor(dock, enabled, overrideRestore, floatX, floatY, minWidth, minHeight) {
+		this.InitialDockState = dock;
+		this.InitialEnabled = enabled;
+		this.InitialEnabledShouldOverrideRestore = overrideRestore;
+		this.FloatingXSize = floatX;
+		this.FloatingYSize = floatY;
+		this.MinWidth = minWidth;
+		this.MinHeight = minHeight;
+		kinds.set(this, "DockWidgetPluginGuiInfo");
+	}
+};
+globalThis.PathWaypoint = class PathWaypoint {
+	constructor(position, action, label) {
+		this.Position = position;
+		this.Action = action;
+		this.Label = label;
+		kinds.set(this, "PathWaypoint");
+	}
+};
+
+const region = new Region3(new Vector3(0, 0, 0), new Vector3(4, 2, 4));
+const decodedRegion = roundTrip(region);
+if (decodedRegion.Size.X !== 4 || decodedRegion.Size.Y !== 2 || decodedRegion.CFrame.Position.X !== 2) throw new Error("region3");
+const parsedRegion = parseDatatype({ type: "region3" }, formatDatatype(region));
+if (!parsedRegion.ok || parsedRegion.value.Size.Z !== 4) throw new Error("region3 editor");
+const fractional = asType("DateTime", { UnixTimestamp: 1.5 });
+if (encodeValue(fractional, "when").ok) throw new Error("dateTime reject");
+const when = DateTime.fromUnixTimestamp(0);
+const decodedWhen = roundTrip(when);
+if (decodedWhen.UnixTimestamp !== 0) throw new Error("dateTime");
+const spin = new Axes(Enum.Axis.X, Enum.NormalId.Top);
+const decodedSpin = roundTrip(spin);
+if (decodedSpin.X !== true || decodedSpin.Top !== true || decodedSpin.Y !== false) throw new Error("axes");
+const sides = new Faces(Enum.NormalId.Front);
+const decodedSides = roundTrip(sides);
+if (decodedSides.Front !== true || decodedSides.Back !== false) throw new Error("faces");
+const ease = new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 1, false, 0);
+const decodedEase = roundTrip(ease);
+if (decodedEase.Time !== 0.3 || decodedEase.EasingStyle.Name !== "Quad" || decodedEase.RepeatCount !== 1) throw new Error("tweenInfo");
+const dock = new DockWidgetPluginGuiInfo(Enum.InitialDockState.Right, true, false, 200, 200, 100, 80);
+const decodedDock = roundTrip(dock);
+if (decodedDock.InitialDockState.Name !== "Right" || decodedDock.MinHeight !== 80) throw new Error("dockWidget");
+const point = new PathWaypoint(new Vector3(1, 2, 3), Enum.PathWaypointAction.Walk, "lane");
+const decodedPoint = roundTrip(point);
+if (decodedPoint.Label !== "lane" || decodedPoint.Position.Y !== 2) throw new Error("pathWaypoint");
+const nudge = new Vector2int16(1, -2);
+if (roundTrip(nudge).Y !== -2) throw new Error("vector2int16");
+if (vector2int16RoundTrip()) throw new Error("vector2int16 range");
+const cells = new Region3int16(new Vector3int16(0, 0, 0), new Vector3int16(4, 2, 4));
+const decodedCells = roundTrip(cells);
+if (decodedCells.Max.Z !== 4) throw new Error("region3int16");
+
+function vector2int16RoundTrip() {
+	const encoded = encodeValue(new Vector2int16(40000, 0), "nudge");
+	return encoded.ok;
 }
 
 console.log("arg codec ok");

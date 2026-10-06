@@ -75,6 +75,16 @@ function argValueMatches(value: unknown, kind: unknown): boolean {
 	if (kind === "numberRange") return typeOf(value) === "NumberRange";
 	if (kind === "ray") return typeOf(value) === "Ray";
 	if (kind === "physicalProperties") return typeOf(value) === "PhysicalProperties";
+	if (kind === "region3") return typeOf(value) === "Region3";
+	if (kind === "region3int16") return typeOf(value) === "Region3int16";
+	if (kind === "vector2int16") return typeOf(value) === "Vector2int16";
+	if (kind === "vector3int16") return typeOf(value) === "Vector3int16";
+	if (kind === "axes") return typeOf(value) === "Axes";
+	if (kind === "faces") return typeOf(value) === "Faces";
+	if (kind === "dateTime") return typeOf(value) === "DateTime";
+	if (kind === "tweenInfo") return typeOf(value) === "TweenInfo";
+	if (kind === "dockWidget") return typeOf(value) === "DockWidgetPluginGuiInfo";
+	if (kind === "pathWaypoint") return typeOf(value) === "PathWaypoint";
 	if (kind === "gradient") {
 		if (typeOf(value) !== "table") return false;
 		const gradient = value as { color?: unknown; transparency?: unknown; offset?: unknown; enabled?: unknown };

@@ -8,7 +8,7 @@ import {
 	moveItem,
 	controlFaultPath,
 	patchField,
-	readOnlyKind,
+	describeReadonly,
 	removeItem,
 	switchUnion,
 } from "packages/nestedArgs";
@@ -24,6 +24,7 @@ import {
 } from "../storyArgs";
 import { argHint } from "../storyLabel";
 import SafeBoundary from "./SafeBoundary";
+import { valueFieldKind, valueFields } from "../valueFields";
 
 interface Spec {
 	type?: string;
@@ -667,8 +668,23 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 				);
 			}
 		}
+		if (editor === undefined && valueFieldKind(spec?.type)) {
+			const fields = valueFields({
+				theme,
+				kind: spec?.type ?? "",
+				value,
+				disabled: spec?.disabled === true,
+				onCommit: (incoming) => {
+					setFaults((current) => writeFault(current, name, ""));
+					commit(incoming);
+				},
+				onFault: (reason) => setFaults((current) => writeFault(current, name, reason)),
+			});
+			if (fields !== undefined) editor = fields;
+		}
 		if (editor === undefined && (
 			datatype(spec?.type) ||
+			valueFieldKind(spec?.type) ||
 			spec?.type === "color" ||
 			spec?.type === "brickColor" ||
 			spec?.type === "vector2" ||
@@ -716,7 +732,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			editor = (
 				<textlabel
 					key={name}
-					Text={readOnlyKind(value) ?? "readonly"}
+					Text={describeReadonly(value)}
 					Size={new UDim2(1, 0, 0, theme.spacing.calc(1))}
 					BackgroundTransparency={1}
 					Font={theme.typography.fontFamilies.default}
