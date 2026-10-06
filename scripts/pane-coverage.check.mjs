@@ -97,6 +97,13 @@ const required = [
 		needles: [],
 		templateNeedles: ["globals: story.globals", "parameters: story.parameters"],
 	},
+	{
+		id: "chrome-shortcuts",
+		title: "Shell/Chrome",
+		check: "scripts/chrome-shortcuts.check.mjs",
+		needles: [],
+		templateNeedles: ["chromeCommand"],
+	},
 ];
 
 for (const pane of required) {
