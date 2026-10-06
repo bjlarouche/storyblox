@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,11 +20,12 @@ function emit(name, sourcePath, fallback) {
 	console.log(`wrote ${file} (${body.length} chars)`);
 }
 
-const uibloxStyling = join(root, "../uiblox-markdown-editor/docs/STYLING.md");
-const altStyling = "/Users/blarouche/Documents/GitHub/uiblox-rbxts/docs/STYLING.md";
-emit(
-	"stylingGuide",
-	uibloxStyling,
-	readFileSync(altStyling, "utf8"),
-);
+// Prefer UIBLOX_STYLING, else a sibling checkout next to this repo.
+const stylingPath =
+	process.env.UIBLOX_STYLING ||
+	join(root, "../uiblox-rbxts/docs/STYLING.md");
+const stylingFallback = existsSync(stylingPath)
+	? readFileSync(stylingPath, "utf8")
+	: "# Uiblox styling\n\nSee the uiblox-rbxts repo `docs/STYLING.md`.\n";
+emit("stylingGuide", stylingPath, stylingFallback);
 emit("pluginReadme", join(root, "README.md"), "# storyblox\n");

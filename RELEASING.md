@@ -1,6 +1,6 @@
 # Releasing
 
-Current package version is `0.1.59`. Do not publish, and do not upload a plugin to the Roblox Store, until Brandon names the version and the artifact.
+Don't publish to npm or upload a plugin to the Roblox Store until a version is named on purpose.
 
 ## Check
 
@@ -18,12 +18,4 @@ pnpm plugin:fixtures
 pnpm plugin:install:local
 ```
 
-That writes `~/Documents/Roblox/Plugins/storyblox-plugin.rbxm`. The shell loads `ServerStorage.StorybloxPlugin`.
-
-## Not this step
-
-- `npm publish`
-- A Roblox Store upload
-- A version bump
-
-Dev plugin uses published `@rbxts/uiblox@0.2.0-alpha.3` (`next`). `latest` stays `0.1.53`. `node scripts/state-gallery.mjs` can still read `stateMatrix` from a sibling uiblox checkout.
+That builds an rbxm into your Roblox Plugins folder (`$HOME/Documents/Roblox/Plugins` on macOS). The shell loads `ServerStorage.StorybloxPlugin`.

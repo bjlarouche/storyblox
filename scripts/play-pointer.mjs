@@ -27,7 +27,7 @@ if (process.argv.includes("--check")) {
 	process.exit(0);
 }
 
-console.log("Play solo after a sync of current main. Do not start a sync.");
+console.log("Play solo against current main.");
 console.log("Edit captures rest rows only. Hover, press, and focus need Play.");
 console.log("SplitPane drag is a press-and-move. stateMatrix marks that row pointer=press and the name contains drag.");
 console.log("There is no separate drag pointer kind.");
@@ -37,5 +37,5 @@ console.log("3. For each play row, mount the story, then on the client:");
 console.log("   hover: move the pointer over StarterGui.StorybloxViewport.Host");
 console.log("   press: mouse down on that Host");
 console.log("   drag (name contains drag): mouse down, move, mouse up");
-console.log("4. screen_capture to storyblox-assets/captures/storybook-parity/play/<name>.png");
+console.log("4. Capture StarterGui.StorybloxViewport to STORYBLOX_CAPTURES or ./captures/storybook-parity/play/<name>.png");
 console.log("5. Stop play.");

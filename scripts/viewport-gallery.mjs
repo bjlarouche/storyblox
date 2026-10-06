@@ -4,9 +4,9 @@
  * Mount with attributes on ServerStorage.StorybloxPlugin.stories, then:
  *   node scripts/viewport-gallery.mjs Components-Switch-dark --status /tmp/storyblox-status.json
  *
- * Writes under ../storyblox-assets/captures/ (never commit that tree).
+ * Writes under STORYBLOX_CAPTURES, or ./captures if unset.
  * For full story×theme layout scans, set storyblox-viewport-scan on the stories root
- * and read storyblox-viewport-report (see skill storyblox-viewport-test).
+ * and read storyblox-viewport-report.
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -31,7 +31,7 @@ const status = JSON.parse(readFileSync(process.argv[statusIndex + 1], "utf8"));
 const validation = validateViewportCapture(status);
 if (!validation.ok) throw new Error(`capture rejected: ${validation.error}`);
 const outDir = resolve(
-	process.env.STORYBLOX_CAPTURES ?? join(dirname(fileURLToPath(import.meta.url)), "../../storyblox-assets/captures"),
+	process.env.STORYBLOX_CAPTURES ?? join(dirname(fileURLToPath(import.meta.url)), "../captures"),
 );
 mkdirSync(outDir, { recursive: true });
 
@@ -85,7 +85,7 @@ const manifest = {
 	ready: status.ready,
 	stats: status.stats,
 	issueCount: validation.issueCount,
-	note: "prefer MCP screen_capture of StarterGui StorybloxViewport for clean frames",
+	note: "StarterGui.StorybloxViewport is the clean capture target",
 };
 writeFileSync(join(outDir, `${name}.json`), JSON.stringify(manifest, undefined, 2));
 console.log(`${file} ${pixelWidth}x${pixelHeight}`);
