@@ -52,11 +52,16 @@ export default {
 	}) => (
 		<textlabel
 			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y}`}
-			Size={new UDim2(1, 0, 0, 24)}
+			Size={new UDim2(1, -16, 1, -16)}
+			Position={new UDim2(0, 8, 0, 8)}
 			BackgroundTransparency={1}
 			TextSize={16}
 			FontFace={args.face}
 			TextXAlignment={Enum.TextXAlignment.Left}
+			TextYAlignment={Enum.TextYAlignment.Top}
+			TextWrapped={true}
+			TextTruncate={Enum.TextTruncate.AtEnd}
+			ClipsDescendants={true}
 		/>
 	),
 };
