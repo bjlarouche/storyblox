@@ -33,7 +33,7 @@ function InputStory(args: Args) {
 
 export default {
 	title: "Components/Input",
-	args: { text: "Story", placeholder: "Search", disabled: false, readOnly: true, hasError: false, variant: "filled", color: "secondary", helperText: "Helper" },
+	args: { text: "Story", placeholder: "Search", disabled: false, readOnly: false, hasError: false, variant: "filled", color: "secondary", helperText: "Helper" },
 	argTypes: {
 		text: { type: "string" },
 		placeholder: { type: "string" },
