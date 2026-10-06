@@ -12,15 +12,52 @@ export function controlFaultPath(parent: string, segment: string) {
 
 export function readOnlyKind(
 	value: unknown,
-): "function" | "Instance" | "binding" | "RBXScriptSignal" | "thread" | "Region3" | undefined {
+): "function" | "Instance" | "binding" | "RBXScriptSignal" | "thread" | undefined {
 	const kind = typeOf(value);
 	if (kind === "function") return "function";
 	if (kind === "Instance") return "Instance";
 	if (kind === "RBXScriptSignal") return "RBXScriptSignal";
 	if (kind === "thread") return "thread";
-	if (kind === "Region3") return "Region3";
 	if (kind === "table" && typeOf((value as { getValue?: unknown }).getValue) === "function") return "binding";
 	return undefined;
+}
+
+export function describeReadonly(value: unknown): string {
+	const kind = typeOf(value);
+	if (kind === "function") return "function";
+	if (kind === "thread") return "thread";
+	if (kind === "RBXScriptSignal") return "RBXScriptSignal";
+	if (kind === "Instance") {
+		const instance = value as { ClassName?: string; Name?: string };
+		return `Instance ${instance.ClassName ?? ""} ${instance.Name ?? ""}`;
+	}
+	if (kind === "RBXScriptConnection") {
+		const connected = (value as { Connected?: boolean }).Connected === true;
+		return connected ? "RBXScriptConnection connected" : "RBXScriptConnection disconnected";
+	}
+	if (kind === "RaycastParams" || kind === "OverlapParams") {
+		const params = value as { FilterType?: { Name?: string }; CollisionGroup?: string; MaxParts?: number; IgnoreWater?: boolean };
+		const filter = typeOf(params.FilterType) === "EnumItem" ? params.FilterType!.Name : "";
+		let text = `${kind} ${filter} group=${params.CollisionGroup ?? ""}`;
+		if (kind === "OverlapParams") text += ` max=${params.MaxParts ?? ""}`;
+		if (kind === "RaycastParams") text += ` water=${params.IgnoreWater === true}`;
+		return text;
+	}
+	if (kind === "RaycastResult") {
+		const result = value as { Distance?: number; Instance?: { Name?: string }; Material?: { Name?: string } };
+		const material = typeOf(result.Material) === "EnumItem" ? result.Material!.Name : "";
+		return `RaycastResult ${result.Instance?.Name ?? ""} ${material} d=${result.Distance ?? ""}`;
+	}
+	if (kind === "FloatCurveKey") {
+		const key = value as { Time?: number; Value?: number };
+		return `FloatCurveKey t=${key.Time ?? ""} v=${key.Value ?? ""}`;
+	}
+	if (kind === "Random") return "Random";
+	if (kind === "buffer") return "buffer";
+	if (kind === "Enum" || kind === "Enums") return kind;
+	if (kind === "table" && typeOf((value as { getValue?: unknown }).getValue) === "function") return "binding";
+	if (kind !== "nil") return kind;
+	return "readonly";
 }
 
 function isList(value: unknown): value is Array<unknown> {

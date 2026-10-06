@@ -247,6 +247,135 @@ export function encodeValue(
 			},
 		};
 	}
+	if (kind === "Region3") {
+		const bounds = region3Bounds(value as Region3);
+		if (bounds === undefined) return fail(path, "region3");
+		return {
+			ok: true,
+			value: {
+				kind: "region3",
+				minX: bounds.min.X,
+				minY: bounds.min.Y,
+				minZ: bounds.min.Z,
+				maxX: bounds.max.X,
+				maxY: bounds.max.Y,
+				maxZ: bounds.max.Z,
+			},
+		};
+	}
+	if (kind === "Region3int16") {
+		const region = value as Region3int16;
+		const min = vector3int16Value(region.Min.X, region.Min.Y, region.Min.Z);
+		const max = vector3int16Value(region.Max.X, region.Max.Y, region.Max.Z);
+		if (min === undefined || max === undefined) return fail(path, "region3int16");
+		return {
+			ok: true,
+			value: { kind: "region3int16", minX: min.X, minY: min.Y, minZ: min.Z, maxX: max.X, maxY: max.Y, maxZ: max.Z },
+		};
+	}
+	if (kind === "Vector2int16") {
+		const vector = value as Vector2int16;
+		if (vector2int16Value(vector.X, vector.Y) === undefined) return fail(path, "vector2int16");
+		return { ok: true, value: { kind: "vector2int16", x: vector.X, y: vector.Y } };
+	}
+	if (kind === "Vector3int16") {
+		const vector = value as Vector3int16;
+		if (vector3int16Value(vector.X, vector.Y, vector.Z) === undefined) return fail(path, "vector3int16");
+		return { ok: true, value: { kind: "vector3int16", x: vector.X, y: vector.Y, z: vector.Z } };
+	}
+	if (kind === "Axes") {
+		const axes = value as Axes;
+		return {
+			ok: true,
+			value: {
+				kind: "axes",
+				x: axes.X === true,
+				y: axes.Y === true,
+				z: axes.Z === true,
+				top: axes.Top === true,
+				bottom: axes.Bottom === true,
+				left: axes.Left === true,
+				right: axes.Right === true,
+				front: axes.Front === true,
+				back: axes.Back === true,
+			},
+		};
+	}
+	if (kind === "Faces") {
+		const faces = value as Faces;
+		return {
+			ok: true,
+			value: {
+				kind: "faces",
+				top: faces.Top === true,
+				bottom: faces.Bottom === true,
+				left: faces.Left === true,
+				right: faces.Right === true,
+				front: faces.Front === true,
+				back: faces.Back === true,
+			},
+		};
+	}
+	if (kind === "DateTime") {
+		const unix = (value as DateTime).UnixTimestamp;
+		if (!finite(unix) || unix % 1 !== 0) return fail(path, "dateTime");
+		return { ok: true, value: { kind: "dateTime", unix } };
+	}
+	if (kind === "TweenInfo") {
+		const info = value as TweenInfo;
+		if (!finite(info.Time) || !finite(info.DelayTime) || !finite(info.RepeatCount) || typeOf(info.Reverses) !== "boolean") {
+			return fail(path, "tweenInfo");
+		}
+		if (typeOf(info.EasingStyle) !== "EnumItem" || typeOf(info.EasingDirection) !== "EnumItem") return fail(path, "tweenInfo");
+		return {
+			ok: true,
+			value: {
+				kind: "tweenInfo",
+				time: info.Time,
+				style: info.EasingStyle.Name,
+				direction: info.EasingDirection.Name,
+				repeatCount: info.RepeatCount,
+				reverses: info.Reverses,
+				delayTime: info.DelayTime,
+			},
+		};
+	}
+	if (kind === "DockWidgetPluginGuiInfo") {
+		const info = value as DockWidgetPluginGuiInfo;
+		if (typeOf(info.InitialDockState) !== "EnumItem" || typeOf(info.InitialEnabled) !== "boolean") return fail(path, "dockWidget");
+		if (!finite(info.FloatingXSize) || !finite(info.FloatingYSize) || !finite(info.MinWidth) || !finite(info.MinHeight)) {
+			return fail(path, "dockWidget");
+		}
+		return {
+			ok: true,
+			value: {
+				kind: "dockWidget",
+				dock: info.InitialDockState.Name,
+				enabled: info.InitialEnabled,
+				override: info.InitialEnabledShouldOverrideRestore === true,
+				floatX: info.FloatingXSize,
+				floatY: info.FloatingYSize,
+				minWidth: info.MinWidth,
+				minHeight: info.MinHeight,
+			},
+		};
+	}
+	if (kind === "PathWaypoint") {
+		const point = value as PathWaypoint;
+		if (!finite(point.Position?.X) || !finite(point.Position?.Y) || !finite(point.Position?.Z)) return fail(path, "pathWaypoint");
+		if (typeOf(point.Action) !== "EnumItem" || typeOf(point.Label) !== "string") return fail(path, "pathWaypoint");
+		return {
+			ok: true,
+			value: {
+				kind: "pathWaypoint",
+				x: point.Position.X,
+				y: point.Position.Y,
+				z: point.Position.Z,
+				action: point.Action.Name,
+				label: point.Label,
+			},
+		};
+	}
 	if (kind === "table") {
 		const record = value as {
 			color?: unknown;
@@ -347,6 +476,68 @@ export function decodeValue(tagged: unknown): unknown {
 			value.elasticityWeight as number,
 		);
 	}
+	if (value.kind === "region3") {
+		return region3FromBounds(
+			new Vector3(value.minX as number, value.minY as number, value.minZ as number),
+			new Vector3(value.maxX as number, value.maxY as number, value.maxZ as number),
+		);
+	}
+	if (value.kind === "region3int16") {
+		const min = vector3int16Value(value.minX as number, value.minY as number, value.minZ as number);
+		const max = vector3int16Value(value.maxX as number, value.maxY as number, value.maxZ as number);
+		if (min === undefined || max === undefined) return undefined;
+		return region3int16Value(min, max);
+	}
+	if (value.kind === "vector2int16") return vector2int16Value(value.x as number, value.y as number);
+	if (value.kind === "vector3int16") return vector3int16Value(value.x as number, value.y as number, value.z as number);
+	if (value.kind === "axes") {
+		return axesValue({
+			X: value.x === true,
+			Y: value.y === true,
+			Z: value.z === true,
+			Top: value.top === true,
+			Bottom: value.bottom === true,
+			Left: value.left === true,
+			Right: value.right === true,
+			Front: value.front === true,
+			Back: value.back === true,
+		});
+	}
+	if (value.kind === "faces") {
+		return facesValue({
+			Top: value.top === true,
+			Bottom: value.bottom === true,
+			Left: value.left === true,
+			Right: value.right === true,
+			Front: value.front === true,
+			Back: value.back === true,
+		});
+	}
+	if (value.kind === "dateTime") return dateTimeValue(value.unix as number);
+	if (value.kind === "tweenInfo") {
+		return tweenInfoValue(
+			value.time as number,
+			value.style as string,
+			value.direction as string,
+			value.repeatCount as number,
+			value.reverses === true,
+			value.delayTime as number,
+		);
+	}
+	if (value.kind === "dockWidget") {
+		return dockWidgetValue(
+			value.dock as string,
+			value.enabled === true,
+			value.override === true,
+			value.floatX as number,
+			value.floatY as number,
+			value.minWidth as number,
+			value.minHeight as number,
+		);
+	}
+	if (value.kind === "pathWaypoint") {
+		return pathWaypointValue(new Vector3(value.x as number, value.y as number, value.z as number), value.action as string, value.label as string);
+	}
 	if (value.kind === "gradient") {
 		return {
 			color: decodeValue(value.color),
@@ -420,6 +611,12 @@ export function formatDatatype(value: unknown): string {
 	if (record.kind === "physicalProperties") {
 		return `${record.density}, ${record.friction}, ${record.elasticity}, ${record.frictionWeight}, ${record.elasticityWeight}`;
 	}
+	if (record.kind === "region3" || record.kind === "region3int16") {
+		return `${record.minX}, ${record.minY}, ${record.minZ}, ${record.maxX}, ${record.maxY}, ${record.maxZ}`;
+	}
+	if (record.kind === "vector2int16") return `${record.x}, ${record.y}`;
+	if (record.kind === "vector3int16") return `${record.x}, ${record.y}, ${record.z}`;
+	if (record.kind === "dateTime") return tostring(record.unix);
 	if (record.kind === "gradient") return "gradient";
 	return "";
 }
@@ -468,8 +665,235 @@ export function parseDatatype(
 		value = new Ray(new Vector3(numbers[0], numbers[1], numbers[2]), new Vector3(numbers[3], numbers[4], numbers[5]));
 	} else if (kind === "physicalProperties" && numbers.size() === 5) {
 		value = new PhysicalProperties(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]);
-	} else return { ok: false, reason: kind ?? "unsupported" };
+	} else if (kind === "region3" && numbers.size() === 6) {
+		value = region3FromBounds(new Vector3(numbers[0], numbers[1], numbers[2]), new Vector3(numbers[3], numbers[4], numbers[5]));
+	} else if (kind === "region3int16" && numbers.size() === 6) {
+		const min = vector3int16Value(numbers[0], numbers[1], numbers[2]);
+		const max = vector3int16Value(numbers[3], numbers[4], numbers[5]);
+		value = min !== undefined && max !== undefined ? region3int16Value(min, max) : undefined;
+	} else if (kind === "vector2int16" && numbers.size() === 2) value = vector2int16Value(numbers[0], numbers[1]);
+	else if (kind === "vector3int16" && numbers.size() === 3) value = vector3int16Value(numbers[0], numbers[1], numbers[2]);
+	else if (kind === "dateTime" && numbers.size() === 1) value = dateTimeValue(numbers[0]);
+	else return { ok: false, reason: kind ?? "unsupported" };
+	if (value === undefined) return { ok: false, reason: kind ?? "unsupported" };
 	const encoded = encodeValue(value, "value");
 	if (!encoded.ok) return { ok: false, reason: encoded.error.reason };
 	return { ok: true, value };
+}
+
+const AXIS_NAMES = ["X", "Y", "Z"];
+const FACE_NAMES = ["Top", "Bottom", "Left", "Right", "Front", "Back"];
+
+function finite3(value: { X: number; Y: number; Z: number } | undefined) {
+	return value !== undefined && finite(value.X) && finite(value.Y) && finite(value.Z);
+}
+
+function near(left: number, right: number) {
+	return math.abs(left - right) <= 1e-3;
+}
+
+function attempt<T extends defined>(produce: () => T): T | undefined {
+	const [ok, value] = pcall(produce);
+	if (!ok) return undefined;
+	return value as T;
+}
+
+function enumNamed(enumName: string, itemName: string): EnumItem | undefined {
+	const enumType = (Enum as unknown as { [key: string]: { [key: string]: EnumItem } })[enumName];
+	const item = enumType?.[itemName];
+	if (item === undefined || typeOf(item) !== "EnumItem") return undefined;
+	return item;
+}
+
+export function region3Bounds(region: Region3): { min: Vector3; max: Vector3 } | undefined {
+	const center = region.CFrame?.Position;
+	const size = region.Size;
+	if (!finite3(center) || !finite3(size)) return undefined;
+	return {
+		min: new Vector3(center.X - size.X / 2, center.Y - size.Y / 2, center.Z - size.Z / 2),
+		max: new Vector3(center.X + size.X / 2, center.Y + size.Y / 2, center.Z + size.Z / 2),
+	};
+}
+
+export function region3FromBounds(min: Vector3, max: Vector3): Region3 | undefined {
+	if (!finite3(min) || !finite3(max)) return undefined;
+	const region = attempt(() => new Region3(min, max));
+	if (region === undefined || typeOf(region) !== "Region3") return undefined;
+	const bounds = region3Bounds(region);
+	if (bounds === undefined) return undefined;
+	const again = attempt(() => new Region3(bounds.min, bounds.max));
+	const check = again !== undefined ? region3Bounds(again) : undefined;
+	if (
+		check === undefined ||
+		!near(bounds.min.X, check.min.X) ||
+		!near(bounds.min.Y, check.min.Y) ||
+		!near(bounds.min.Z, check.min.Z) ||
+		!near(bounds.max.X, check.max.X) ||
+		!near(bounds.max.Y, check.max.Y) ||
+		!near(bounds.max.Z, check.max.Z)
+	) {
+		return undefined;
+	}
+	return region;
+}
+
+function int16(value: number): number | undefined {
+	if (!finite(value) || value % 1 !== 0 || value < -32768 || value > 32767) return undefined;
+	return value;
+}
+
+export function vector2int16Value(x: number, y: number): Vector2int16 | undefined {
+	const ix = int16(x);
+	const iy = int16(y);
+	if (ix === undefined || iy === undefined) return undefined;
+	const vector = attempt(() => new Vector2int16(ix, iy));
+	if (vector === undefined || typeOf(vector) !== "Vector2int16" || vector.X !== ix || vector.Y !== iy) return undefined;
+	return vector;
+}
+
+export function vector3int16Value(x: number, y: number, z: number): Vector3int16 | undefined {
+	const ix = int16(x);
+	const iy = int16(y);
+	const iz = int16(z);
+	if (ix === undefined || iy === undefined || iz === undefined) return undefined;
+	const vector = attempt(() => new Vector3int16(ix, iy, iz));
+	if (
+		vector === undefined ||
+		typeOf(vector) !== "Vector3int16" ||
+		vector.X !== ix ||
+		vector.Y !== iy ||
+		vector.Z !== iz
+	) {
+		return undefined;
+	}
+	return vector;
+}
+
+export function region3int16Value(min: Vector3int16, max: Vector3int16): Region3int16 | undefined {
+	const region = attempt(() => new Region3int16(min, max));
+	if (region === undefined || typeOf(region) !== "Region3int16") return undefined;
+	if (
+		region.Min.X !== min.X ||
+		region.Min.Y !== min.Y ||
+		region.Min.Z !== min.Z ||
+		region.Max.X !== max.X ||
+		region.Max.Y !== max.Y ||
+		region.Max.Z !== max.Z
+	) {
+		return undefined;
+	}
+	return region;
+}
+
+function flagValue(enumName: string, names: Array<string>, flags: { [key: string]: boolean }, produce: (picked: Array<EnumItem>) => unknown, kind: string) {
+	const picked = new Array<EnumItem>();
+	for (const name of names) {
+		if (flags[name] !== true) continue;
+		const item = enumNamed(enumName, name);
+		if (item === undefined) return undefined;
+		picked.push(item);
+	}
+	const value = attempt(() => produce(picked) as defined);
+	if (value === undefined || typeOf(value) !== kind) return undefined;
+	const record = value as { [key: string]: boolean };
+	for (const name of names) {
+		if (record[name] !== (flags[name] === true)) return undefined;
+	}
+	return value;
+}
+
+export function axesValue(flags: { [key: string]: boolean }) {
+	const picked = new Array<Enum.Axis | Enum.NormalId>();
+	for (const name of AXIS_NAMES) {
+		if (flags[name] !== true) continue;
+		const item = enumNamed("Axis", name);
+		if (item === undefined) return undefined;
+		picked.push(item as Enum.Axis);
+	}
+	for (const name of FACE_NAMES) {
+		if (flags[name] !== true) continue;
+		const item = enumNamed("NormalId", name);
+		if (item === undefined) return undefined;
+		picked.push(item as Enum.NormalId);
+	}
+	const axes = attempt(() => new Axes(...picked));
+	if (axes === undefined || typeOf(axes) !== "Axes") return undefined;
+	const record = axes as unknown as { [key: string]: boolean };
+	for (const name of AXIS_NAMES) {
+		if (record[name] !== (flags[name] === true)) return undefined;
+	}
+	for (const name of FACE_NAMES) {
+		if (record[name] !== (flags[name] === true)) return undefined;
+	}
+	return axes;
+}
+
+export function facesValue(flags: { [key: string]: boolean }) {
+	const faces = flagValue("NormalId", FACE_NAMES, flags, (picked) => new Faces(...(picked as Array<Enum.NormalId>)), "Faces");
+	return faces as Faces | undefined;
+}
+
+export function dateTimeValue(unix: number): DateTime | undefined {
+	if (!finite(unix) || unix % 1 !== 0) return undefined;
+	const value = attempt(() => DateTime.fromUnixTimestamp(unix));
+	if (value === undefined || typeOf(value) !== "DateTime" || value.UnixTimestamp !== unix) return undefined;
+	return value;
+}
+
+export function tweenInfoValue(
+	time: number,
+	styleName: string,
+	directionName: string,
+	repeatCount: number,
+	reverses: boolean,
+	delayTime: number,
+): TweenInfo | undefined {
+	if (!finite(time) || time < 0 || !finite(delayTime) || delayTime < 0) return undefined;
+	if (!finite(repeatCount) || repeatCount < 0 || repeatCount % 1 !== 0 || typeOf(reverses) !== "boolean") return undefined;
+	const style = enumNamed("EasingStyle", styleName);
+	const direction = enumNamed("EasingDirection", directionName);
+	if (style === undefined || direction === undefined) return undefined;
+	const info = attempt(() => new TweenInfo(time, style as Enum.EasingStyle, direction as Enum.EasingDirection, repeatCount, reverses, delayTime));
+	if (info === undefined || typeOf(info) !== "TweenInfo") return undefined;
+	if (info.Time !== time || info.RepeatCount !== repeatCount || info.Reverses !== reverses || info.DelayTime !== delayTime) return undefined;
+	if (info.EasingStyle.Name !== styleName || info.EasingDirection.Name !== directionName) return undefined;
+	return info;
+}
+
+export function dockWidgetValue(
+	dock: string,
+	enabled: boolean,
+	overrideRestore: boolean,
+	floatX: number,
+	floatY: number,
+	minWidth: number,
+	minHeight: number,
+): DockWidgetPluginGuiInfo | undefined {
+	if (!finite(floatX) || !finite(floatY) || !finite(minWidth) || !finite(minHeight)) return undefined;
+	if (floatX < 0 || floatY < 0 || minWidth < 0 || minHeight < 0) return undefined;
+	if (typeOf(enabled) !== "boolean" || typeOf(overrideRestore) !== "boolean") return undefined;
+	const state = enumNamed("InitialDockState", dock);
+	if (state === undefined) return undefined;
+	const info = attempt(
+		() => new DockWidgetPluginGuiInfo(state as Enum.InitialDockState, enabled, overrideRestore, floatX, floatY, minWidth, minHeight),
+	);
+	if (info === undefined || typeOf(info) !== "DockWidgetPluginGuiInfo") return undefined;
+	if (info.InitialDockState.Name !== dock || info.InitialEnabled !== enabled || info.InitialEnabledShouldOverrideRestore !== overrideRestore) {
+		return undefined;
+	}
+	if (info.FloatingXSize !== floatX || info.FloatingYSize !== floatY || info.MinWidth !== minWidth || info.MinHeight !== minHeight) {
+		return undefined;
+	}
+	return info;
+}
+
+export function pathWaypointValue(position: Vector3, actionName: string, label: string): PathWaypoint | undefined {
+	if (!finite3(position) || typeOf(label) !== "string") return undefined;
+	const action = enumNamed("PathWaypointAction", actionName);
+	if (action === undefined) return undefined;
+	const point = attempt(() => new PathWaypoint(position, action as Enum.PathWaypointAction, label));
+	if (point === undefined || typeOf(point) !== "PathWaypoint") return undefined;
+	if (point.Action.Name !== actionName || point.Label !== label) return undefined;
+	if (!near(point.Position.X, position.X) || !near(point.Position.Y, position.Y) || !near(point.Position.Z, position.Z)) return undefined;
+	return point;
 }

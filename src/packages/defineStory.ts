@@ -18,6 +18,16 @@ export interface ControlSpec {
 		| "ray"
 		| "physicalProperties"
 		| "gradient"
+		| "region3"
+		| "region3int16"
+		| "vector2int16"
+		| "vector3int16"
+		| "axes"
+		| "faces"
+		| "dateTime"
+		| "tweenInfo"
+		| "dockWidget"
+		| "pathWaypoint"
 		| "font"
 		| "colorSequence"
 		| "numberSequence"
@@ -76,6 +86,16 @@ export const controls = {
 	ray: (): ControlSpec => ({ type: "ray" }),
 	physicalProperties: (): ControlSpec => ({ type: "physicalProperties" }),
 	gradient: (): ControlSpec => ({ type: "gradient" }),
+	region3: (): ControlSpec => ({ type: "region3" }),
+	region3int16: (): ControlSpec => ({ type: "region3int16" }),
+	vector2int16: (): ControlSpec => ({ type: "vector2int16" }),
+	vector3int16: (): ControlSpec => ({ type: "vector3int16" }),
+	axes: (): ControlSpec => ({ type: "axes" }),
+	faces: (): ControlSpec => ({ type: "faces" }),
+	dateTime: (): ControlSpec => ({ type: "dateTime" }),
+	tweenInfo: (): ControlSpec => ({ type: "tweenInfo" }),
+	dockWidget: (): ControlSpec => ({ type: "dockWidget" }),
+	pathWaypoint: (): ControlSpec => ({ type: "pathWaypoint" }),
 	object: (fields: { [key: string]: ControlSpec }): ControlSpec => ({ type: "object", fields }),
 	array: (item: ControlSpec): ControlSpec => ({ type: "array", item }),
 	dictionary: (item: ControlSpec): ControlSpec => ({ type: "dictionary", item }),

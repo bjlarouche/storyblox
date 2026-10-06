@@ -2,14 +2,15 @@
  * CI coverage matrix for Storyblox ControlSpec + codec + Controls wiring.
  */
 import { readFileSync } from "node:fs";
+import { assertInstalledTypes } from "./installed-types.check.mjs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const defineStory = readFileSync(join(root, "src/packages/defineStory.ts"), "utf8");
 const argCodec = readFileSync(join(root, "src/packages/argCodec.ts"), "utf8");
-const controls = readFileSync(join(root, "src/packages/ui/template/components/Controls.tsx"), "utf8");
-const datatypes = readFileSync(join(root, "src/fixtures/stories/Datatypes.stories.tsx"), "utf8");
+const controls = `${readFileSync(join(root, "src/packages/ui/template/components/Controls.tsx"), "utf8")}\n${readFileSync(join(root, "src/packages/ui/template/valueFields.tsx"), "utf8")}`;
+const datatypes = `${readFileSync(join(root, "src/fixtures/stories/Datatypes.stories.tsx"), "utf8")}\n${readFileSync(join(root, "src/fixtures/stories/ValueTypes.stories.tsx"), "utf8")}`;
 const nestedFixture = readFileSync(join(root, "src/fixtures/stories/NestedControls.stories.tsx"), "utf8");
 
 const matrix = [
@@ -34,6 +35,16 @@ const matrix = [
 	{ type: "ray", status: "rich", codecKind: "ray", editor: "RayEditor", fixture: true },
 	{ type: "physicalProperties", status: "rich", codecKind: "physicalProperties", editor: "PhysicalPropertiesEditor", fixture: true },
 	{ type: "gradient", status: "rich", codecKind: "gradient", editor: "GradientEditor", fixture: true },
+	{ type: "region3", status: "rich", codecKind: "region3", editor: 'kind === "region3"', fixture: true },
+	{ type: "region3int16", status: "rich", codecKind: "region3int16", editor: 'kind === "region3int16"', fixture: true },
+	{ type: "vector2int16", status: "rich", codecKind: "vector2int16", editor: 'kind === "vector2int16"', fixture: true },
+	{ type: "vector3int16", status: "rich", codecKind: "vector3int16", editor: 'kind === "vector3int16"', fixture: true },
+	{ type: "axes", status: "rich", codecKind: "axes", editor: 'kind === "axes"', fixture: true },
+	{ type: "faces", status: "rich", codecKind: "faces", editor: 'kind === "faces"', fixture: true },
+	{ type: "dateTime", status: "rich", codecKind: "dateTime", editor: 'kind === "dateTime"', fixture: true },
+	{ type: "tweenInfo", status: "rich", codecKind: "tweenInfo", editor: 'kind === "tweenInfo"', fixture: true },
+	{ type: "dockWidget", status: "rich", codecKind: "dockWidget", editor: 'kind === "dockWidget"', fixture: true },
+	{ type: "pathWaypoint", status: "rich", codecKind: "pathWaypoint", editor: 'kind === "pathWaypoint"', fixture: true },
 	{ type: "object", status: "nested", codecKind: null, editor: 'type === "object"', fixture: false },
 	{ type: "array", status: "nested", codecKind: null, editor: 'type === "array"', fixture: false },
 	{ type: "dictionary", status: "nested", codecKind: null, editor: 'type === "dictionary"', fixture: false },
@@ -44,7 +55,6 @@ const matrix = [
 ];
 
 const unsupported = [
-	{ type: "Region3", reason: "readonly inspection only" },
 	{ type: "Instance", reason: "readonly; not a control value" },
 	{ type: "RBXScriptSignal", reason: "readonly; not a control value" },
 	{ type: "thread", reason: "readonly; not a control value" },
@@ -70,7 +80,7 @@ for (const row of matrix) {
 	else if (row.status === "readonly") readonly += 1;
 }
 
-if (rich < 21) throw new Error(`expected >=21 rich types, got ${rich}`);
+if (rich !== 32) throw new Error(`expected 32 rich types, got ${rich}`);
 if (nested !== 5) throw new Error(`expected 5 nested types, got ${nested}`);
 if (readonly !== 1) throw new Error(`expected 1 readonly type, got ${readonly}`);
 if (unsupported.length < 5) throw new Error("unsupported list incomplete");
@@ -87,6 +97,7 @@ for (const row of unsupported) {
 	if (row.reason.length === 0) throw new Error(`unsupported ${row.type} missing rationale`);
 }
 
+assertInstalledTypes();
 console.log(
 	`control types ok rich=${rich} nested=${nested} readonly=${readonly} unsupported=${unsupported.length}`,
 );

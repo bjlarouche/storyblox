@@ -26,6 +26,7 @@ const {
 	moveItem,
 	switchUnion,
 	controlFaultPath,
+	describeReadonly,
 	readOnlyKind,
 	registerControlEditor,
 	mountControlEditor,
@@ -64,7 +65,13 @@ if (readOnlyKind(fn) !== "function") throw new Error("function");
 if (readOnlyKind({ __type: "Instance" }) !== "Instance") throw new Error("instance");
 if (readOnlyKind({ __type: "RBXScriptSignal" }) !== "RBXScriptSignal") throw new Error("signal");
 if (readOnlyKind({ __type: "thread" }) !== "thread") throw new Error("thread");
-if (readOnlyKind({ __type: "Region3" }) !== "Region3") throw new Error("region3");
+if (readOnlyKind({ __type: "Region3" }) !== undefined) throw new Error("region3 is editable");
+if (describeReadonly({ __type: "FloatCurveKey", Time: 1, Value: 2 }) !== "FloatCurveKey t=1 v=2") throw new Error("float curve");
+if (!describeReadonly({ __type: "RaycastParams", CollisionGroup: "Default", IgnoreWater: true }).includes("RaycastParams")) {
+	throw new Error("raycast params");
+}
+if (describeReadonly({ __type: "RBXScriptConnection", Connected: true }) !== "RBXScriptConnection connected") throw new Error("connection");
+if (!describeReadonly({ __type: "Instance", ClassName: "Part", Name: "Door" }).includes("Part")) throw new Error("instance text");
 if (readOnlyKind({ getValue: () => 1 }) !== "binding") throw new Error("binding");
 const copied = copyTree({ onClick: fn, label: "A" });
 if (copied.onClick !== fn) throw new Error("function was copied by value");
