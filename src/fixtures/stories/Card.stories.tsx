@@ -12,7 +12,7 @@ interface Args {
 
 export default {
 	title: "Components/Card",
-	args: { title: "Card", subtitle: "Subtitle", elevation: "flat", square: false, body: "Body", showActions: true },
+	args: { title: "Card", subtitle: "Subtitle", elevation: "raised", square: false, body: "Body", showActions: true },
 	argTypes: {
 		title: { type: "string" },
 		subtitle: { type: "string" },
