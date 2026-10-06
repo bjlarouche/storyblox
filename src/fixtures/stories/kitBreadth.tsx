@@ -49,6 +49,7 @@ export const SpeedDial = kit.SpeedDial;
 export const FormLabel = kit.FormLabel;
 export const FormHelperText = kit.FormHelperText;
 export const BrickColorPicker = kit.BrickColorPicker;
+export const ColorPicker = kit.ColorPicker;
 export const CFrameEditor = kit.CFrameEditor;
 export const EnumPicker = kit.EnumPicker;
 export const NumberRangeEditor = kit.NumberRangeEditor;
