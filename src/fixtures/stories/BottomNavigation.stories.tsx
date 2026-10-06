@@ -16,7 +16,7 @@ interface Args {
 function BottomNavigationStory(args: Args) {
 	const [value, setValue] = useArg(args.value);
 	return (
-		<frame Size={new UDim2(1, 0, 0, 64)} BackgroundTransparency={1}>
+		<frame Size={new UDim2(0, 320, 0, 64)} BackgroundTransparency={1}>
 			<BottomNavigation
 				value={value}
 				options={options}
