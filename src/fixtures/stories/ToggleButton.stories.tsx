@@ -23,7 +23,7 @@ function ToggleButtonStory(args: Args) {
 
 export default {
 	title: "Components/Toggle Button",
-	args: { label: "Bold", selected: false, disabled: false, size: "medium" },
+	args: { label: "Bold", selected: true, disabled: false, size: "medium" },
 	argTypes: {
 		label: { type: "string" },
 		selected: { type: "boolean" },
