@@ -7,20 +7,38 @@ interface Args {
 	elevation: "flat" | "raised";
 	square: boolean;
 	body: string;
+	showActions: boolean;
 }
 
 export default {
 	title: "Components/Card",
-	args: { title: "Card", subtitle: "Subtitle", elevation: "flat", square: false, body: "Body" },
+	args: { title: "Card", subtitle: "Subtitle", elevation: "flat", square: false, body: "Body", showActions: true },
 	argTypes: {
 		title: { type: "string" },
 		subtitle: { type: "string" },
 		elevation: { type: "enum", options: ["flat", "raised"] },
 		square: { type: "boolean" },
 		body: { type: "string" },
+		showActions: { type: "boolean" },
 	},
 	render: (args: Args) => (
-		<Card title={args.title} subtitle={args.subtitle} elevation={args.elevation} square={args.square}>
+		<Card
+			title={args.title}
+			subtitle={args.subtitle}
+			elevation={args.elevation}
+			square={args.square}
+			actions={
+				args.showActions ? (
+					<textbutton
+						Size={new UDim2(0, 64, 0, 24)}
+						BackgroundTransparency={1}
+						Text="Action"
+						TextSize={14}
+						Font={Enum.Font.SourceSans}
+					/>
+				) : undefined
+			}
+		>
 			<textlabel Size={new UDim2(1, 0, 0, 24)} BackgroundTransparency={1} Text={args.body} TextSize={16} Font={Enum.Font.SourceSans} />
 		</Card>
 	),
