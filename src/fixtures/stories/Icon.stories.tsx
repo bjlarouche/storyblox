@@ -20,7 +20,6 @@ export default {
 		<Icon
 			icon={Icons[args.name]}
 			size={args.size}
-			tint={Color3.fromRGB(230, 230, 230)}
 		/>
 	),
 };
