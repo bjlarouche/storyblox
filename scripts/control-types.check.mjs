@@ -30,6 +30,9 @@ const matrix = [
 	{ type: "cframe", status: "rich", codecKind: "cframe", editor: "CFrameEditor", fixture: true },
 	{ type: "rect", status: "rich", codecKind: "rect", editor: "RectEditor", fixture: true },
 	{ type: "numberRange", status: "rich", codecKind: "numberRange", editor: "NumberRangeEditor", fixture: true },
+	{ type: "ray", status: "rich", codecKind: "ray", editor: "RayEditor", fixture: true },
+	{ type: "physicalProperties", status: "rich", codecKind: "physicalProperties", editor: "PhysicalPropertiesEditor", fixture: true },
+	{ type: "gradient", status: "rich", codecKind: "gradient", editor: "GradientEditor", fixture: true },
 	{ type: "object", status: "nested", codecKind: null, editor: 'type === "object"', fixture: false },
 	{ type: "array", status: "nested", codecKind: null, editor: 'type === "array"', fixture: false },
 	{ type: "dictionary", status: "nested", codecKind: null, editor: 'type === "dictionary"', fixture: false },
@@ -39,9 +42,6 @@ const matrix = [
 ];
 
 const unsupported = [
-	{ type: "Ray", reason: "codec+Controls pending" },
-	{ type: "PhysicalProperties", reason: "codec+Controls pending" },
-	{ type: "gradient", reason: "GradientValue codec+Controls pending" },
 	{ type: "Region3", reason: "readonly inspection only" },
 	{ type: "Instance", reason: "readonly; not a control value" },
 	{ type: "RBXScriptSignal", reason: "readonly; not a control value" },
@@ -68,7 +68,7 @@ for (const row of matrix) {
 	else if (row.status === "readonly") readonly += 1;
 }
 
-if (rich < 18) throw new Error(`expected >=18 rich types, got ${rich}`);
+if (rich < 21) throw new Error(`expected >=21 rich types, got ${rich}`);
 if (nested !== 4) throw new Error(`expected 4 nested types, got ${nested}`);
 if (readonly !== 1) throw new Error(`expected 1 readonly type, got ${readonly}`);
 if (unsupported.length < 5) throw new Error("unsupported list incomplete");

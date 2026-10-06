@@ -54,6 +54,9 @@ if (switched.kind !== "square" || switched.size !== 2 || switched.radius !== und
 const fn = () => {};
 if (readOnlyKind(fn) !== "function") throw new Error("function");
 if (readOnlyKind({ __type: "Instance" }) !== "Instance") throw new Error("instance");
+if (readOnlyKind({ __type: "RBXScriptSignal" }) !== "RBXScriptSignal") throw new Error("signal");
+if (readOnlyKind({ __type: "thread" }) !== "thread") throw new Error("thread");
+if (readOnlyKind({ __type: "Region3" }) !== "Region3") throw new Error("region3");
 if (readOnlyKind({ getValue: () => 1 }) !== "binding") throw new Error("binding");
 const copied = copyTree({ onClick: fn, label: "A" });
 if (copied.onClick !== fn) throw new Error("function was copied by value");
