@@ -19,7 +19,7 @@ function AccordionStory(args: Args) {
 
 export default {
 	title: "Components/Accordion",
-	args: { title: "Section", open: false, disabled: false, square: true },
+	args: { title: "Section", open: true, disabled: false, square: true },
 	argTypes: {
 		title: { type: "string" },
 		open: { type: "boolean" },
