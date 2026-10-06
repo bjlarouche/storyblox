@@ -40,6 +40,7 @@ export const Rating = kit.Rating;
 export const Stack = kit.Stack;
 export const ScrollView = kit.ScrollView;
 export const DateRangePicker = kit.DateRangePicker;
+export const Sparkline = kit.Sparkline;
 export const FlexItem = kit.FlexItem;
 export const Box = kit.Box;
 export const Container = kit.Container;
