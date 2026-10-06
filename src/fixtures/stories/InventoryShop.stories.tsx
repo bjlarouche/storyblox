@@ -1,5 +1,5 @@
 import React, { useState } from "@rbxts/react";
-import { Button, NumberInput, Typography, useTheme } from "@rbxts/uiblox";
+import { Box, Button, NumberInput, Typography, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import { LinearProgress, Tabs, Tooltip } from "./kit";
 import { Badge, Chip, Dialog, Drawer, Menu, Paper, Stack, useArg } from "./kitBreadth";
 
@@ -9,6 +9,7 @@ interface Args {
 	tab: "shop" | "inventory";
 	menuOpen: boolean;
 	confirmOpen: boolean;
+	detailsOpen: boolean;
 }
 
 const VIEWPORT: { [key in Args["viewport"]]: { width: number; height: number } } = {
@@ -103,20 +104,55 @@ function findItem(id: string): Item {
 
 function Swatch(props: { from: Color3; to: Color3; height: number; rotation?: number; radius?: number }) {
 	return (
-		<frame Size={new UDim2(1, 0, 0, props.height)} BackgroundColor3={Color3.fromRGB(255, 255, 255)} BorderSizePixel={0}>
-			<uicorner CornerRadius={new UDim(0, props.radius ?? 8)} />
-			<uigradient Color={new ColorSequence(props.from, props.to)} Rotation={props.rotation ?? 120} />
-		</frame>
+		<Box
+			sx={{
+				Size: new UDim2(1, 0, 0, props.height),
+				AutomaticSize: Enum.AutomaticSize.None,
+				BackgroundColor3: Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency: 0,
+				BorderSizePixel: 0,
+				radius: props.radius ?? 8,
+				gradient: { colors: [props.from, props.to], rotation: props.rotation ?? 120 },
+			} as WriteableStyle<Frame>}
+		/>
+	);
+}
+
+function Hill(props: { position: UDim2; size: UDim2; from: Color3; to: Color3 }) {
+	return (
+		<Box
+			sx={{
+				AnchorPoint: new Vector2(0.5, 1),
+				Position: props.position,
+				Size: props.size,
+				AutomaticSize: Enum.AutomaticSize.None,
+				BackgroundColor3: Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency: 0,
+				BorderSizePixel: 0,
+				gradient: { colors: [props.from, props.to], rotation: 90 },
+			} as WriteableStyle<Frame>}
+		>
+			<uicorner CornerRadius={new UDim(0.5, 0)} />
+		</Box>
 	);
 }
 
 function World() {
 	return (
-		<frame Size={UDim2.fromScale(1, 1)} BackgroundColor3={Color3.fromRGB(255, 255, 255)} BorderSizePixel={0} ZIndex={0}>
-			<uigradient
-				Color={new ColorSequence(Color3.fromRGB(70, 120, 190), Color3.fromRGB(244, 196, 150))}
-				Rotation={90}
-			/>
+		<Box
+			sx={{
+				Size: UDim2.fromScale(1, 1),
+				AutomaticSize: Enum.AutomaticSize.None,
+				BackgroundColor3: Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency: 0,
+				BorderSizePixel: 0,
+				ZIndex: 0,
+				gradient: {
+					colors: [Color3.fromRGB(70, 120, 190), Color3.fromRGB(244, 196, 150)],
+					rotation: 90,
+				},
+			} as WriteableStyle<Frame>}
+		>
 			<frame
 				AnchorPoint={new Vector2(0.5, 0.5)}
 				Position={UDim2.fromScale(0.72, 0.3)}
@@ -127,27 +163,19 @@ function World() {
 			>
 				<uicorner CornerRadius={new UDim(0.5, 0)} />
 			</frame>
-			<frame
-				AnchorPoint={new Vector2(0.5, 1)}
-				Position={UDim2.fromScale(0.25, 1.2)}
-				Size={UDim2.fromScale(1.1, 0.7)}
-				BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-				BorderSizePixel={0}
-			>
-				<uicorner CornerRadius={new UDim(0.5, 0)} />
-				<uigradient Color={new ColorSequence(Color3.fromRGB(86, 140, 96), Color3.fromRGB(40, 78, 62))} Rotation={90} />
-			</frame>
-			<frame
-				AnchorPoint={new Vector2(0.5, 1)}
-				Position={UDim2.fromScale(0.85, 1.25)}
-				Size={UDim2.fromScale(1, 0.62)}
-				BackgroundColor3={Color3.fromRGB(255, 255, 255)}
-				BorderSizePixel={0}
-			>
-				<uicorner CornerRadius={new UDim(0.5, 0)} />
-				<uigradient Color={new ColorSequence(Color3.fromRGB(120, 168, 110), Color3.fromRGB(52, 96, 70))} Rotation={90} />
-			</frame>
-		</frame>
+			<Hill
+				position={UDim2.fromScale(0.25, 1.2)}
+				size={UDim2.fromScale(1.1, 0.7)}
+				from={Color3.fromRGB(86, 140, 96)}
+				to={Color3.fromRGB(40, 78, 62)}
+			/>
+			<Hill
+				position={UDim2.fromScale(0.85, 1.25)}
+				size={UDim2.fromScale(1, 0.62)}
+				from={Color3.fromRGB(120, 168, 110)}
+				to={Color3.fromRGB(52, 96, 70)}
+			/>
+		</Box>
 	);
 }
 
@@ -374,7 +402,7 @@ function InventoryShop(args: Args) {
 	const [tab, setTab] = useArg<string>(args.tab);
 	const [menuOpen, setMenuOpen] = useArg(args.menuOpen);
 	const [confirmOpen, setConfirmOpen] = useArg(args.confirmOpen);
-	const [detailsOpen, setDetailsOpen] = useState(false);
+	const [detailsOpen, setDetailsOpen] = useArg(args.detailsOpen);
 	const [sort, setSort] = useState("rarity");
 	const [selectedId, setSelectedId] = useState("cloak");
 	const [quantity, setQuantity] = useState(1);
@@ -554,13 +582,14 @@ function InventoryShop(args: Args) {
 export default {
 	title: "Scenarios/Inventory Shop",
 	description: "Game HUD over a gradient world with a trader overlay: item grid, details, quantity, buy confirm, equip, sort menu, tooltips.",
-	args: { viewport: "desktop", shopOpen: true, tab: "shop", menuOpen: false, confirmOpen: false },
+	args: { viewport: "desktop", shopOpen: true, tab: "shop", menuOpen: false, confirmOpen: false, detailsOpen: false },
 	argTypes: {
 		viewport: { type: "enum", options: ["phone", "desktop"] },
 		shopOpen: { type: "boolean" },
 		tab: { type: "enum", options: ["shop", "inventory"] },
 		menuOpen: { type: "boolean" },
 		confirmOpen: { type: "boolean" },
+		detailsOpen: { type: "boolean" },
 	},
 	preview: { width: 1100, height: 720 },
 	tags: ["scenario", "parity"],
