@@ -9,6 +9,18 @@ if (!safe.includes("resetKey") || !safe.includes("Retry") || !safe.includes("Err
 	throw new Error("SafeBoundary must wrap ErrorBoundary with resetKey + Retry");
 }
 
+const panel = read("src/packages/ui/template/components/ErrorPanel.tsx");
+for (const needle of ["<textbox", "TextEditable={false}", "ClearTextOnFocus={false}", "MultiLine={true}", "<scrollingframe"]) {
+	if (!panel.includes(needle)) throw new Error(`ErrorPanel must keep ${needle}`);
+}
+if (panel.includes("TextScaled") || panel.indexOf('"Retry"') > panel.indexOf("<scrollingframe")) {
+	throw new Error("ErrorPanel must not scale text and must pin Retry above the stack");
+}
+if (!safe.includes("<ErrorPanel")) throw new Error("SafeBoundary must use ErrorPanel");
+for (const rel of ["src/packages/ui/template/components/Template.tsx", "src/packages/ui/storyblox/components/Storyblox.tsx"]) {
+	if (!read(rel).includes("<ErrorPanel")) throw new Error(`${rel} must use ErrorPanel`);
+}
+
 const controls = read("src/packages/ui/template/components/Controls.tsx");
 if (!controls.includes("SafeBoundary") || !controls.includes("resetKey={`${resetKey}:${name}`}")) {
 	throw new Error("Controls rows must wrap editors in SafeBoundary");

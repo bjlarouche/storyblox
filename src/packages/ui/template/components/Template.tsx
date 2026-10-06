@@ -20,6 +20,7 @@ import { CaseResult, createCaseClock, createSeed, runCase } from "packages/story
 import { ActionLogContext } from "../actionLogContext";
 import InspectorPane from "./InspectorPane";
 import OutlineOverlay from "./OutlineOverlay";
+import ErrorPanel from "./ErrorPanel";
 import SafeBoundary from "./SafeBoundary";
 import useTemplateStyles from "./Template.styles";
 
@@ -174,25 +175,8 @@ function loaderStatus(theme: Theme) {
 	);
 }
 
-function storyError(title: string, failure: unknown, theme: Theme) {
-	return (
-		<frame key="Error" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
-			<textlabel
-				key="Message"
-				Text={`<u>Unable to render <b>${title}</b>...</u>\n\n${failure}`}
-				AnchorPoint={new Vector2(0.5, 0.5)}
-				Position={UDim2.fromScale(0.5, 0.5)}
-				Size={new UDim2(1, -theme.spacing.calc(2), 1, -theme.spacing.calc(2))}
-				BackgroundTransparency={1}
-				TextColor3={theme.palette.status.error.main}
-				TextScaled={true}
-				TextYAlignment={Enum.TextYAlignment.Top}
-				TextXAlignment={Enum.TextXAlignment.Left}
-				RichText={true}
-				Font={theme.typography.fontFamilies.semibold}
-			/>
-		</frame>
-	);
+function storyError(title: string, failure: unknown) {
+	return <ErrorPanel key="Error" title={`Unable to render ${title}`} message={`${failure}`} />;
 }
 
 function Template({
@@ -1023,7 +1007,7 @@ function Template({
 									onRenderError?.(failure);
 									return (
 										<Canvas className={canvas}>
-											{storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)}
+											{storyError(storyKey.size() > 0 ? storyKey : "story", failure)}
 										</Canvas>
 									);
 								}}
@@ -1033,9 +1017,9 @@ function Template({
 										{hasLoaders && loaderPhase === "loading"
 											? loaderStatus(theme)
 											: hasLoaders && loaderPhase === "error"
-												? storyError(storyKey.size() > 0 ? storyKey : "story", loaderMessage, theme)
+												? storyError(storyKey.size() > 0 ? storyKey : "story", loaderMessage)
 												: failure !== undefined
-													? storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)
+													? storyError(storyKey.size() > 0 ? storyKey : "story", failure)
 													: template}
 									</ActionLogContext.Provider>
 								</Canvas>
