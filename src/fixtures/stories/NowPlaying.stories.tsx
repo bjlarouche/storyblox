@@ -45,6 +45,16 @@ interface ScrubProps {
 	format?: (value: number) => string;
 }
 
+type Glyph = "play" | "pause" | "previous" | "next";
+
+interface ControlProps {
+	icon: Icons;
+	glyph?: Glyph;
+	tint: Color3;
+	size?: "md";
+	onClick?: () => void;
+}
+
 interface RowProps {
 	track: Track;
 	current: boolean;
@@ -57,6 +67,7 @@ interface RowProps {
 }
 
 const Scrub = Slider as unknown as (props: ScrubProps) => React.Element;
+const Control = IconButton as unknown as (props: ControlProps) => React.Element;
 const STACK = { Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y };
 const VIEWPORT = {
 	phone: { width: 390, height: 780 },
@@ -268,13 +279,19 @@ function NowPlaying(args: Args) {
 				</Stack>
 				<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
 					<Tooltip text="Previous">
-						<Button text="Back" size="small" variant="outlined" onLeftClick={() => shift(-1)} />
+						<Control icon={Icons.HorizontalDots} glyph="previous" tint={theme.palette.text.primary} size="md" onClick={() => shift(-1)} />
 					</Tooltip>
 					<Tooltip text={playing ? "Pause" : "Play"}>
-						<Button text={playing ? "Pause" : "Play"} size="small" variant="contained" onLeftClick={() => setPlaying(!playing)} />
+						<Control
+							icon={Icons.HorizontalDots}
+							glyph={playing ? "pause" : "play"}
+							tint={theme.palette.text.primary}
+							size="md"
+							onClick={() => setPlaying(!playing)}
+						/>
 					</Tooltip>
-					<Tooltip text="Skip">
-						<Button text="Next" size="small" variant="outlined" onLeftClick={() => shift(1)} />
+					<Tooltip text="Next">
+						<Control icon={Icons.HorizontalDots} glyph="next" tint={theme.palette.text.primary} size="md" onClick={() => shift(1)} />
 					</Tooltip>
 					<Tooltip text={liked[current.id] === true ? "Unlike" : "Like"}>
 						<IconButton
