@@ -147,6 +147,7 @@ export interface TemplateProps {
 	starred?: boolean;
 	onToggleFavorite?: () => void;
 	remount?: number;
+	chromeCommand?: { kind: string; id: number };
 	caseRequest?: { name: string; id: number };
 	argsRequest?: { args?: { [key: string]: unknown }; id: number };
 	onCaseResult?: (result: CaseResult) => void;
@@ -183,6 +184,7 @@ function Template({
 	starred,
 	onToggleFavorite,
 	remount = 0,
+	chromeCommand,
 	caseRequest,
 	argsRequest,
 	onCaseResult,
@@ -281,6 +283,17 @@ function Template({
 	useEffect(() => {
 		if (remount > 0) setEpoch((current) => current + 1);
 	}, [remount]);
+
+	useEffect(() => {
+		if (chromeCommand === undefined) return;
+		const kind = chromeCommand.kind;
+		if (kind === "zoomIn") setZoom((current) => stepZoom(current, 1));
+		else if (kind === "zoomOut") setZoom((current) => stepZoom(current, -1));
+		else if (kind === "grid") setGrid((current) => !current);
+		else if (kind === "fit") setFit((current) => !current);
+		else if (kind === "orientation") setOrientation((current) => flipOrientation(current));
+		else if (kind === "background") setBgStep((current) => (current + 1) % 3);
+	}, [chromeCommand]);
 
 	useEffect(() => {
 		if (!outline && !measure) {

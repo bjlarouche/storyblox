@@ -180,6 +180,7 @@ function Storyblox(props: StorybloxProps) {
 	const [pane, setPane] = useState("canvas");
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
+	const [chromeCommand, setChromeCommand] = useState<{ kind: string; id: number } | undefined>();
 	const [caseRequest, setCaseRequest] = useState<{ name: string; id: number } | undefined>();
 	const [argsRequest, setArgsRequest] = useState<{ args?: { [key: string]: unknown }; id: number } | undefined>();
 	const bridgeGeneration = useRef(0);
@@ -405,6 +406,13 @@ function Storyblox(props: StorybloxProps) {
 		const remountConn = marker
 			.GetAttributeChangedSignal("storyblox-remount")
 			.Connect(() => setRemount((current) => current + 1));
+		const chromeConn = marker.GetAttributeChangedSignal("storyblox-chrome").Connect(() => {
+			const raw = marker.GetAttribute("storyblox-chrome");
+			if (typeOf(raw) !== "string" || (raw as string).size() === 0) return;
+			const kind = (raw as string).split("@")[0];
+			if (kind.size() === 0) return;
+			setChromeCommand((current) => ({ kind, id: (current?.id ?? 0) + 1 }));
+		});
 		const caseConn = marker.GetAttributeChangedSignal("storyblox-case").Connect(() => {
 			const name = marker.GetAttribute("storyblox-case");
 			if (typeOf(name) !== "string" || name === "") return;
@@ -485,6 +493,7 @@ function Storyblox(props: StorybloxProps) {
 			includeConn.Disconnect();
 			excludeConn.Disconnect();
 			remountConn.Disconnect();
+			chromeConn.Disconnect();
 			caseConn.Disconnect();
 		};
 	}, [root, primaryTheme, secondaryTheme, onThemeChange]);
@@ -626,6 +635,7 @@ function Storyblox(props: StorybloxProps) {
 							<Template
 								story={selectedStory}
 								remount={remount}
+								chromeCommand={chromeCommand}
 								caseRequest={caseRequest}
 								argsRequest={argsRequest}
 								onCaseResult={(result) => {
