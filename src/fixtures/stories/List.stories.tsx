@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
 import { List } from "./kitBreadth";
 
 interface Args {
@@ -8,14 +9,15 @@ interface Args {
 }
 
 function Chip(props: { order: number; text: string }) {
+	const { theme } = useTheme();
 	return (
 		<textlabel
 			AutomaticSize={Enum.AutomaticSize.XY}
 			Size={UDim2.fromScale(0, 0)}
-			BackgroundColor3={Color3.fromRGB(60, 80, 110)}
+			BackgroundColor3={theme.palette.primary.main}
 			BorderSizePixel={0}
 			Text={`  ${props.text}  `}
-			TextColor3={Color3.fromRGB(240, 240, 240)}
+			TextColor3={theme.palette.primary.on}
 			TextSize={14}
 			LayoutOrder={props.order}
 		/>
