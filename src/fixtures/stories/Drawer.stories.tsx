@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
 import { Drawer, useArg } from "./kitBreadth";
 
 interface Args {
@@ -8,6 +9,7 @@ interface Args {
 }
 
 function DrawerStory(args: Args) {
+	const { theme } = useTheme();
 	const [open, setOpen] = useArg(args.open);
 	return (
 		<>
@@ -15,6 +17,8 @@ function DrawerStory(args: Args) {
 				<textbutton
 					Size={new UDim2(0, 120, 0, 28)}
 					Text="Open drawer"
+					TextColor3={theme.palette.text.primary}
+					BackgroundColor3={theme.palette.surface.paper}
 					Event={{ Activated: () => setOpen(true) }}
 				/>
 			)}
@@ -30,6 +34,7 @@ function DrawerStory(args: Args) {
 					Text="Drawer"
 					TextSize={16}
 					Font={Enum.Font.SourceSans}
+					TextColor3={theme.palette.text.primary}
 				/>
 			</Drawer>
 		</>
