@@ -51,6 +51,7 @@ function ProgressStory(args: Args) {
 					indeterminate={args.indeterminate}
 					reducedMotion={args.reducedMotion}
 					disabled={args.disabled}
+					color={color}
 					className={{ Size: new UDim2(1, 0, 0, 8) }}
 				/>
 			)}
