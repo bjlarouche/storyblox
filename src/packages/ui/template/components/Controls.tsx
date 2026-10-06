@@ -12,7 +12,15 @@ import {
 	switchUnion,
 } from "packages/nestedArgs";
 import { useDragScroll } from "../../scroll";
-import { ArgValues, choiceOptions, commitNumberText, enumItemOptions } from "../storyArgs";
+import {
+	ArgValues,
+	assetId,
+	assetText,
+	choiceOptions,
+	commitNumberText,
+	enumItemOptions,
+	enumItems,
+} from "../storyArgs";
 import { argHint } from "../storyLabel";
 import SafeBoundary from "./SafeBoundary";
 
@@ -106,6 +114,18 @@ const kit = Uiblox as unknown as {
 		onChange: (value: NumberSequence) => void;
 		disabled?: boolean;
 	}) => React.Element;
+	CFrameEditor: (props: { value: CFrame; onChange: (value: CFrame) => void; disabled?: boolean }) => React.Element;
+	AssetField: (props: {
+		value: string;
+		onChange: (value: string) => void;
+		disabled?: boolean;
+	}) => React.Element;
+	EnumPicker: (props: {
+		value: EnumItem;
+		items: EnumItem[];
+		onChange: (value: EnumItem) => void;
+		disabled?: boolean;
+	}) => React.Element;
 };
 
 export interface ControlsProps {
@@ -140,7 +160,10 @@ function hasKit(
 		| "UDimEditor"
 		| "FontEditor"
 		| "ColorSequenceEditor"
-		| "NumberSequenceEditor",
+		| "NumberSequenceEditor"
+		| "CFrameEditor"
+		| "AssetField"
+		| "EnumPicker",
 ) {
 	return typeOf((Uiblox as unknown as { [key: string]: unknown })[name]) === "function";
 }
@@ -390,7 +413,55 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					}}
 				/>
 			);
-		} else if (
+		} else if (spec?.type === "cframe" && hasKit("CFrameEditor")) {
+			const frame = typeOf(value) === "CFrame" ? (value as CFrame) : new CFrame();
+			editor = (
+				<kit.CFrameEditor
+					key={name}
+					value={frame}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (spec?.type === "asset" && hasKit("AssetField")) {
+			editor = (
+				<kit.AssetField
+					key={name}
+					value={assetText(value)}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						const id = assetId(incoming);
+						if (id === undefined) {
+							setFaults((current) => writeFault(current, name, "asset"));
+							return;
+						}
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, id);
+					}}
+				/>
+			);
+		} else if (spec?.type === "EnumItem" && hasKit("EnumPicker")) {
+			const items = enumItems(spec.enumType, spec.options);
+			if (items.size() > 0) {
+				const selected = typeOf(value) === "EnumItem" ? (value as EnumItem) : items[0];
+				editor = (
+					<kit.EnumPicker
+						key={name}
+						value={selected}
+						items={items}
+						disabled={spec.disabled === true}
+						onChange={(incoming) => {
+							setFaults((current) => writeFault(current, name, ""));
+							onChange(name, incoming);
+						}}
+					/>
+				);
+			}
+		}
+		if (editor === undefined && (
 			datatype(spec?.type) ||
 			spec?.type === "color" ||
 			spec?.type === "brickColor" ||
@@ -401,7 +472,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			spec?.type === "font" ||
 			spec?.type === "colorSequence" ||
 			spec?.type === "numberSequence"
-		) {
+		)) {
 			const commitText = (text: string) => {
 				const parsed = parseDatatype(spec ?? {}, text);
 				if (!parsed.ok) {
@@ -431,7 +502,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					/>
 				);
 			}
-		} else if (spec?.type === "readonly") {
+		} else if (editor === undefined && spec?.type === "readonly") {
 			editor = (
 				<textlabel
 					key={name}
@@ -444,9 +515,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
 			);
-		} else if (spec?.type === "custom") {
+		} else if (editor === undefined && spec?.type === "custom") {
 			editor = <CustomEditor key={name} editor={spec.editor ?? ""} value={value} onChange={(incoming) => onChange(name, incoming)} />;
-		} else if (spec?.type === "array") {
+		} else if (editor === undefined && spec?.type === "array") {
 			const items = (typeOf(value) === "table" ? value : []) as Array<defined>;
 			let keys = rowKeys[name];
 			if (keys === undefined || keys.size() !== items.size()) {
@@ -536,7 +607,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					/>
 				</frame>
 			);
-		} else if (spec?.type === "union") {
+		} else if (editor === undefined && spec?.type === "union") {
 			const tag = spec.tag ?? "kind";
 			const record = typeOf(value) === "table" ? (value as { [key: string]: unknown }) : {};
 			const selected = tostring(record[tag] ?? "");
@@ -551,7 +622,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					onChange={(incoming) => onChange(name, switchUnion(tag, incoming, {}))}
 				/>
 			);
-		} else if (spec?.type === "object" || spec?.type === "dictionary") {
+		} else if (editor === undefined && (spec?.type === "object" || spec?.type === "dictionary")) {
 			const record = typeOf(value) === "table" ? (value as { [key: string]: unknown }) : {};
 			const fieldRows: Array<React.Element> = [];
 			const entries = spec.type === "object" ? spec.fields ?? {} : record;
@@ -576,7 +647,7 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					{fieldRows}
 				</frame>
 			);
-		} else if (spec?.type === "string") {
+		} else if (editor === undefined && spec?.type === "string") {
 			editor = (
 				<Input
 					key={name}
