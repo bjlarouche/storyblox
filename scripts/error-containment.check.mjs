@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
@@ -68,6 +68,16 @@ if (!pack.includes("!out/fixtures/**")) {
 const release = read("scripts/plugin-fixtures.check.mjs");
 if (!release.includes('globIgnorePaths = ["**/fixtures/**"]')) {
 	throw new Error("release plugin must ignore fixtures");
+}
+
+for (const rel of readdirSync(join(root, "src/packages"), { recursive: true })) {
+	if (!rel.endsWith(".tsx")) continue;
+	const lines = read(join("src/packages", rel)).split("\n");
+	lines.forEach((line, i) => {
+		if (/^\s*\{[^}]*\.map\(/.test(line) && lines[i - 1].trim() !== "<>") {
+			throw new Error(`${rel}:${i + 1} mapped children must be wrapped in <> (ReactLua rekeys bare arrays into text)`);
+		}
+	});
 }
 
 console.log("error containment ok");
