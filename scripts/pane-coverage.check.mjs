@@ -109,8 +109,16 @@ const required = [
 	{
 		id: "loaders",
 		title: "Shell/Loaders",
-		check: "scripts/define-story.check.mjs",
+		check: "scripts/story-loaders.check.mjs",
 		needles: [],
+		templateNeedles: ["preloaded", "key=\"Loading\""],
+	},
+	{
+		id: "async-loaders",
+		title: "Shell/AsyncLoaders",
+		check: "scripts/story-loaders.check.mjs",
+		needles: [],
+		templateNeedles: ["settleLoaders", "key=\"Loading\""],
 	},
 ];
 
