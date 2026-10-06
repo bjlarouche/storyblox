@@ -145,6 +145,21 @@ export function encodeValue(
 		}
 		return { ok: true, value: tagged };
 	}
+	if (kind === "Rect") {
+		const rect = value as { Min: Vector; Max: Vector };
+		if (!finite(rect.Min?.X) || !finite(rect.Min?.Y) || !finite(rect.Max?.X) || !finite(rect.Max?.Y)) {
+			return fail(path, "rect");
+		}
+		return {
+			ok: true,
+			value: { kind: "rect", minX: rect.Min.X, minY: rect.Min.Y, maxX: rect.Max.X, maxY: rect.Max.Y },
+		};
+	}
+	if (kind === "NumberRange") {
+		const range = value as { Min: number; Max: number };
+		if (!finite(range.Min) || !finite(range.Max)) return fail(path, "numberRange");
+		return { ok: true, value: { kind: "numberRange", min: range.Min, max: range.Max } };
+	}
 	return fail(path, "unsupported");
 }
 
@@ -207,6 +222,12 @@ export function decodeValue(tagged: unknown): unknown {
 		const up = value.upX === undefined ? undefined : new Vector3(value.upX as number, value.upY as number, value.upZ as number);
 		return CFrame.lookAt(at, target, up);
 	}
+	if (value.kind === "rect") {
+		return new Rect(value.minX as number, value.minY as number, value.maxX as number, value.maxY as number);
+	}
+	if (value.kind === "numberRange") {
+		return new NumberRange(value.min as number, value.max as number);
+	}
 	return tagged;
 }
 
@@ -263,6 +284,8 @@ export function formatDatatype(value: unknown): string {
 		if (record.upX !== undefined) text += `, ${record.upX}, ${record.upY}, ${record.upZ}`;
 		return text;
 	}
+	if (record.kind === "rect") return `${record.minX}, ${record.minY}, ${record.maxX}, ${record.maxY}`;
+	if (record.kind === "numberRange") return `${record.min}, ${record.max}`;
 	return "";
 }
 
@@ -304,7 +327,9 @@ export function parseDatatype(
 		const target = new Vector3(numbers[0] + numbers[3], numbers[1] + numbers[4], numbers[2] + numbers[5]);
 		const up = numbers.size() === 9 ? new Vector3(numbers[6], numbers[7], numbers[8]) : undefined;
 		value = CFrame.lookAt(at, target, up);
-	} else return { ok: false, reason: kind ?? "unsupported" };
+	} else if (kind === "rect" && numbers.size() === 4) value = new Rect(numbers[0], numbers[1], numbers[2], numbers[3]);
+	else if (kind === "numberRange" && numbers.size() === 2) value = new NumberRange(numbers[0], numbers[1]);
+	else return { ok: false, reason: kind ?? "unsupported" };
 	const encoded = encodeValue(value, "value");
 	if (!encoded.ok) return { ok: false, reason: encoded.error.reason };
 	return { ok: true, value };

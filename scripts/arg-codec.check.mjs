@@ -258,4 +258,31 @@ if (!paintedBrick.ok || paintedBrick.value.Name !== "Bright red") throw new Erro
 const badBrick = parseDatatype({ type: "brickColor" }, "Nope");
 if (badBrick.ok || badBrick.reason !== "brickColor") throw new Error("brickColor editor reject");
 
+globalThis.Rect = class Rect {
+	constructor(minX, minY, maxX, maxY) {
+		this.Min = { X: minX, Y: minY };
+		this.Max = { X: maxX, Y: maxY };
+		this.Width = maxX - minX;
+		kinds.set(this, "Rect");
+	}
+};
+globalThis.NumberRange = class NumberRange {
+	constructor(min, max) {
+		this.Min = min;
+		this.Max = max;
+		kinds.set(this, "NumberRange");
+	}
+};
+
+const rect = new Rect(0, 1, 10, 20);
+const decodedRect = roundTrip(rect);
+if (decodedRect.Min.X !== 0 || decodedRect.Max.Y !== 20) throw new Error("rect");
+const parsedRect = parseDatatype({ type: "rect" }, formatDatatype(rect));
+if (!parsedRect.ok || parsedRect.value.Max.X !== 10) throw new Error("rect editor");
+const range = new NumberRange(0.25, 0.75);
+const decodedRange = roundTrip(range);
+if (decodedRange.Min !== 0.25 || decodedRange.Max !== 0.75) throw new Error("numberRange");
+const parsedRange = parseDatatype({ type: "numberRange" }, formatDatatype(range));
+if (!parsedRange.ok || parsedRange.value.Max !== 0.75) throw new Error("numberRange editor");
+
 console.log("arg codec ok");
