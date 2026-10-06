@@ -13,7 +13,7 @@ interface Args {
 
 export default {
 	title: "Components/Fab",
-	args: { size: "medium", color: "accent", label: "", loading: false, disabled: false, reducedMotion: false },
+	args: { size: "medium", color: "accent", label: "Create", loading: false, disabled: false, reducedMotion: false },
 	argTypes: {
 		size: { type: "enum", options: ["small", "medium", "large"] },
 		color: { type: "enum", options: ["primary", "accent"] },
