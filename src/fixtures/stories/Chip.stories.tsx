@@ -39,7 +39,7 @@ function ChipStory(args: Args) {
 
 export default {
 	title: "Components/Chip",
-	args: { label: "Chip", selected: false, disabled: false, deletable: true, size: "medium", variant: "filled", color: "primary" },
+	args: { label: "Chip", selected: true, disabled: false, deletable: true, size: "medium", variant: "filled", color: "default" },
 	argTypes: {
 		label: { type: "string" },
 		selected: { type: "boolean" },
