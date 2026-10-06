@@ -23,6 +23,18 @@ export default {
 		origin: new CFrame(0, 1, 0),
 		bounds: new Rect(0, 0, 100, 50),
 		spanRange: new NumberRange(0.25, 0.75),
+		beam: new Ray(new Vector3(0, 1, 0), new Vector3(0, 0, -1)),
+		material: new PhysicalProperties(0.7, 0.3, 0.5),
+		wash: {
+			color: new ColorSequence([
+				new ColorSequenceKeypoint(0, Color3.fromRGB(255, 80, 80)),
+				new ColorSequenceKeypoint(1, Color3.fromRGB(80, 120, 255)),
+			]),
+			transparency: new NumberSequence(0),
+			rotation: 45,
+			offset: new Vector2(0, 0),
+			enabled: true,
+		},
 	},
 	argTypes: {
 		paint: { type: "color" },
@@ -39,6 +51,9 @@ export default {
 		origin: { type: "cframe" },
 		bounds: { type: "rect" },
 		spanRange: { type: "numberRange" },
+		beam: { type: "ray" },
+		material: { type: "physicalProperties" },
+		wash: { type: "gradient" },
 	},
 	render: (args: {
 		paint: Color3;
@@ -55,9 +70,18 @@ export default {
 		origin: CFrame;
 		bounds: Rect;
 		spanRange: NumberRange;
+		beam: Ray;
+		material: PhysicalProperties;
+		wash: {
+			color: ColorSequence;
+			transparency: NumberSequence;
+			rotation: number;
+			offset: Vector2;
+			enabled: boolean;
+		};
 	}) => (
 		<textlabel
-			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y} rect=${args.bounds.Width} range=${args.spanRange.Min}`}
+			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y} rect=${args.bounds.Width} range=${args.spanRange.Min} ray=${args.beam.Direction.Z} dens=${args.material.Density} wash=${args.wash.rotation}`}
 			Size={new UDim2(1, -16, 1, -16)}
 			Position={new UDim2(0, 8, 0, 8)}
 			BackgroundTransparency={1}

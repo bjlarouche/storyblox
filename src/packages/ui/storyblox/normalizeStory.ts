@@ -72,6 +72,18 @@ function argValueMatches(value: unknown, kind: unknown): boolean {
 	if (kind === "cframe") return typeOf(value) === "CFrame";
 	if (kind === "rect") return typeOf(value) === "Rect";
 	if (kind === "numberRange") return typeOf(value) === "NumberRange";
+	if (kind === "ray") return typeOf(value) === "Ray";
+	if (kind === "physicalProperties") return typeOf(value) === "PhysicalProperties";
+	if (kind === "gradient") {
+		if (typeOf(value) !== "table") return false;
+		const gradient = value as { color?: unknown; transparency?: unknown; offset?: unknown; enabled?: unknown };
+		return (
+			typeOf(gradient.color) === "ColorSequence" &&
+			typeOf(gradient.transparency) === "NumberSequence" &&
+			typeOf(gradient.offset) === "Vector2" &&
+			typeOf(gradient.enabled) === "boolean"
+		);
+	}
 	if (kind === "asset") {
 		return typeOf(value) === "number" && (value as number) === value && (value as number) >= 0 && (value as number) % 1 === 0;
 	}

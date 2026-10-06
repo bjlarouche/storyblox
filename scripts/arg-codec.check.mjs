@@ -285,4 +285,44 @@ if (decodedRange.Min !== 0.25 || decodedRange.Max !== 0.75) throw new Error("num
 const parsedRange = parseDatatype({ type: "numberRange" }, formatDatatype(range));
 if (!parsedRange.ok || parsedRange.value.Max !== 0.75) throw new Error("numberRange editor");
 
+globalThis.Ray = class Ray {
+	constructor(origin, direction) {
+		this.Origin = origin;
+		this.Direction = direction;
+		kinds.set(this, "Ray");
+	}
+};
+globalThis.PhysicalProperties = class PhysicalProperties {
+	constructor(density, friction, elasticity, frictionWeight = 1, elasticityWeight = 1) {
+		this.Density = density;
+		this.Friction = friction;
+		this.Elasticity = elasticity;
+		this.FrictionWeight = frictionWeight;
+		this.ElasticityWeight = elasticityWeight;
+		kinds.set(this, "PhysicalProperties");
+	}
+};
+
+const ray = new Ray(asType("Vector3", { X: 0, Y: 1, Z: 0 }), asType("Vector3", { X: 0, Y: 0, Z: -1 }));
+const decodedRay = roundTrip(ray);
+if (decodedRay.Origin.Y !== 1 || decodedRay.Direction.Z !== -1) throw new Error("ray");
+const parsedRay = parseDatatype({ type: "ray" }, formatDatatype(ray));
+if (!parsedRay.ok || parsedRay.value.Direction.Z !== -1) throw new Error("ray editor");
+const physical = new PhysicalProperties(0.7, 0.3, 0.5, 1, 1);
+const decodedPhysical = roundTrip(physical);
+if (decodedPhysical.Density !== 0.7 || decodedPhysical.ElasticityWeight !== 1) throw new Error("physicalProperties");
+const wash = {
+	color: gradient,
+	transparency: fade,
+	rotation: 45,
+	offset: asType("Vector2", { X: 0, Y: 0 }),
+	enabled: true,
+};
+const encodedWash = encodeValue(wash, "wash", { type: "gradient" });
+if (!encodedWash.ok || encodedWash.value.kind !== "gradient") throw new Error("gradient encode");
+const decodedWash = decodeValue(encodedWash.value);
+if (decodedWash.rotation !== 45 || decodedWash.enabled !== true || decodedWash.offset.X !== 0) {
+	throw new Error("gradient decode");
+}
+
 console.log("arg codec ok");

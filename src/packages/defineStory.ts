@@ -15,6 +15,9 @@ export interface ControlSpec {
 		| "cframe"
 		| "rect"
 		| "numberRange"
+		| "ray"
+		| "physicalProperties"
+		| "gradient"
 		| "font"
 		| "colorSequence"
 		| "numberSequence"
@@ -68,6 +71,9 @@ export const controls = {
 	cframe: (): ControlSpec => ({ type: "cframe" }),
 	rect: (): ControlSpec => ({ type: "rect" }),
 	numberRange: (): ControlSpec => ({ type: "numberRange" }),
+	ray: (): ControlSpec => ({ type: "ray" }),
+	physicalProperties: (): ControlSpec => ({ type: "physicalProperties" }),
+	gradient: (): ControlSpec => ({ type: "gradient" }),
 	object: (fields: { [key: string]: ControlSpec }): ControlSpec => ({ type: "object", fields }),
 	array: (item: ControlSpec): ControlSpec => ({ type: "array", item }),
 	dictionary: (item: ControlSpec): ControlSpec => ({ type: "dictionary", item }),

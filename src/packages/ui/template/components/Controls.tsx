@@ -121,6 +121,29 @@ const kit = Uiblox as unknown as {
 		onChange: (value: NumberRange) => void;
 		disabled?: boolean;
 	}) => React.Element;
+	RayEditor: (props: { value: Ray; onChange: (value: Ray) => void; disabled?: boolean }) => React.Element;
+	PhysicalPropertiesEditor: (props: {
+		value: PhysicalProperties;
+		onChange: (value: PhysicalProperties) => void;
+		disabled?: boolean;
+	}) => React.Element;
+	GradientEditor: (props: {
+		value: {
+			color: ColorSequence;
+			transparency: NumberSequence;
+			rotation: number;
+			offset: Vector2;
+			enabled: boolean;
+		};
+		onChange: (value: {
+			color: ColorSequence;
+			transparency: NumberSequence;
+			rotation: number;
+			offset: Vector2;
+			enabled: boolean;
+		}) => void;
+		disabled?: boolean;
+	}) => React.Element;
 	AssetField: (props: {
 		value: string;
 		onChange: (value: string) => void;
@@ -155,7 +178,15 @@ function writeFault(current: { [key: string]: string }, key: string, reason: str
 }
 
 function datatype(kind?: string) {
-	return kind === "EnumItem" || kind === "asset" || kind === "cframe" || kind === "rect" || kind === "numberRange";
+	return (
+		kind === "EnumItem" ||
+		kind === "asset" ||
+		kind === "cframe" ||
+		kind === "rect" ||
+		kind === "numberRange" ||
+		kind === "ray" ||
+		kind === "physicalProperties"
+	);
 }
 
 function hasKit(
@@ -170,10 +201,23 @@ function hasKit(
 		| "CFrameEditor"
 		| "RectEditor"
 		| "NumberRangeEditor"
+		| "RayEditor"
+		| "PhysicalPropertiesEditor"
+		| "GradientEditor"
 		| "AssetField"
 		| "EnumPicker",
 ) {
 	return typeOf((Uiblox as unknown as { [key: string]: unknown })[name]) === "function";
+}
+
+function defaultGradient() {
+	return {
+		color: new ColorSequence(new Color3(1, 1, 1)),
+		transparency: new NumberSequence(0),
+		rotation: 0,
+		offset: new Vector2(),
+		enabled: true,
+	};
 }
 
 let rowSerial = 0;
@@ -460,6 +504,58 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					}}
 				/>
 			);
+		} else if (spec?.type === "ray" && hasKit("RayEditor")) {
+			const ray =
+				typeOf(value) === "Ray" ? (value as Ray) : new Ray(new Vector3(), new Vector3(0, 0, -1));
+			editor = (
+				<kit.RayEditor
+					key={name}
+					value={ray}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (spec?.type === "physicalProperties" && hasKit("PhysicalPropertiesEditor")) {
+			const props =
+				typeOf(value) === "PhysicalProperties"
+					? (value as PhysicalProperties)
+					: new PhysicalProperties(0.7, 0.3, 0.5);
+			editor = (
+				<kit.PhysicalPropertiesEditor
+					key={name}
+					value={props}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (spec?.type === "gradient" && hasKit("GradientEditor")) {
+			const gradient =
+				typeOf(value) === "table" && typeOf((value as { color?: unknown }).color) === "ColorSequence"
+					? (value as {
+							color: ColorSequence;
+							transparency: NumberSequence;
+							rotation: number;
+							offset: Vector2;
+							enabled: boolean;
+						})
+					: defaultGradient();
+			editor = (
+				<kit.GradientEditor
+					key={name}
+					value={gradient}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
 		} else if (spec?.type === "asset" && hasKit("AssetField")) {
 			editor = (
 				<kit.AssetField
@@ -507,7 +603,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			spec?.type === "colorSequence" ||
 			spec?.type === "numberSequence" ||
 			spec?.type === "rect" ||
-			spec?.type === "numberRange"
+			spec?.type === "numberRange" ||
+			spec?.type === "ray" ||
+			spec?.type === "physicalProperties"
 		)) {
 			const commitText = (text: string) => {
 				const parsed = parseDatatype(spec ?? {}, text);

@@ -47,6 +47,39 @@ export function encodeValue(
 		if (!finite(value) || (value as number) < 0 || (value as number) % 1 !== 0) return fail(path, "asset");
 		return { ok: true, value: { kind: "asset", id: value } };
 	}
+	if (spec?.type === "gradient") {
+		if (typeOf(value) !== "table") return fail(path, "gradient");
+		const gradient = value as {
+			color?: unknown;
+			transparency?: unknown;
+			rotation?: unknown;
+			offset?: Vector;
+			enabled?: unknown;
+		};
+		const color = encodeValue(gradient.color, `${path}.color`);
+		if (!color.ok) return color;
+		const transparency = encodeValue(gradient.transparency, `${path}.transparency`);
+		if (!transparency.ok) return transparency;
+		const offset = gradient.offset;
+		if (typeOf(offset) !== "Vector2" || !finite(gradient.rotation) || typeOf(gradient.enabled) !== "boolean") {
+			return fail(path, "gradient");
+		}
+		const offsetX = (offset as Vector).X;
+		const offsetY = (offset as Vector).Y;
+		if (!finite(offsetX) || !finite(offsetY)) return fail(path, "gradient");
+		return {
+			ok: true,
+			value: {
+				kind: "gradient",
+				color: color.value,
+				transparency: transparency.value,
+				rotation: gradient.rotation,
+				offsetX,
+				offsetY,
+				enabled: gradient.enabled,
+			},
+		};
+	}
 	const kind = typeOf(value);
 	if (kind === "string" || kind === "boolean") return { ok: true, value };
 	if (kind === "number") {
@@ -160,6 +193,77 @@ export function encodeValue(
 		if (!finite(range.Min) || !finite(range.Max)) return fail(path, "numberRange");
 		return { ok: true, value: { kind: "numberRange", min: range.Min, max: range.Max } };
 	}
+	if (kind === "Ray") {
+		const ray = value as { Origin: Vector; Direction: Vector };
+		if (
+			!finite(ray.Origin?.X) ||
+			!finite(ray.Origin?.Y) ||
+			!finite(ray.Origin?.Z) ||
+			!finite(ray.Direction?.X) ||
+			!finite(ray.Direction?.Y) ||
+			!finite(ray.Direction?.Z)
+		) {
+			return fail(path, "ray");
+		}
+		return {
+			ok: true,
+			value: {
+				kind: "ray",
+				ox: ray.Origin.X,
+				oy: ray.Origin.Y,
+				oz: ray.Origin.Z,
+				dx: ray.Direction.X,
+				dy: ray.Direction.Y,
+				dz: ray.Direction.Z,
+			},
+		};
+	}
+	if (kind === "PhysicalProperties") {
+		const props = value as {
+			Density: number;
+			Friction: number;
+			Elasticity: number;
+			FrictionWeight: number;
+			ElasticityWeight: number;
+		};
+		if (
+			!finite(props.Density) ||
+			!finite(props.Friction) ||
+			!finite(props.Elasticity) ||
+			!finite(props.FrictionWeight) ||
+			!finite(props.ElasticityWeight)
+		) {
+			return fail(path, "physicalProperties");
+		}
+		return {
+			ok: true,
+			value: {
+				kind: "physicalProperties",
+				density: props.Density,
+				friction: props.Friction,
+				elasticity: props.Elasticity,
+				frictionWeight: props.FrictionWeight,
+				elasticityWeight: props.ElasticityWeight,
+			},
+		};
+	}
+	if (kind === "table") {
+		const record = value as {
+			color?: unknown;
+			transparency?: unknown;
+			rotation?: unknown;
+			offset?: unknown;
+			enabled?: unknown;
+		};
+		if (
+			typeOf(record.color) === "ColorSequence" &&
+			typeOf(record.transparency) === "NumberSequence" &&
+			typeOf(record.offset) === "Vector2" &&
+			typeOf(record.enabled) === "boolean"
+		) {
+			return encodeValue(value, path, { type: "gradient" });
+		}
+	}
 	return fail(path, "unsupported");
 }
 
@@ -228,6 +332,30 @@ export function decodeValue(tagged: unknown): unknown {
 	if (value.kind === "numberRange") {
 		return new NumberRange(value.min as number, value.max as number);
 	}
+	if (value.kind === "ray") {
+		return new Ray(
+			new Vector3(value.ox as number, value.oy as number, value.oz as number),
+			new Vector3(value.dx as number, value.dy as number, value.dz as number),
+		);
+	}
+	if (value.kind === "physicalProperties") {
+		return new PhysicalProperties(
+			value.density as number,
+			value.friction as number,
+			value.elasticity as number,
+			value.frictionWeight as number,
+			value.elasticityWeight as number,
+		);
+	}
+	if (value.kind === "gradient") {
+		return {
+			color: decodeValue(value.color),
+			transparency: decodeValue(value.transparency),
+			rotation: value.rotation as number,
+			offset: new Vector2(value.offsetX as number, value.offsetY as number),
+			enabled: value.enabled as boolean,
+		};
+	}
 	return tagged;
 }
 
@@ -286,6 +414,13 @@ export function formatDatatype(value: unknown): string {
 	}
 	if (record.kind === "rect") return `${record.minX}, ${record.minY}, ${record.maxX}, ${record.maxY}`;
 	if (record.kind === "numberRange") return `${record.min}, ${record.max}`;
+	if (record.kind === "ray") {
+		return `${record.ox}, ${record.oy}, ${record.oz}, ${record.dx}, ${record.dy}, ${record.dz}`;
+	}
+	if (record.kind === "physicalProperties") {
+		return `${record.density}, ${record.friction}, ${record.elasticity}, ${record.frictionWeight}, ${record.elasticityWeight}`;
+	}
+	if (record.kind === "gradient") return "gradient";
 	return "";
 }
 
@@ -329,7 +464,11 @@ export function parseDatatype(
 		value = CFrame.lookAt(at, target, up);
 	} else if (kind === "rect" && numbers.size() === 4) value = new Rect(numbers[0], numbers[1], numbers[2], numbers[3]);
 	else if (kind === "numberRange" && numbers.size() === 2) value = new NumberRange(numbers[0], numbers[1]);
-	else return { ok: false, reason: kind ?? "unsupported" };
+	else if (kind === "ray" && numbers.size() === 6) {
+		value = new Ray(new Vector3(numbers[0], numbers[1], numbers[2]), new Vector3(numbers[3], numbers[4], numbers[5]));
+	} else if (kind === "physicalProperties" && numbers.size() === 5) {
+		value = new PhysicalProperties(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]);
+	} else return { ok: false, reason: kind ?? "unsupported" };
 	const encoded = encodeValue(value, "value");
 	if (!encoded.ok) return { ok: false, reason: encoded.error.reason };
 	return { ok: true, value };

@@ -6,10 +6,15 @@ type EditorMount = (value: unknown, onChange: (value: unknown) => void) => () =>
 
 const editors: { [name: string]: EditorMount } = {};
 
-export function readOnlyKind(value: unknown): "function" | "Instance" | "binding" | undefined {
+export function readOnlyKind(
+	value: unknown,
+): "function" | "Instance" | "binding" | "RBXScriptSignal" | "thread" | "Region3" | undefined {
 	const kind = typeOf(value);
 	if (kind === "function") return "function";
 	if (kind === "Instance") return "Instance";
+	if (kind === "RBXScriptSignal") return "RBXScriptSignal";
+	if (kind === "thread") return "thread";
+	if (kind === "Region3") return "Region3";
 	if (kind === "table" && typeOf((value as { getValue?: unknown }).getValue) === "function") return "binding";
 	return undefined;
 }
