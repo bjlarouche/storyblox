@@ -9,6 +9,7 @@ interface Args {
 	disabled: boolean;
 	marks: boolean;
 	color: "primary" | "accent";
+	size: "small" | "medium" | "large";
 }
 
 function SliderStory(args: Args) {
@@ -22,6 +23,7 @@ function SliderStory(args: Args) {
 			disabled={args.disabled}
 			marks={args.marks}
 			color={args.color}
+			size={args.size}
 			onChange={setValue}
 		/>
 	);
@@ -29,7 +31,7 @@ function SliderStory(args: Args) {
 
 export default {
 	title: "Components/Slider",
-	args: { value: 40, min: 0, max: 100, step: 5, disabled: false, marks: true, color: "accent" },
+	args: { value: 40, min: 0, max: 100, step: 5, disabled: false, marks: true, color: "accent", size: "small" },
 	argTypes: {
 		value: { type: "number", control: "slider", min: 0, max: 100, step: 5 },
 		min: { type: "number" },
@@ -38,6 +40,7 @@ export default {
 		disabled: { type: "boolean" },
 		marks: { type: "boolean" },
 		color: { type: "enum", options: ["primary", "accent"] },
+		size: { type: "enum", options: ["small", "medium", "large"] },
 	},
 	render: (args: Args) => <SliderStory {...args} />,
 };
