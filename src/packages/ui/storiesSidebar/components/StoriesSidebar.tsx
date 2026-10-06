@@ -190,9 +190,11 @@ function StoriesSidebar({
 			: hits.size() === 1
 				? "1 match"
 				: `${hits.size()} matches`
-		: stories.size() === 1
-			? "1 story"
-			: `${stories.size()} stories`;
+		: stories.size() === 0
+			? "No stories found"
+			: stories.size() === 1
+				? "1 story"
+				: `${stories.size()} stories`;
 
 	return (
 		<Sidebar size="large" className={{ Size: new UDim2(1, 0, 1, 0) } as WriteableStyle<Frame>}>
@@ -286,7 +288,7 @@ function StoriesSidebar({
 					</frame>
 				)}
 
-				{searching && hits.size() === 0 && (
+				{((searching && hits.size() === 0) || (!searching && stories.size() === 0)) && (
 					<Typography
 						text="No stories found"
 						variant="caption"

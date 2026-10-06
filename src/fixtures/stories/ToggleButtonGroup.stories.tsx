@@ -10,21 +10,29 @@ const options = [
 interface Args {
 	value: string;
 	disabled: boolean;
+	orientation: "horizontal" | "vertical";
 }
 
 function ToggleButtonGroupStory(args: Args) {
 	const [value, setValue] = useArg(args.value);
 	return (
-		<ToggleButtonGroup value={value} options={options} disabled={args.disabled} onChange={setValue} />
+		<ToggleButtonGroup
+			value={value}
+			options={options}
+			disabled={args.disabled}
+			orientation={args.orientation}
+			onChange={setValue}
+		/>
 	);
 }
 
 export default {
 	title: "Components/Toggle Button Group",
-	args: { value: "left", disabled: false },
+	args: { value: "left", disabled: false, orientation: "vertical" },
 	argTypes: {
 		value: { type: "enum", options: ["left", "center", "right"] },
 		disabled: { type: "boolean" },
+		orientation: { type: "enum", options: ["horizontal", "vertical"] },
 	},
 	render: (args: Args) => <ToggleButtonGroupStory {...args} />,
 };

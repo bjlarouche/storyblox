@@ -33,11 +33,13 @@ if (nativeFn.kind !== "native" || nativeFn.title !== "Legacy/Native" || nativeFn
 
 const mount = () => {};
 const descriptor = normalizeExport(
-	{ renderer: "native", title: "Panel/Base", mount },
+	{ renderer: "native", title: "Panel/Base", mount, tags: ["dev", "native"] },
 	"Panel.stories",
 	suffix,
 );
-if (descriptor.kind !== "native" || descriptor.mount !== mount) throw new Error("native descriptor");
+if (descriptor.kind !== "native" || descriptor.mount !== mount || descriptor.tags?.[0] !== "dev") {
+	throw new Error("native descriptor");
+}
 
 const onClick = () => {};
 const described = normalizeExport(
