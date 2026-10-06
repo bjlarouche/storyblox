@@ -11,6 +11,7 @@ interface Args {
 	value: string;
 	disabled: boolean;
 	orientation: "horizontal" | "vertical";
+	size: "small" | "medium" | "large";
 }
 
 function ToggleButtonGroupStory(args: Args) {
@@ -21,6 +22,7 @@ function ToggleButtonGroupStory(args: Args) {
 			options={options}
 			disabled={args.disabled}
 			orientation={args.orientation}
+			size={args.size}
 			onChange={setValue}
 		/>
 	);
@@ -28,11 +30,12 @@ function ToggleButtonGroupStory(args: Args) {
 
 export default {
 	title: "Components/Toggle Button Group",
-	args: { value: "left", disabled: false, orientation: "vertical" },
+	args: { value: "left", disabled: false, orientation: "vertical", size: "small" },
 	argTypes: {
 		value: { type: "enum", options: ["left", "center", "right"] },
 		disabled: { type: "boolean" },
 		orientation: { type: "enum", options: ["horizontal", "vertical"] },
+		size: { type: "enum", options: ["small", "medium", "large"] },
 	},
 	render: (args: Args) => <ToggleButtonGroupStory {...args} />,
 };
