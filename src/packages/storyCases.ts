@@ -4,6 +4,7 @@ export interface CaseResult {
 	name: string;
 	passed: boolean;
 	failures: Array<string>;
+	elapsed?: number;
 }
 
 export function createCaseClock() {

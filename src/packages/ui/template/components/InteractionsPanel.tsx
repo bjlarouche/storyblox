@@ -21,16 +21,19 @@ function resultFor(results: CaseResult[], name: string): CaseResult | undefined 
 
 function InteractionsPanel({ theme, cases, results, running, onRun, onRerun }: InteractionsPanelProps) {
 	const [listFrame, setListFrame] = useState<ScrollingFrame>();
+	const [selected, setSelected] = useState<string | undefined>();
 	const drag = useDragScroll(listFrame);
 	const gap = new UDim(0, theme.padding.calc(1));
 	const muted = theme.palette.text.secondary;
 	const last = results.size() > 0 ? results[results.size() - 1] : undefined;
+	const focus = selected ?? last?.name;
+	const focused = focus !== undefined ? resultFor(results, focus) : undefined;
 	const rows = new Array<React.Element>();
 	for (let index = 0; index < cases.size(); index++) {
 		const name = cases[index];
 		const result = resultFor(results, name);
 		const status =
-			running === name ? "running" : result === undefined ? "" : result.passed ? "pass" : `fail (${result.failures.size()})`;
+			running === name ? "running" : result === undefined ? "idle" : result.passed ? "pass" : `fail (${result.failures.size()})`;
 		rows.push(
 			<frame key={`case-${name}`} LayoutOrder={index + 1} Size={new UDim2(1, 0, 0, theme.spacing.calc(1.5))} BackgroundTransparency={1}>
 				<textbutton
@@ -40,16 +43,17 @@ function InteractionsPanel({ theme, cases, results, running, onRun, onRerun }: I
 					BackgroundTransparency={1}
 					Font={theme.typography.fontFamilies.semibold}
 					TextSize={theme.typography.fontSizes.caption}
-					TextColor3={theme.palette.primary.main}
+					TextColor3={name === focus ? theme.palette.text.primary : theme.palette.primary.main}
 					TextXAlignment={Enum.TextXAlignment.Left}
 					Event={{
 						MouseButton1Click: () => {
 							if (drag.suppressClick()) return;
+							setSelected(name);
 							onRun(name);
 						},
 					}}
 				/>
-				<textlabel
+				<textbutton
 					key="Status"
 					Text={status}
 					Size={new UDim2(0, theme.spacing.calc(5.5), 1, 0)}
@@ -60,16 +64,61 @@ function InteractionsPanel({ theme, cases, results, running, onRun, onRerun }: I
 					TextSize={theme.typography.fontSizes.caption}
 					TextColor3={result?.passed === false ? theme.palette.status.error.main : muted}
 					TextXAlignment={Enum.TextXAlignment.Right}
+					Event={{
+						MouseButton1Click: () => {
+							if (drag.suppressClick()) return;
+							setSelected(name);
+						},
+					}}
 				/>
 			</frame>,
 		);
-		if (result !== undefined && !result.passed) {
-			for (let failIndex = 0; failIndex < result.failures.size(); failIndex++) {
-				rows.push(
+	}
+
+	const detail = new Array<React.Element>();
+	if (focus !== undefined) {
+		const state = running === focus ? "running" : focused === undefined ? "idle" : focused.passed ? "pass" : "fail";
+		const elapsed =
+			focused?.elapsed !== undefined ? ` · ${string.format("%.0f", focused.elapsed * 1000)}ms` : "";
+		detail.push(
+			<textlabel
+				key="InspectTitle"
+				Text={`${focus}: ${state}${elapsed}`}
+				LayoutOrder={1000}
+				Size={new UDim2(1, 0, 0, 0)}
+				AutomaticSize={Enum.AutomaticSize.Y}
+				TextWrapped={true}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.semibold}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.palette.text.primary}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>,
+		);
+		const failures = focused?.failures ?? [];
+		if (failures.size() === 0) {
+			detail.push(
+				<textlabel
+					key="InspectEmpty"
+					Text={focused === undefined ? "Not run yet" : "No errors"}
+					LayoutOrder={1001}
+					Size={new UDim2(1, 0, 0, 0)}
+					AutomaticSize={Enum.AutomaticSize.Y}
+					TextWrapped={true}
+					BackgroundTransparency={1}
+					Font={theme.typography.fontFamilies.default}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={muted}
+					TextXAlignment={Enum.TextXAlignment.Left}
+				/>,
+			);
+		} else {
+			for (let failIndex = 0; failIndex < failures.size(); failIndex++) {
+				detail.push(
 					<textlabel
-						key={`fail-${name}-${failIndex}`}
-						Text={result.failures[failIndex]}
-						LayoutOrder={index + 1}
+						key={`inspect-fail-${failIndex}`}
+						Text={failures[failIndex]}
+						LayoutOrder={1001 + failIndex}
 						Size={new UDim2(1, 0, 0, 0)}
 						AutomaticSize={Enum.AutomaticSize.Y}
 						TextWrapped={true}
@@ -83,6 +132,7 @@ function InteractionsPanel({ theme, cases, results, running, onRun, onRerun }: I
 			}
 		}
 	}
+	for (const line of detail) rows.push(line);
 
 	return (
 		<scrollingframe
@@ -103,7 +153,7 @@ function InteractionsPanel({ theme, cases, results, running, onRun, onRerun }: I
 			<frame key="Header" LayoutOrder={-3} Size={new UDim2(1, 0, 0, theme.spacing.calc(1.5))} BackgroundTransparency={1}>
 				<textlabel
 					key="Title"
-					Text="Interactions"
+					Text="Steps"
 					Size={new UDim2(1, -theme.spacing.calc(4), 1, 0)}
 					BackgroundTransparency={1}
 					Font={theme.typography.fontFamilies.semibold}
@@ -136,7 +186,7 @@ function InteractionsPanel({ theme, cases, results, running, onRun, onRerun }: I
 			{cases.size() === 0 ? (
 				<textlabel
 					key="Empty"
-					Text="No interaction cases"
+					Text="No steps"
 					LayoutOrder={0}
 					Size={new UDim2(1, 0, 0, 0)}
 					AutomaticSize={Enum.AutomaticSize.Y}
