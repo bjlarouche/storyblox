@@ -25,7 +25,7 @@ function RatingStory(args: Args) {
 
 export default {
 	title: "Components/Rating",
-	args: { value: 3, max: 5, size: "medium", disabled: false, readOnly: true },
+	args: { value: 3, max: 5, size: "medium", disabled: false, readOnly: false },
 	argTypes: {
 		value: { type: "number", min: 0, max: 5, step: 1 },
 		max: { type: "number", min: 1, max: 10, step: 1 },
