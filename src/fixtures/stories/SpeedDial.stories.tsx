@@ -6,10 +6,12 @@ interface Args {
 	open: boolean;
 	disabled: boolean;
 	direction: "up" | "down" | "left" | "right";
+	openIcon: "settings" | "save" | "close";
 }
 
 function SpeedDialStory(args: Args) {
 	const [open, setOpen] = useArg(args.open);
+	const openIcon = args.openIcon === "save" ? Icons.Save : args.openIcon === "close" ? Icons.Close : Icons.Settings;
 	return (
 		<frame Size={new UDim2(0, 200, 0, 200)} BackgroundTransparency={1}>
 			<SpeedDial
@@ -17,6 +19,7 @@ function SpeedDialStory(args: Args) {
 				onOpenChange={setOpen}
 				disabled={args.disabled}
 				direction={args.direction}
+				openIcon={openIcon}
 				actions={[
 					{ icon: Icons.Save },
 					{ icon: Icons.Settings },
@@ -29,11 +32,12 @@ function SpeedDialStory(args: Args) {
 
 export default {
 	title: "Components/Speed Dial",
-	args: { open: true, disabled: false, direction: "up" },
+	args: { open: true, disabled: false, direction: "up", openIcon: "settings" },
 	argTypes: {
 		open: { type: "boolean" },
 		disabled: { type: "boolean" },
 		direction: { type: "enum", options: ["up", "down", "left", "right"] },
+		openIcon: { type: "enum", options: ["settings", "save", "close"] },
 	},
 	render: (args: Args) => <SpeedDialStory {...args} />,
 };
