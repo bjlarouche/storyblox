@@ -2,18 +2,15 @@ import Log from "@rbxts/log";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { HttpService, ReplicatedStorage, ServerStorage } from "@rbxts/services";
 import {
-	createStyles,
 	DarkTheme,
 	ErrorBoundary,
 	LightTheme,
-	makeStyles,
 	Theme,
 	ThemeProvider,
-	WriteableStyle,
 } from "@rbxts/uiblox";
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "interfaces";
-import { SafeBoundary, SplitPane, Template } from "../../template";
+import { ErrorPanel, SafeBoundary, SplitPane, Template } from "../../template";
 import { withStoryControls } from "../../template/storyControls";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
@@ -111,27 +108,6 @@ const VALID_ROOT_TYPES = [
 	"Player",
 ];
 
-const useStorybloxStyles = makeStyles((theme: Theme) =>
-	createStyles({
-		errorContainer: {
-			Size: new UDim2(1, 0, 1, 0),
-			BackgroundTransparency: 1,
-		} as WriteableStyle<Frame>,
-		errorMessage: {
-			AnchorPoint: new Vector2(0.5, 0.5),
-			Position: UDim2.fromScale(0.5, 0.5),
-			Size: new UDim2(1, -theme.spacing.calc(2), 1, -theme.spacing.calc(2)),
-			BackgroundTransparency: 1,
-			TextColor3: theme.palette.status.error.main,
-			TextScaled: true,
-			TextYAlignment: Enum.TextYAlignment.Top,
-			TextXAlignment: Enum.TextXAlignment.Left,
-			RichText: true,
-			Font: theme.typography.fontFamilies.semibold,
-		} as WriteableStyle<TextLabel>,
-	}),
-);
-
 export interface StorybloxProps {
 	root?: Instance;
 	extension?: `.${string}`;
@@ -164,8 +140,6 @@ function Storyblox(props: StorybloxProps) {
 		inspectorOpen = true,
 		onInspectorOpenChange,
 	} = props;
-
-	const { errorContainer, errorMessage } = useStorybloxStyles();
 
 	const [stories, setStories] = useState<Story[]>([]);
 	const [includeTags, setIncludeTags] = useState<string[]>([]);
@@ -616,13 +590,7 @@ function Storyblox(props: StorybloxProps) {
 								boundaryFailed.current = true;
 								controlRoot(root)?.SetAttribute("storyblox-error", `${e}`);
 								const errorComponnt = (
-									<frame key="Error" {...errorContainer}>
-										<textlabel
-											key="Message"
-											{...errorMessage}
-											Text={`<u>Unable to render <b>${selectedStory?.title}</b>...</u>\n\n${e}`}
-										></textlabel>
-									</frame>
+									<ErrorPanel key="Error" title={`Unable to render ${selectedStory?.title}`} message={`${e}`} />
 								);
 
 								return (
