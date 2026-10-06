@@ -17,18 +17,6 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 		onExtraRootsChange?.(encodeRootList(paths));
 		setDraft("");
 	};
-	const extraChips = extras.map((path, index) => (
-		<Chip
-			key={`extra-${path}`}
-			label={path}
-			size="small"
-			variant="outlined"
-			className={{ LayoutOrder: 21 + index } as WriteableStyle<TextButton>}
-			onDelete={() => {
-				onExtraRootsChange?.(encodeRootList(extras.filter((item) => item !== path)));
-			}}
-		/>
-	));
 
 	return (
 		<scrollingframe
@@ -51,14 +39,16 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 				color="secondary"
 				className={{ LayoutOrder: 2 } as WriteableStyle<TextLabel>}
 			/>
-			{DEFAULT_STORY_ROOTS.map((path, index) => (
-				<Typography
-					key={`default-${path}`}
-					text={path}
-					variant="body"
-					className={{ LayoutOrder: 3 + index } as WriteableStyle<TextLabel>}
-				/>
-			))}
+			<>
+				{DEFAULT_STORY_ROOTS.map((path, index) => (
+					<Typography
+						key={`default-${path}`}
+						text={path}
+						variant="body"
+						className={{ LayoutOrder: 3 + index } as WriteableStyle<TextLabel>}
+					/>
+				))}
+			</>
 			<Typography
 				key="ExtraLabel"
 				text="Extra folders"
@@ -67,7 +57,20 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 				className={{ LayoutOrder: 20 } as WriteableStyle<TextLabel>}
 			/>
 			{extras.size() > 0 ? (
-				extraChips
+				<>
+					{extras.map((path, index) => (
+						<Chip
+							key={`extra-${path}`}
+							label={path}
+							size="small"
+							variant="outlined"
+							className={{ LayoutOrder: 21 + index } as WriteableStyle<TextButton>}
+							onDelete={() => {
+								onExtraRootsChange?.(encodeRootList(extras.filter((item) => item !== path)));
+							}}
+						/>
+					))}
+				</>
 			) : (
 				<Typography
 					key="NoExtra"
