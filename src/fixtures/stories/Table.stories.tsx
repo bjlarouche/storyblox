@@ -9,16 +9,18 @@ interface Args {
 function TableStory(args: Args) {
 	const [selected, setSelected] = useArg(args.selected);
 	return (
-		<Table
-			columns={["Name", "Role"]}
-			rows={[
-				["Ada", "Engineer"],
-				["Grace", "Admiral"],
-			]}
-			selected={selected}
-			dense={args.dense}
-			onRowActivated={setSelected}
-		/>
+		<frame Size={new UDim2(0, 320, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} BorderSizePixel={0}>
+			<Table
+				columns={["Name", "Role"]}
+				rows={[
+					["Ada", "Engineer"],
+					["Grace", "Admiral"],
+				]}
+				selected={selected}
+				dense={args.dense}
+				onRowActivated={setSelected}
+			/>
+		</frame>
 	);
 }
 
