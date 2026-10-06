@@ -71,7 +71,11 @@ export function settleLoaders(
 		};
 		const andThen = item.andThen;
 		if (andThen !== undefined) {
-			andThen(item, onOk, onErr);
+			try {
+				andThen(item, onOk, onErr);
+			} catch (error) {
+				onErr(error);
+			}
 			return;
 		}
 		const resume = item.then;
@@ -79,7 +83,11 @@ export function settleLoaders(
 			onError("loader thenable missing");
 			return;
 		}
-		resume(onOk, onErr);
+		try {
+			resume(onOk, onErr);
+		} catch (error) {
+			onErr(error);
+		}
 	};
 	step();
 }

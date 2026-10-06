@@ -76,6 +76,28 @@ settleLoaders(
 );
 if (viaAndThen !== "andThen") throw new Error("andThen loader");
 
+let exploded = "";
+settleLoaders(
+	collectLoaders(
+		[
+			() => ({
+				then: () => {
+					throw new Error("explode");
+				},
+			}),
+		],
+		{},
+	),
+	() => true,
+	() => {
+		throw new Error("throwing loader resolved");
+	},
+	(message) => {
+		exploded = message;
+	},
+);
+if (!exploded.includes("explode")) throw new Error("thenable throw");
+
 let open = true;
 let stale = false;
 settleLoaders(
