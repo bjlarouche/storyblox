@@ -8,6 +8,7 @@ interface Args {
 	disabled: boolean;
 	readOnly: boolean;
 	hasError: boolean;
+	variant: "filled" | "outlined" | "standard";
 }
 
 function InputStory(args: Args) {
@@ -19,7 +20,7 @@ function InputStory(args: Args) {
 			disabled={args.disabled}
 			readOnly={args.readOnly}
 			hasError={args.hasError}
-			variant="outlined"
+			variant={args.variant}
 			width={new UDim(1, 0)}
 			onTextChanged={setText}
 		/>
@@ -28,13 +29,14 @@ function InputStory(args: Args) {
 
 export default {
 	title: "Components/Input",
-	args: { text: "Story", placeholder: "Search", disabled: false, readOnly: true, hasError: false },
+	args: { text: "Story", placeholder: "Search", disabled: false, readOnly: true, hasError: false, variant: "filled" },
 	argTypes: {
 		text: { type: "string" },
 		placeholder: { type: "string" },
 		disabled: { type: "boolean" },
 		readOnly: { type: "boolean" },
 		hasError: { type: "boolean" },
+		variant: { type: "enum", options: ["filled", "outlined", "standard"] },
 	},
 	render: (args: Args) => <InputStory {...args} />,
 };
