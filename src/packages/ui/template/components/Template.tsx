@@ -9,6 +9,7 @@ import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
 import { flipOrientation, GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { extraGlobalEntries, mergeGlobals } from "packages/storyGlobals";
+import { collectLoaders, settleLoaders } from "packages/storyLoaders";
 import { createActionLog } from "packages/storyActions";
 import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
 import { BoxRect, collectGuiBoxes, guiBox } from "packages/layoutTools";
@@ -157,6 +158,22 @@ export interface TemplateProps {
 	onRenderError?: (failure: unknown | undefined) => void;
 }
 
+function loaderStatus(theme: Theme) {
+	return (
+		<textlabel
+			key="Loading"
+			Text="Loading"
+			AnchorPoint={new Vector2(0.5, 0.5)}
+			Position={UDim2.fromScale(0.5, 0.5)}
+			Size={new UDim2(1, 0, 0, theme.spacing.calc(2))}
+			BackgroundTransparency={1}
+			TextColor3={theme.palette.text.secondary}
+			Font={theme.typography.fontFamilies.semibold}
+			TextSize={theme.typography.fontSizes.body}
+		/>
+	);
+}
+
 function storyError(title: string, failure: unknown, theme: Theme) {
 	return (
 		<frame key="Error" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
@@ -214,6 +231,17 @@ function Template({
 	const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
 	const [bgStep, setBgStep] = useState(0);
 	const [globalPatch, setGlobalPatch] = useState<{ [key: string]: unknown }>({});
+	const [loaderPhase, setLoaderPhase] = useState<"loading" | "error" | "ready">("ready");
+	const [loaderMessage, setLoaderMessage] = useState("");
+	const [preloaded, setPreloaded] = useState<{ [key: string]: unknown } | undefined>();
+	const [loaderWatch, setLoaderWatch] = useState({
+		storyKey: "",
+		args: {} as ArgValues,
+		patch: {} as { [key: string]: unknown },
+		density,
+		theme: primaryThemeEnabled,
+		epoch: 0,
+	});
 	const [dock, setDock] = useState({ x: 0, y: 0 });
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
@@ -263,6 +291,33 @@ function Template({
 		setGlobalPatch({});
 		const previewOrientation = (story as { preview?: { orientation?: unknown } } | undefined)?.preview?.orientation;
 		setOrientation(previewOrientation === "landscape" ? "landscape" : "portrait");
+	}
+	const loaderFns = (
+		story as {
+			loaderFns?: Array<(context: { args: unknown; globals?: unknown; parameters?: unknown }) => unknown>;
+		} | undefined
+	)?.loaderFns;
+	const hasLoaders = loaderFns !== undefined && loaderFns.size() > 0;
+	if (
+		loaderWatch.storyKey !== storyKey ||
+		loaderWatch.args !== args ||
+		loaderWatch.patch !== globalPatch ||
+		loaderWatch.density !== density ||
+		loaderWatch.theme !== primaryThemeEnabled ||
+		loaderWatch.epoch !== epoch
+	) {
+		setLoaderWatch({
+			storyKey,
+			args,
+			patch: globalPatch,
+			density,
+			theme: primaryThemeEnabled,
+			epoch,
+		});
+		setLoaderPhase(hasLoaders ? "loading" : "ready");
+		setPreloaded(undefined);
+		setLoaderMessage("");
+		setFailure(undefined);
 	}
 	const previewTheme = theme;
 	const argTypes = (story as { argTypes?: unknown } | undefined)?.argTypes;
@@ -384,6 +439,44 @@ function Template({
 	}, [argsRequest]);
 
 	useEffect(() => {
+		if (story === undefined || !hasLoaders || loaderFns === undefined) return;
+		let alive = true;
+		const themeName = primaryThemeEnabled ? "dark" : "light";
+		const globals = mergeGlobals(story.globals, globalPatch, themeName, density);
+		const batch = collectLoaders(loaderFns, args, globals, story.parameters);
+		if (batch.error !== undefined) {
+			setLoaderPhase("error");
+			setLoaderMessage(batch.error);
+			setPreloaded(undefined);
+			return;
+		}
+		if (batch.pending.size() === 0) {
+			setLoaderPhase("ready");
+			setLoaderMessage("");
+			setPreloaded(batch.loaded);
+			return;
+		}
+		setLoaderPhase("loading");
+		settleLoaders(
+			batch,
+			() => alive,
+			(loaded) => {
+				setLoaderPhase("ready");
+				setLoaderMessage("");
+				setPreloaded(loaded);
+			},
+			(message) => {
+				setLoaderPhase("error");
+				setLoaderMessage(message);
+				setPreloaded(undefined);
+			},
+		);
+		return () => {
+			alive = false;
+		};
+	}, [story, args, globalPatch, density, primaryThemeEnabled, hasLoaders, loaderFns, epoch]);
+
+	useEffect(() => {
 		if (story === undefined) {
 			setTemplate(undefined);
 			setFailure(undefined);
@@ -391,6 +484,12 @@ function Template({
 			gate.replace(undefined);
 			mounted.current = "";
 			themeMounted.current = undefined;
+			return;
+		}
+		if (hasLoaders && (loaderPhase !== "ready" || preloaded === undefined)) {
+			setTemplate(undefined);
+			gate.replace(undefined);
+			mounted.current = "";
 			return;
 		}
 
@@ -410,7 +509,12 @@ function Template({
 		try {
 			const render = story.template as (
 				props: unknown,
-				context: { theme: Theme; globals?: { [key: string]: unknown }; parameters?: { [key: string]: unknown } },
+				context: {
+					theme: Theme;
+					globals?: { [key: string]: unknown };
+					parameters?: { [key: string]: unknown };
+					preloaded?: { [key: string]: unknown };
+				},
 			) => unknown;
 			const props = args;
 			const themeName = primaryThemeEnabled ? "dark" : "light";
@@ -419,6 +523,7 @@ function Template({
 				theme: previewTheme,
 				globals,
 				parameters: story.parameters,
+				preloaded: hasLoaders ? preloaded : undefined,
 			}) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
@@ -508,6 +613,9 @@ function Template({
 		globalPatch,
 		density,
 		primaryThemeEnabled,
+		hasLoaders,
+		loaderPhase,
+		preloaded,
 	]);
 
 	useEffect(() => {
@@ -922,9 +1030,13 @@ function Template({
 							>
 								<Canvas className={canvas}>
 									<ActionLogContext.Provider value={actionApi}>
-										{failure !== undefined
-											? storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)
-											: template}
+										{hasLoaders && loaderPhase === "loading"
+											? loaderStatus(theme)
+											: hasLoaders && loaderPhase === "error"
+												? storyError(storyKey.size() > 0 ? storyKey : "story", loaderMessage, theme)
+												: failure !== undefined
+													? storyError(storyKey.size() > 0 ? storyKey : "story", failure, theme)
+													: template}
 									</ActionLogContext.Provider>
 								</Canvas>
 							</ErrorBoundary>

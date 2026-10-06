@@ -13,6 +13,7 @@ export interface ReactStoryShape {
 	tags?: unknown;
 	parameters?: unknown;
 	globals?: unknown;
+	loaderFns?: Array<(context: { args: unknown; globals?: unknown; parameters?: unknown }) => unknown>;
 	features?: {
 		actions: boolean;
 		docs: boolean;
@@ -154,12 +155,17 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		tags: typeOf(story.tags) === "table" ? story.tags : undefined,
 		parameters,
 		globals,
+		loaderFns: loaders,
 		features: featureFlags(story.features),
 		props: args,
 		component: story.component,
 		template: (props: unknown, context: unknown) => {
 			const value = props !== undefined ? props : args;
-			const loaded = runLoaders(loaders, value, globals, parameters);
+			const provided = (context as { preloaded?: unknown } | undefined)?.preloaded;
+			const loaded =
+				typeOf(provided) === "table"
+					? (provided as { [key: string]: unknown })
+					: runLoaders(loaders, value, globals, parameters);
 			const merged = mergeLoaded(value, loaded);
 			const nextContext = attachLoaded(context, loaded);
 			if (decorators.size() === 0) return render(merged, nextContext);
@@ -183,6 +189,12 @@ function loadersOf(
 	return kept;
 }
 
+function isThenable(value: unknown): boolean {
+	if (value === undefined || typeOf(value) !== "table") return false;
+	const called = value as { then?: unknown; andThen?: unknown };
+	return typeOf(called.then) === "function" || typeOf(called.andThen) === "function";
+}
+
 function runLoaders(
 	loaders: Array<(context: { args: unknown; globals?: unknown; parameters?: unknown }) => unknown>,
 	args: unknown,
@@ -193,7 +205,7 @@ function runLoaders(
 	for (const loader of loaders) {
 		try {
 			const chunk = loader({ args, globals, parameters });
-			if (typeOf(chunk) !== "table") continue;
+			if (isThenable(chunk) || typeOf(chunk) !== "table") continue;
 			for (const [key, value] of pairs(chunk as object)) loaded[key as string] = value;
 		} catch {
 			// skip failing loaders; render still proceeds with partial loaded data

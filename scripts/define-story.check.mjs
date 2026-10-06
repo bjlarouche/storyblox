@@ -226,4 +226,34 @@ if (withLoaders.story.template({ label: "world" }, { theme: {} }) !== "hello wor
 	throw new Error("loaders merge");
 }
 
+let asyncCalls = 0;
+const withAsync = normalizeExport(
+	{
+		default: defineStory({
+			title: "Shell/AsyncLoaders",
+			args: { label: "world" },
+			loaders: [
+				() => ({ greeting: "hello" }),
+				() => {
+					asyncCalls += 1;
+					return { then: (ok) => ok({ label: "async" }) };
+				},
+			],
+			render: (args) => `${args.greeting} ${args.label}`,
+		}),
+	},
+	"AsyncLoaders.stories",
+	".stories",
+);
+if (withAsync.kind !== "react") throw new Error("async loaders story");
+if (withAsync.story.template({ label: "world" }, { theme: {} }) !== "hello world") {
+	throw new Error("sync template skips thenable");
+}
+if (asyncCalls !== 1) throw new Error("thenable loader invoked");
+const preloaded = withAsync.story.template(
+	{ label: "world" },
+	{ theme: {}, preloaded: { greeting: "hello", label: "async" } },
+);
+if (preloaded !== "hello async" || asyncCalls !== 1) throw new Error("preloaded skips loaders");
+
 console.log("define story ok");
