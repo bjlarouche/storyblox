@@ -51,6 +51,7 @@ interface Args {
 	lane: "Backlog" | "Doing" | "Done";
 	menuOpen: boolean;
 	editorOpen: boolean;
+	editing: boolean;
 }
 
 interface Task {
@@ -239,9 +240,20 @@ function TextLine(props: { text: string; variant?: "h3" | "body" | "caption"; co
 	);
 }
 
-function MoreButton(props: { onOpen: (anchor: TextButton) => void }) {
+function MoreButton(props: { onOpen: (anchor: TextButton) => void; pin?: (anchor: TextButton) => void }) {
 	const [button, setButton] = useState<TextButton>();
-	return <Button ref={setButton} text="More" variant="text" size="small" onLeftClick={() => button !== undefined && props.onOpen(button)} />;
+	return (
+		<Button
+			ref={(instance: TextButton | undefined) => {
+				setButton(instance);
+				if (instance && props.pin) props.pin(instance);
+			}}
+			text="More"
+			variant="text"
+			size="small"
+			onLeftClick={() => button !== undefined && props.onOpen(button)}
+		/>
+	);
 }
 
 function TaskCard(props: {
@@ -251,6 +263,7 @@ function TaskCard(props: {
 	onBegin: (id: string, input: InputObject) => void;
 	onOpen: (task: Task) => void;
 	onMenu: (anchor: TextButton, task: Task) => void;
+	pin?: (anchor: TextButton) => void;
 	suppressClick: () => boolean;
 	bind: (id: string, gui?: GuiObject) => void;
 	order: number;
@@ -293,7 +306,7 @@ function TaskCard(props: {
 					TextXAlignment={Enum.TextXAlignment.Left}
 					TextTruncate={Enum.TextTruncate.AtEnd}
 				/>
-				<MoreButton onOpen={(anchor) => props.onMenu(anchor, task)} />
+				<MoreButton onOpen={(anchor) => props.onMenu(anchor, task)} pin={props.pin} />
 			</frame>
 			<textlabel
 				Text={task.title}
@@ -381,6 +394,7 @@ function ProjectBoard(args: Args) {
 	const [lane, setLane] = useArg<Args["lane"]>(args.lane);
 	const [menuOpen, setMenuOpen] = useArg(args.menuOpen);
 	const [editorOpen, setEditorOpen] = useArg(args.editorOpen);
+	const [editing] = useArg(args.editing);
 	const [query, setQuery] = useState("");
 	const [priority, setPriority] = useState("All");
 	const [tasks, setTasks] = useState(SEED);
@@ -491,7 +505,21 @@ function ProjectBoard(args: Args) {
 		return over !== undefined && over.column === name;
 	};
 
-	const form = <TaskForm draft={draft} onChange={setDraft} />;
+	const shownDraft =
+		editorOpen && editing && draft.title.size() === 0
+			? {
+					id: SEED[0].id,
+					title: SEED[0].title,
+					column: SEED[0].column,
+					priority: SEED[0].priority,
+					owner: SEED[0].owner,
+					due: SEED[0].due,
+					done: SEED[0].done,
+					total: SEED[0].total,
+				}
+			: draft;
+	const form = <TaskForm draft={shownDraft} onChange={setDraft} />;
+	const shownMenu = menuTask ?? (menuOpen ? SEED[0] : undefined);
 	const saveButton = <Button text="Save" variant="contained" color="primary" disabled={draft.title.size() < 3} onLeftClick={save} />;
 
 	return (
@@ -596,6 +624,13 @@ function ProjectBoard(args: Args) {
 															setMenuTask(opened);
 															setMenuOpen(true);
 														}}
+														pin={
+															menuOpen && task.id === "welcome"
+																? (instance) => {
+																		if (anchor !== instance) setAnchor(instance);
+																	}
+																: undefined
+														}
 														suppressClick={drag.suppressClick}
 														bind={(id, gui) => {
 															slots.current[id] = gui;
@@ -627,7 +662,7 @@ function ProjectBoard(args: Args) {
 			)}
 			<Menu
 				anchor={anchor}
-				open={menuOpen && menuTask !== undefined}
+				open={menuOpen && shownMenu !== undefined}
 				dense
 				items={[
 					{ id: "edit", text: "Edit" },
@@ -636,9 +671,9 @@ function ProjectBoard(args: Args) {
 					{ id: "Done", text: "Move to Done" },
 				]}
 				onSelect={(id: string) => {
-					if (menuTask === undefined) return;
-					if (id === "edit") openEdit(menuTask);
-					else moveTask(menuTask, id);
+					if (shownMenu === undefined) return;
+					if (id === "edit") openEdit(shownMenu);
+					else moveTask(shownMenu, id);
 				}}
 				onClose={() => setMenuOpen(false)}
 			/>
@@ -646,7 +681,7 @@ function ProjectBoard(args: Args) {
 				<Stack direction="column" gap={2} sx={{ ...STACK, p: 2 }}>
 					{showEditor ? (
 						<>
-							<TextLine text={draft.id === undefined ? "Add task" : "Edit task"} variant="h3" />
+							<TextLine text={shownDraft.id === undefined ? "Add task" : "Edit task"} variant="h3" />
 							{form}
 							{saveButton}
 						</>
@@ -664,7 +699,7 @@ function ProjectBoard(args: Args) {
 			</Drawer>
 			<Dialog
 				open={!narrow && showEditor}
-				title={draft.id === undefined ? "Add task" : "Edit task"}
+				title={shownDraft.id === undefined ? "Add task" : "Edit task"}
 				onClose={() => setEditorOpen(false)}
 				actions={saveButton}
 			>
@@ -687,13 +722,14 @@ function ProjectBoard(args: Args) {
 export default {
 	title: "Scenarios/Project Board",
 	description: "Task board with search, status chips, draggable cards, a move menu, and an editor.",
-	args: { viewport: "desktop", phase: "ready", lane: "Backlog", menuOpen: false, editorOpen: false },
+	args: { viewport: "desktop", phase: "ready", lane: "Backlog", menuOpen: false, editorOpen: false, editing: false },
 	argTypes: {
 		viewport: { type: "enum", options: ["phone", "desktop"] },
 		phase: { type: "enum", options: ["ready", "loading", "empty", "error"] },
 		lane: { type: "enum", options: ["Backlog", "Doing", "Done"] },
 		menuOpen: { type: "boolean" },
 		editorOpen: { type: "boolean" },
+		editing: { type: "boolean" },
 	},
 	preview: { width: 1100, height: 760 },
 	tags: ["scenario", "parity"],

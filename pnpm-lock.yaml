@@ -21,8 +21,8 @@ importers:
         specifier: ^1.5.5
         version: 1.5.5
       '@rbxts/uiblox':
-        specifier: 0.2.0-alpha.35
-        version: 0.2.0-alpha.35
+        specifier: 0.2.0-alpha.36
+        version: 0.2.0-alpha.36
     devDependencies:
       '@rbxts/attributes':
         specifier: ^1.0.0
@@ -190,8 +190,8 @@ packages:
   '@rbxts/types@1.0.813':
     resolution: {integrity: sha512-Qpsmqnl+TNdl5AYqKFkYHyUrv652r30qK6A3GObOyDz+cvn8i+HE61mO021oq0nu1FcA4pMHbYqLSbv2CMF9Ig==}
 
-  '@rbxts/uiblox@0.2.0-alpha.35':
-    resolution: {integrity: sha512-sYtVObKagr2XoIFbHp9fXoI3Or0Os9HD8QWYt9FGl/IociTH0g1NodLc9HXsY5GH5HebBk4KZDDdgXnUhTTGmA==}
+  '@rbxts/uiblox@0.2.0-alpha.36':
+    resolution: {integrity: sha512-MUZS6Q1qB2G+9hxpTCW5hfRI67yMniU1n+9roPwXR8B0E09XyZwdCnDfk384VOJpI5PccLgPoHkrs0J6zW4Zbw==}
 
   '@roblox-ts/luau-ast@2.0.0':
     resolution: {integrity: sha512-cmMi093IdwBOLVxwuordhM8AmtbyTIyRpsTbB0D/JauidW4SXsQRQowSwWjHo4QP0DRJBXvOIlxtqEQi50uNzQ==}
@@ -1013,7 +1013,7 @@ snapshots:
 
   '@rbxts/types@1.0.813': {}
 
-  '@rbxts/uiblox@0.2.0-alpha.35':
+  '@rbxts/uiblox@0.2.0-alpha.36':
     dependencies:
       '@rbxts/boat-tween': 1.0.1
       '@rbxts/pretty-react-hooks': 0.6.4(@rbxts/react-roblox@17.2.1)(@rbxts/react@17.2.1)
