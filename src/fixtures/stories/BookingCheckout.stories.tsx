@@ -30,6 +30,11 @@ interface Args {
 	summaryOpen: boolean;
 	confirmOpen: boolean;
 	booked: boolean;
+	menuOpen: boolean;
+	query: string;
+	rangeStart: number;
+	rangeFinish: number;
+	notice: string;
 }
 
 interface DateSpan {
@@ -166,14 +171,19 @@ function BookingCheckout(args: Args) {
 	const [summaryOpen, setSummaryOpen] = useArg(args.summaryOpen);
 	const [confirmOpen, setConfirmOpen] = useArg(args.confirmOpen);
 	const [booked, setBooked] = useArg(args.booked);
-	const [notice, setNotice] = useState("");
-	const [query, setQuery] = useState("");
-	const [span, setSpan] = useState<DateSpan>({});
+	const [notice, setNotice] = useArg(args.notice);
+	const [query, setQuery] = useArg(args.query);
+	const [rangeStart, setRangeStart] = useArg(args.rangeStart);
+	const [rangeFinish, setRangeFinish] = useArg(args.rangeFinish);
+	const span: DateSpan = {
+		start: rangeStart > 0 ? rangeStart : undefined,
+		finish: rangeFinish > 0 ? rangeFinish : undefined,
+	};
 	const [year, setYear] = useState(2026);
 	const [month, setMonth] = useState(10);
 	const [roomId, setRoomId] = useState("cedar");
 	const [sort, setSort] = useState("featured");
-	const [menuOpen, setMenuOpen] = useState(false);
+	const [menuOpen, setMenuOpen] = useArg(args.menuOpen);
 	const [anchor, setAnchor] = useState<TextButton>();
 	const [adults, setAdults] = useState(2);
 	const [children, setChildren] = useState(0);
@@ -243,7 +253,10 @@ function BookingCheckout(args: Args) {
 										year={year}
 										month={month}
 										value={span}
-										onChange={(value: DateSpan) => setSpan(value)}
+										onChange={(value: DateSpan) => {
+											setRangeStart(value.start ?? 0);
+											setRangeFinish(value.finish ?? 0);
+										}}
 										onMonthChange={(nextYear: number, nextMonth: number) => {
 											setYear(nextYear);
 											setMonth(nextMonth);
@@ -393,13 +406,29 @@ function Field(props: { label: string; children: React.ReactNode }) {
 export default {
 	title: "Scenarios/Booking Checkout",
 	description: "Multi-step stay booking: date range, room cards, guests, contact, price summary, validation, confirm dialog, and phone drawer.",
-	args: { viewport: "desktop", step: 0, summaryOpen: false, confirmOpen: false, booked: false },
+	args: {
+		viewport: "desktop",
+		step: 0,
+		summaryOpen: false,
+		confirmOpen: false,
+		booked: false,
+		menuOpen: false,
+		query: "",
+		rangeStart: 0,
+		rangeFinish: 0,
+		notice: "",
+	},
 	argTypes: {
 		viewport: { type: "enum", options: ["phone", "desktop"] },
 		step: { type: "number", min: 0, max: 3, step: 1 },
 		summaryOpen: { type: "boolean" },
 		confirmOpen: { type: "boolean" },
 		booked: { type: "boolean" },
+		menuOpen: { type: "boolean" },
+		query: { type: "string" },
+		rangeStart: { type: "number" },
+		rangeFinish: { type: "number" },
+		notice: { type: "string" },
 	},
 	preview: { width: 1100, height: 760 },
 	tags: ["scenario", "parity"],
