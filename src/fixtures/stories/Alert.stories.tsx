@@ -35,7 +35,7 @@ function AlertStory(args: Args) {
 
 export default {
 	title: "Feedback/Alert",
-	args: { severity: "info", title: "Note", message: "Something happened", closable: true, filled: true, square: true },
+	args: { severity: "info", title: "Note", message: "Something happened", closable: true, filled: true, square: false },
 	argTypes: {
 		severity: { type: "enum", options: ["info", "success", "warning", "error"] },
 		title: { type: "string" },
