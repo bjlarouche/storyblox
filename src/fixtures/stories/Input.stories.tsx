@@ -10,6 +10,7 @@ interface Args {
 	hasError: boolean;
 	variant: "filled" | "outlined" | "standard";
 	color: "primary" | "secondary";
+	helperText: string;
 }
 
 function InputStory(args: Args) {
@@ -23,6 +24,7 @@ function InputStory(args: Args) {
 			hasError={args.hasError}
 			variant={args.variant}
 			color={args.color}
+			helperText={args.helperText === "" ? undefined : args.helperText}
 			width={new UDim(1, 0)}
 			onTextChanged={setText}
 		/>
@@ -31,7 +33,7 @@ function InputStory(args: Args) {
 
 export default {
 	title: "Components/Input",
-	args: { text: "Story", placeholder: "Search", disabled: false, readOnly: true, hasError: false, variant: "filled", color: "secondary" },
+	args: { text: "Story", placeholder: "Search", disabled: false, readOnly: true, hasError: false, variant: "filled", color: "secondary", helperText: "Helper" },
 	argTypes: {
 		text: { type: "string" },
 		placeholder: { type: "string" },
@@ -40,6 +42,7 @@ export default {
 		hasError: { type: "boolean" },
 		variant: { type: "enum", options: ["filled", "outlined", "standard"] },
 		color: { type: "enum", options: ["primary", "secondary"] },
+		helperText: { type: "string" },
 	},
 	render: (args: Args) => <InputStory {...args} />,
 };
