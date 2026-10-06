@@ -134,7 +134,15 @@ export interface ModernStory<T> {
 	description?: string;
 	args?: T;
 	argTypes?: { [key: string]: ControlSpec };
-	render: (args: T, context?: { theme?: unknown; globals?: { [key: string]: unknown }; parameters?: { [key: string]: unknown } }) => unknown;
+	render: (
+		args: T,
+		context?: {
+			theme?: unknown;
+			globals?: { [key: string]: unknown };
+			parameters?: { [key: string]: unknown };
+			loaded?: { [key: string]: unknown };
+		},
+	) => unknown;
 	preview?: {
 		kind: string;
 		preset?: "phone" | "tablet" | "desktop" | "console";
@@ -148,6 +156,13 @@ export interface ModernStory<T> {
 	parameters?: { [key: string]: unknown };
 	globals?: { [key: string]: unknown };
 	decorators?: Array<(inner: (args: T) => unknown) => (args: T) => unknown>;
+	loaders?: Array<
+		(context: {
+			args: T;
+			globals?: { [key: string]: unknown };
+			parameters?: { [key: string]: unknown };
+		}) => { [key: string]: unknown }
+	>;
 	features?: StoryFeatures;
 	component?: unknown;
 }
