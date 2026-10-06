@@ -25,6 +25,7 @@ export interface ControlSpec {
 		| "array"
 		| "dictionary"
 		| "union"
+		| "tuple"
 		| "custom"
 		| "readonly";
 	options?: string[];
@@ -37,6 +38,7 @@ export interface ControlSpec {
 	enumType?: string;
 	fields?: { [key: string]: ControlSpec };
 	item?: ControlSpec;
+	items?: ControlSpec[];
 	tag?: string;
 	variants?: { [key: string]: { [key: string]: ControlSpec } };
 	editor?: string;
@@ -77,6 +79,7 @@ export const controls = {
 	object: (fields: { [key: string]: ControlSpec }): ControlSpec => ({ type: "object", fields }),
 	array: (item: ControlSpec): ControlSpec => ({ type: "array", item }),
 	dictionary: (item: ControlSpec): ControlSpec => ({ type: "dictionary", item }),
+	tuple: (items: ControlSpec[]): ControlSpec => ({ type: "tuple", items }),
 	union: (tag: string, variants: { [key: string]: { [key: string]: ControlSpec } }): ControlSpec => ({
 		type: "union",
 		tag,

@@ -4,6 +4,9 @@ globalThis.typeOf = (value) => {
 	return typeof value === "object" && value !== null ? "table" : typeof value;
 };
 globalThis.pairs = (record) => Object.keys(record).map((key) => [key, record[key]]);
+String.prototype.size = function size() {
+	return this.length;
+};
 Array.prototype.size = function size() {
 	return this.length;
 };
@@ -22,6 +25,7 @@ const {
 	removeItem,
 	moveItem,
 	switchUnion,
+	controlFaultPath,
 	readOnlyKind,
 	registerControlEditor,
 	mountControlEditor,
@@ -52,6 +56,10 @@ const switched = switchUnion("kind", "square", { size: 2 });
 if (switched.kind !== "square" || switched.size !== 2 || switched.radius !== undefined) throw new Error("union");
 
 const fn = () => {};
+if (controlFaultPath("meta", "note") !== "meta.note") throw new Error("field path");
+if (controlFaultPath("items.0", "tint") !== "items.0.tint") throw new Error("nested field path");
+if (controlFaultPath("", "items") !== "items") throw new Error("root field path");
+
 if (readOnlyKind(fn) !== "function") throw new Error("function");
 if (readOnlyKind({ __type: "Instance" }) !== "Instance") throw new Error("instance");
 if (readOnlyKind({ __type: "RBXScriptSignal" }) !== "RBXScriptSignal") throw new Error("signal");

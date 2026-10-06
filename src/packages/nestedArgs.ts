@@ -6,6 +6,10 @@ type EditorMount = (value: unknown, onChange: (value: unknown) => void) => () =>
 
 const editors: { [name: string]: EditorMount } = {};
 
+export function controlFaultPath(parent: string, segment: string) {
+	return parent.size() === 0 ? segment : `${parent}.${segment}`;
+}
+
 export function readOnlyKind(
 	value: unknown,
 ): "function" | "Instance" | "binding" | "RBXScriptSignal" | "thread" | "Region3" | undefined {
