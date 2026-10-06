@@ -31,13 +31,13 @@ if (process.argv.includes("--check")) {
 	process.exit(0);
 }
 
-console.log("Run after a sync of current main. Do not hydrate from a feature branch.");
+console.log("Run against current main.");
 console.log("Edit mode. Harness must already be running from ServerStorage.StorybloxPlugin._HarnessBoot.");
 console.log("On ServerStorage.StorybloxPlugin.stories, for each title, dark then light:");
 for (const title of titles) {
 	console.log(`  storyblox-viewport-theme=dark|light  storyblox-viewport=${title}`);
 }
 console.log("Wait for storyblox-viewport-ready starting with the title, or stop on storyblox-viewport-error.");
-console.log("Read storyblox-viewport-stats. screen_capture sees StarterGui.StorybloxViewport only.");
-console.log("Save under storyblox-assets/captures/storybook-parity/.");
+console.log("Read storyblox-viewport-stats from StarterGui.StorybloxViewport.");
+console.log("Save under STORYBLOX_CAPTURES or ./captures/storybook-parity/.");
 console.log("Then: node --experimental-strip-types scripts/capture-baseline.mjs --update <report.json>");
