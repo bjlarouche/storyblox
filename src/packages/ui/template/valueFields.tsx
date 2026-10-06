@@ -164,6 +164,43 @@ function flagBoxes(
 	return rows;
 }
 
+function flagGroup(
+	title: string,
+	order: number,
+	names: Array<string>,
+	flags: { [key: string]: boolean },
+	disabled: boolean,
+	theme: Theme,
+	gap: UDim,
+	onToggle: (name: string, on: boolean) => void,
+) {
+	return (
+		<frame key={title} LayoutOrder={order} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, theme.padding.calc(0.5))} SortOrder={Enum.SortOrder.LayoutOrder} />
+			{caption(title, 1, theme)}
+			<frame key="Flags" LayoutOrder={2} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+				<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={gap} SortOrder={Enum.SortOrder.LayoutOrder} />
+				{flagBoxes(names, flags, disabled, onToggle)}
+			</frame>
+		</frame>
+	);
+}
+
+function pairRow(order: number, left: React.Element, right: React.Element, theme: Theme) {
+	const gapPx = theme.padding.calc(1);
+	return (
+		<frame key={`Pair-${order}`} LayoutOrder={order} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, gapPx)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<frame key="L" LayoutOrder={1} Size={new UDim2(0.5, -gapPx / 2, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+				{left}
+			</frame>
+			<frame key="R" LayoutOrder={2} Size={new UDim2(0.5, -gapPx / 2, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+				{right}
+			</frame>
+		</frame>
+	);
+}
+
 export function valueFields(props: {
 	theme: Theme;
 	kind: string;
@@ -248,18 +285,21 @@ export function valueFields(props: {
 	if (kind === "axes" || kind === "faces") {
 		const names = kind === "axes" ? [...AXIS_NAMES, ...FACE_NAMES] : FACE_NAMES;
 		const flags = flagsOf(value, names);
-		return column(
-			kind,
-			gap,
-			flagBoxes(names, flags, disabled, (name, on) => {
-				const incomingFlags: { [key: string]: boolean } = {};
-				for (const flag of names) incomingFlags[flag] = flags[flag] === true;
-				incomingFlags[name] = on;
-				const incoming = kind === "axes" ? axesValue(incomingFlags) : facesValue(incomingFlags);
-				if (incoming === undefined) fault();
-				else onCommit(incoming);
-			}),
-		);
+		const onToggle = (name: string, on: boolean) => {
+			const incomingFlags: { [key: string]: boolean } = {};
+			for (const flag of names) incomingFlags[flag] = flags[flag] === true;
+			incomingFlags[name] = on;
+			const incoming = kind === "axes" ? axesValue(incomingFlags) : facesValue(incomingFlags);
+			if (incoming === undefined) fault();
+			else onCommit(incoming);
+		};
+		if (kind === "faces") {
+			return column(kind, gap, flagBoxes(names, flags, disabled, onToggle));
+		}
+		return column(kind, gap, [
+			flagGroup("Axes", 1, AXIS_NAMES, flags, disabled, theme, gap, onToggle),
+			flagGroup("Faces", 2, FACE_NAMES, flags, disabled, theme, gap, onToggle),
+		]);
 	}
 	if (kind === "dateTime") {
 		const unix = typeOf(value) === "DateTime" ? (value as DateTime).UnixTimestamp : 0;
@@ -294,12 +334,23 @@ export function valueFields(props: {
 			else onCommit(incoming);
 		};
 		return column("tweenInfo", gap, [
-			numberBox("Time", 1, time, disabled, false, theme, (incoming) => commit({ time: incoming }), fault),
+			pairRow(
+				1,
+				numberBox("Time", 1, time, disabled, false, theme, (incoming) => commit({ time: incoming }), fault),
+				numberBox("Delay", 1, delayTime, disabled, false, theme, (incoming) => commit({ delayTime: incoming }), fault),
+				theme,
+			),
 			enumSelect("EasingStyle", 2, "EasingStyle", style, disabled, theme, fill, (incoming) => commit({ style: incoming })),
 			enumSelect("EasingDirection", 3, "EasingDirection", direction, disabled, theme, fill, (incoming) => commit({ direction: incoming })),
-			numberBox("Repeat", 4, repeatCount, disabled, true, theme, (incoming) => commit({ repeatCount: incoming }), fault),
-			<kit.Checkbox key="Reverses" value={reverses} label="Reverses" disabled={disabled} onChange={(on) => commit({ reverses: on })} />,
-			numberBox("Delay", 6, delayTime, disabled, false, theme, (incoming) => commit({ delayTime: incoming }), fault),
+			pairRow(
+				4,
+				numberBox("Repeat", 1, repeatCount, disabled, true, theme, (incoming) => commit({ repeatCount: incoming }), fault),
+				<frame key="ReversesWrap" Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+					{caption(" ", 1, theme)}
+					<kit.Checkbox key="Reverses" value={reverses} label="Reverses" disabled={disabled} onChange={(on) => commit({ reverses: on })} />
+				</frame>,
+				theme,
+			),
 		]);
 	}
 	if (kind === "dockWidget") {
@@ -336,10 +387,18 @@ export function valueFields(props: {
 			enumSelect("Dock", 1, "InitialDockState", dock, disabled, theme, fill, (incoming) => commit({ dock: incoming })),
 			<kit.Checkbox key="Enabled" value={enabled} label="Enabled" disabled={disabled} onChange={(on) => commit({ enabled: on })} />,
 			<kit.Checkbox key="Override" value={overrideRestore} label="Override restore" disabled={disabled} onChange={(on) => commit({ overrideRestore: on })} />,
-			numberBox("Float X", 4, floatX, disabled, false, theme, (incoming) => commit({ floatX: incoming }), fault),
-			numberBox("Float Y", 5, floatY, disabled, false, theme, (incoming) => commit({ floatY: incoming }), fault),
-			numberBox("Min width", 6, minWidth, disabled, false, theme, (incoming) => commit({ minWidth: incoming }), fault),
-			numberBox("Min height", 7, minHeight, disabled, false, theme, (incoming) => commit({ minHeight: incoming }), fault),
+			pairRow(
+				4,
+				numberBox("Float X", 1, floatX, disabled, false, theme, (incoming) => commit({ floatX: incoming }), fault),
+				numberBox("Float Y", 1, floatY, disabled, false, theme, (incoming) => commit({ floatY: incoming }), fault),
+				theme,
+			),
+			pairRow(
+				5,
+				numberBox("Min width", 1, minWidth, disabled, false, theme, (incoming) => commit({ minWidth: incoming }), fault),
+				numberBox("Min height", 1, minHeight, disabled, false, theme, (incoming) => commit({ minHeight: incoming }), fault),
+				theme,
+			),
 		]);
 	}
 	if (kind === "pathWaypoint") {
@@ -353,9 +412,10 @@ export function valueFields(props: {
 			else onCommit(incoming);
 		};
 		return column("pathWaypoint", gap, [
+			caption("Position", 1, theme),
 			<kit.VectorEditor key="Position" value={position} disabled={disabled} onChange={(incoming) => commit({ position: incoming as Vector3 })} />,
-			enumSelect("Action", 2, "PathWaypointAction", action, disabled, theme, fill, (incoming) => commit({ action: incoming })),
-			textBox("Label", 3, label, disabled, theme, (incoming) => commit({ label: incoming })),
+			enumSelect("Action", 3, "PathWaypointAction", action, disabled, theme, fill, (incoming) => commit({ action: incoming })),
+			textBox("Label", 4, label, disabled, theme, (incoming) => commit({ label: incoming })),
 		]);
 	}
 	return undefined;
