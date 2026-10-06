@@ -866,58 +866,60 @@ function Template({
 								TextColor3={theme.palette.primary.main}
 								Event={{ MouseButton1Click: () => onToggleDensity?.() }}
 							/>
-							{extraGlobalEntries(story?.globals).map((entry, index) => {
-								const shown = globalPatch[entry.name] !== undefined ? globalPatch[entry.name] : entry.value;
-								if (typeOf(shown) === "boolean" || typeOf(entry.value) === "boolean") {
-									const on = shown === true;
+							<>
+								{extraGlobalEntries(story?.globals).map((entry, index) => {
+									const shown = globalPatch[entry.name] !== undefined ? globalPatch[entry.name] : entry.value;
+									if (typeOf(shown) === "boolean" || typeOf(entry.value) === "boolean") {
+										const on = shown === true;
+										return (
+											<textbutton
+												key={`global-${entry.name}`}
+												Text={`${entry.name} ${on ? "on" : "off"}`}
+												LayoutOrder={20 + index}
+												AutomaticSize={Enum.AutomaticSize.X}
+												Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+												BackgroundTransparency={1}
+												Font={theme.typography.fontFamilies.semibold}
+												TextSize={theme.typography.fontSizes.caption}
+												TextColor3={theme.palette.primary.main}
+												Event={{
+													MouseButton1Click: () =>
+														setGlobalPatch((current) => {
+															const patched: { [key: string]: unknown } = {};
+															for (const [key, value] of pairs(current)) patched[key as string] = value;
+															patched[entry.name] = !on;
+															return patched;
+														}),
+												}}
+											/>
+										);
+									}
 									return (
-										<textbutton
+										<textbox
 											key={`global-${entry.name}`}
-											Text={`${entry.name} ${on ? "on" : "off"}`}
+											Text={tostring(shown)}
+											PlaceholderText={entry.name}
 											LayoutOrder={20 + index}
-											AutomaticSize={Enum.AutomaticSize.X}
-											Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-											BackgroundTransparency={1}
-											Font={theme.typography.fontFamilies.semibold}
+											Size={new UDim2(0, theme.spacing.calc(8), 0, theme.spacing.calc(2))}
+											BackgroundTransparency={0.5}
+											BackgroundColor3={theme.palette.surface.paper}
+											ClearTextOnFocus={false}
+											Font={theme.typography.fontFamilies.default}
 											TextSize={theme.typography.fontSizes.caption}
-											TextColor3={theme.palette.primary.main}
+											TextColor3={theme.palette.text.primary}
 											Event={{
-												MouseButton1Click: () =>
+												FocusLost: (box) =>
 													setGlobalPatch((current) => {
 														const patched: { [key: string]: unknown } = {};
 														for (const [key, value] of pairs(current)) patched[key as string] = value;
-														patched[entry.name] = !on;
+														patched[entry.name] = box.Text;
 														return patched;
 													}),
 											}}
 										/>
 									);
-								}
-								return (
-									<textbox
-										key={`global-${entry.name}`}
-										Text={tostring(shown)}
-										PlaceholderText={entry.name}
-										LayoutOrder={20 + index}
-										Size={new UDim2(0, theme.spacing.calc(8), 0, theme.spacing.calc(2))}
-										BackgroundTransparency={0.5}
-										BackgroundColor3={theme.palette.surface.paper}
-										ClearTextOnFocus={false}
-										Font={theme.typography.fontFamilies.default}
-										TextSize={theme.typography.fontSizes.caption}
-										TextColor3={theme.palette.text.primary}
-										Event={{
-											FocusLost: (box) =>
-												setGlobalPatch((current) => {
-													const patched: { [key: string]: unknown } = {};
-													for (const [key, value] of pairs(current)) patched[key as string] = value;
-													patched[entry.name] = box.Text;
-													return patched;
-												}),
-										}}
-									/>
-								);
-							})}
+								})}
+							</>
 							{extraGlobalEntries(story?.globals).size() > 0 && (
 								<textbutton
 									key="ResetGlobals"
@@ -957,22 +959,24 @@ function Template({
 							PaddingLeft={new UDim(0, theme.spacing.calc(0.75))}
 							PaddingRight={new UDim(0, theme.spacing.calc(0.75))}
 						/>
-						{storyTools.map((tool, index) => (
-							<textbutton
-								key={tool.id}
-								Text={tool.label}
-								LayoutOrder={index}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(1.75))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.text.secondary}
-								TextTransparency={tool.active === false ? 0.45 : 0}
-								Selectable={true}
-								Event={{ MouseButton1Click: tool.onClick }}
-							/>
-						))}
+						<>
+							{storyTools.map((tool, index) => (
+								<textbutton
+									key={tool.id}
+									Text={tool.label}
+									LayoutOrder={index}
+									AutomaticSize={Enum.AutomaticSize.X}
+									Size={new UDim2(0, 0, 0, theme.spacing.calc(1.75))}
+									BackgroundTransparency={1}
+									Font={theme.typography.fontFamilies.semibold}
+									TextSize={theme.typography.fontSizes.caption}
+									TextColor3={theme.palette.text.secondary}
+									TextTransparency={tool.active === false ? 0.45 : 0}
+									Selectable={true}
+									Event={{ MouseButton1Click: tool.onClick }}
+								/>
+							))}
+						</>
 					</frame>
 				)}
 

@@ -90,20 +90,22 @@ function InspectorPane(props: InspectorPaneProps) {
 						PaddingLeft={new UDim(0, theme.padding.calc(1))}
 						PaddingRight={new UDim(0, theme.padding.calc(1))}
 					/>
-					{tabs.map((name, index) => (
-						<textbutton
-							key={name}
-							Text={tabLabel(name)}
-							LayoutOrder={index}
-							AutomaticSize={Enum.AutomaticSize.X}
-							Size={new UDim2(0, 0, 1, 0)}
-							BackgroundTransparency={1}
-							Font={theme.typography.fontFamilies.semibold}
-							TextSize={theme.typography.fontSizes.caption}
-							TextColor3={name === current ? theme.palette.text.primary : theme.palette.text.secondary}
-							Event={{ MouseButton1Click: () => setTab(name) }}
-						/>
-					))}
+					<>
+						{tabs.map((name, index) => (
+							<textbutton
+								key={name}
+								Text={tabLabel(name)}
+								LayoutOrder={index}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 1, 0)}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={name === current ? theme.palette.text.primary : theme.palette.text.secondary}
+								Event={{ MouseButton1Click: () => setTab(name) }}
+							/>
+						))}
+					</>
 				</frame>
 			)}
 			<frame
