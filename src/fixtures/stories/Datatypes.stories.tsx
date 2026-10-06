@@ -21,6 +21,8 @@ export default {
 		]),
 		icon: 123,
 		origin: new CFrame(0, 1, 0),
+		bounds: new Rect(0, 0, 100, 50),
+		spanRange: new NumberRange(0.25, 0.75),
 	},
 	argTypes: {
 		paint: { type: "color" },
@@ -35,6 +37,8 @@ export default {
 		fade: { type: "numberSequence" },
 		icon: { type: "asset" },
 		origin: { type: "cframe" },
+		bounds: { type: "rect" },
+		spanRange: { type: "numberRange" },
 	},
 	render: (args: {
 		paint: Color3;
@@ -49,9 +53,11 @@ export default {
 		fade: NumberSequence;
 		icon: number;
 		origin: CFrame;
+		bounds: Rect;
+		spanRange: NumberRange;
 	}) => (
 		<textlabel
-			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y}`}
+			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y} rect=${args.bounds.Width} range=${args.spanRange.Min}`}
 			Size={new UDim2(1, -16, 1, -16)}
 			Position={new UDim2(0, 8, 0, 8)}
 			BackgroundTransparency={1}

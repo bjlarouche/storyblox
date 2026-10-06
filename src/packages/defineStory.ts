@@ -13,6 +13,8 @@ export interface ControlSpec {
 		| "EnumItem"
 		| "asset"
 		| "cframe"
+		| "rect"
+		| "numberRange"
 		| "font"
 		| "colorSequence"
 		| "numberSequence"
@@ -64,6 +66,8 @@ export const controls = {
 	numberSequence: (): ControlSpec => ({ type: "numberSequence" }),
 	asset: (): ControlSpec => ({ type: "asset" }),
 	cframe: (): ControlSpec => ({ type: "cframe" }),
+	rect: (): ControlSpec => ({ type: "rect" }),
+	numberRange: (): ControlSpec => ({ type: "numberRange" }),
 	object: (fields: { [key: string]: ControlSpec }): ControlSpec => ({ type: "object", fields }),
 	array: (item: ControlSpec): ControlSpec => ({ type: "array", item }),
 	dictionary: (item: ControlSpec): ControlSpec => ({ type: "dictionary", item }),

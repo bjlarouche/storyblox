@@ -70,6 +70,8 @@ function argValueMatches(value: unknown, kind: unknown): boolean {
 	if (kind === "numberSequence") return typeOf(value) === "NumberSequence";
 	if (kind === "EnumItem") return typeOf(value) === "EnumItem";
 	if (kind === "cframe") return typeOf(value) === "CFrame";
+	if (kind === "rect") return typeOf(value) === "Rect";
+	if (kind === "numberRange") return typeOf(value) === "NumberRange";
 	if (kind === "asset") {
 		return typeOf(value) === "number" && (value as number) === value && (value as number) >= 0 && (value as number) % 1 === 0;
 	}

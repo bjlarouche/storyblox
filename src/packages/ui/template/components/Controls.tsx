@@ -115,6 +115,12 @@ const kit = Uiblox as unknown as {
 		disabled?: boolean;
 	}) => React.Element;
 	CFrameEditor: (props: { value: CFrame; onChange: (value: CFrame) => void; disabled?: boolean }) => React.Element;
+	RectEditor: (props: { value: Rect; onChange: (value: Rect) => void; disabled?: boolean }) => React.Element;
+	NumberRangeEditor: (props: {
+		value: NumberRange;
+		onChange: (value: NumberRange) => void;
+		disabled?: boolean;
+	}) => React.Element;
 	AssetField: (props: {
 		value: string;
 		onChange: (value: string) => void;
@@ -149,7 +155,7 @@ function writeFault(current: { [key: string]: string }, key: string, reason: str
 }
 
 function datatype(kind?: string) {
-	return kind === "EnumItem" || kind === "asset" || kind === "cframe";
+	return kind === "EnumItem" || kind === "asset" || kind === "cframe" || kind === "rect" || kind === "numberRange";
 }
 
 function hasKit(
@@ -162,6 +168,8 @@ function hasKit(
 		| "ColorSequenceEditor"
 		| "NumberSequenceEditor"
 		| "CFrameEditor"
+		| "RectEditor"
+		| "NumberRangeEditor"
 		| "AssetField"
 		| "EnumPicker",
 ) {
@@ -426,6 +434,32 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					}}
 				/>
 			);
+		} else if (spec?.type === "rect" && hasKit("RectEditor")) {
+			const rect = typeOf(value) === "Rect" ? (value as Rect) : new Rect();
+			editor = (
+				<kit.RectEditor
+					key={name}
+					value={rect}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
+		} else if (spec?.type === "numberRange" && hasKit("NumberRangeEditor")) {
+			const range = typeOf(value) === "NumberRange" ? (value as NumberRange) : new NumberRange(0, 1);
+			editor = (
+				<kit.NumberRangeEditor
+					key={name}
+					value={range}
+					disabled={spec.disabled === true}
+					onChange={(incoming) => {
+						setFaults((current) => writeFault(current, name, ""));
+						onChange(name, incoming);
+					}}
+				/>
+			);
 		} else if (spec?.type === "asset" && hasKit("AssetField")) {
 			editor = (
 				<kit.AssetField
@@ -471,7 +505,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			spec?.type === "udim2" ||
 			spec?.type === "font" ||
 			spec?.type === "colorSequence" ||
-			spec?.type === "numberSequence"
+			spec?.type === "numberSequence" ||
+			spec?.type === "rect" ||
+			spec?.type === "numberRange"
 		)) {
 			const commitText = (text: string) => {
 				const parsed = parseDatatype(spec ?? {}, text);
