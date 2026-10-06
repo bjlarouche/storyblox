@@ -62,5 +62,8 @@ export default {
 		fullscreen: { type: "boolean" },
 		value: { type: "string" },
 	},
+	// HTML_SAMPLE: paste into value then use Paste HTML → preview
 	render: (args: Args) => <MarkdownEditorStory {...args} />,
 };
+
+export { HTML_SAMPLE };
