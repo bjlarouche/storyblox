@@ -89,6 +89,7 @@ interface LinearProgressProps {
 	indeterminate?: boolean;
 	disabled?: boolean;
 	reducedMotion?: boolean;
+	color?: Color3;
 	className?: { Size: UDim2 };
 }
 
