@@ -10,6 +10,7 @@ interface Args {
 	reducedMotion: boolean;
 	disabled: boolean;
 	size: number;
+	thickness: number;
 }
 
 function fillScale(root: Instance | undefined) {
@@ -41,6 +42,7 @@ function ProgressStory(args: Args) {
 				<CircularProgress
 					value={args.indeterminate ? undefined : args.value}
 					size={args.size}
+					thickness={args.thickness}
 					color={color}
 					reducedMotion={args.reducedMotion}
 					disabled={args.disabled}
@@ -69,6 +71,7 @@ export default {
 		reducedMotion: false,
 		disabled: false,
 		size: 36,
+		thickness: 8,
 	},
 	argTypes: {
 		kind: { type: "enum", options: ["linear", "circular"] },
@@ -78,6 +81,7 @@ export default {
 		reducedMotion: { type: "boolean" },
 		disabled: { type: "boolean" },
 		size: { type: "number", control: "slider", min: 16, max: 72, step: 4 },
+		thickness: { type: "number", control: "slider", min: 1, max: 12, step: 1 },
 	},
 	cases: {
 		determinate: (env: {
