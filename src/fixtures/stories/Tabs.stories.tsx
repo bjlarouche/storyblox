@@ -36,7 +36,7 @@ function TabsStory(args: Args) {
 
 export default {
 	title: "Components/Tabs",
-	args: { value: "left", orientation: "horizontal", centered: false, disabled: true },
+	args: { value: "left", orientation: "horizontal", centered: false, disabled: false },
 	argTypes: {
 		value: { type: "enum", options: ["left", "center", "right"], control: "radio" },
 		orientation: { type: "enum", options: ["horizontal", "vertical"] },
