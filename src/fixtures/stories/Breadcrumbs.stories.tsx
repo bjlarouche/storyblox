@@ -16,7 +16,7 @@ const items = [
 
 export default {
 	title: "Components/Breadcrumbs",
-	args: { separator: "/", maxItems: 0 },
+	args: { separator: "/", maxItems: 3 },
 	argTypes: {
 		separator: { type: "string" },
 		maxItems: { type: "number", min: 0, max: 5, step: 1 },
