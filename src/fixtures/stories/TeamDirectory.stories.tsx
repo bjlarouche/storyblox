@@ -29,6 +29,8 @@ interface Args {
 	page: number;
 	menuOpen: boolean;
 	editorOpen: boolean;
+	bulk: boolean;
+	editing: boolean;
 }
 
 interface Person {
@@ -181,11 +183,14 @@ function StatusCell(props: { status: string }) {
 	);
 }
 
-function MoreButton(props: { id: string; onOpen: (anchor: TextButton, id: string) => void }) {
+function MoreButton(props: { id: string; onOpen: (anchor: TextButton, id: string) => void; pin?: (anchor: TextButton) => void }) {
 	const [button, setButton] = useState<TextButton>();
 	return (
 		<Button
-			ref={setButton}
+			ref={(instance: TextButton | undefined) => {
+				setButton(instance);
+				if (instance && props.pin) props.pin(instance);
+			}}
 			text="More"
 			variant="text"
 			size="small"
@@ -257,6 +262,8 @@ function TeamDirectory(args: Args) {
 	const [page, setPage] = useArg(args.page);
 	const [menuOpen, setMenuOpen] = useArg(args.menuOpen);
 	const [editorOpen, setEditorOpen] = useArg(args.editorOpen);
+	const [bulk] = useArg(args.bulk);
+	const [editing] = useArg(args.editing);
 	const [query, setQuery] = useState("");
 	const [team, setTeam] = useState("All");
 	const [status, setStatus] = useState("All");
@@ -273,9 +280,11 @@ function TeamDirectory(args: Args) {
 	const count = math.max(1, math.ceil(rows.size() / PAGE));
 	const shownPage = math.clamp(page, 1, count);
 	const slice = pageSlice(rows, shownPage);
+	const selection = bulk ? ["avery", "blair"] : picked;
+	const shownSelected = selectedId ?? (bulk ? "avery" : undefined);
 	let selectedIndex: number | undefined;
 	for (let index = 0; index < slice.size(); index++) {
-		if (slice[index].id === selectedId) selectedIndex = index;
+		if (slice[index].id === shownSelected) selectedIndex = index;
 	}
 
 	const toggle = (id: string, value: boolean) => {
@@ -337,18 +346,33 @@ function TeamDirectory(args: Args) {
 	const cells: Array<Array<string | React.Element>> = [];
 	for (const person of slice) {
 		cells.push([
-			<Checkbox value={hasId(picked, person.id)} onChange={(value: boolean) => toggle(person.id, value)} />,
+			<Checkbox value={hasId(selection, person.id)} onChange={(value: boolean) => toggle(person.id, value)} />,
 			<NameCell name={person.name} />,
 			person.role,
 			person.team,
 			<StatusCell status={person.status} />,
 			<Sparkline values={person.activity} width={96} height={28} />,
-			<MoreButton id={person.id} onOpen={openMenu} />,
+			<MoreButton
+				id={person.id}
+				onOpen={openMenu}
+				pin={
+					menuOpen && person.id === "avery"
+						? (instance) => {
+								if (anchor !== instance) setAnchor(instance);
+							}
+						: undefined
+				}
+			/>,
 		]);
 	}
 
-	const menuPerson = people.filter((person) => person.id === menuId)[0];
-	const form = <MemberForm draft={draft} onChange={setDraft} />;
+	const activeMenuId = menuId ?? (menuOpen ? "avery" : undefined);
+	const menuPerson = people.filter((person) => person.id === activeMenuId)[0];
+	const shownDraft =
+		editorOpen && editing && draft.name.size() === 0
+			? { id: SEED[0].id, name: SEED[0].name, role: SEED[0].role, team: SEED[0].team, status: SEED[0].status }
+			: draft;
+	const form = <MemberForm draft={shownDraft} onChange={setDraft} />;
 	const saveButton = <Button text="Save" variant="contained" color="primary" disabled={draft.name.size() < 2} onLeftClick={save} />;
 
 	return (
@@ -381,12 +405,12 @@ function TeamDirectory(args: Args) {
 							))}
 						</Stack>
 						<Summary rows={rows} />
-						{picked.size() > 0 && (
+						{selection.size() > 0 && (
 							<Paper elevation="flat" sx={{ ...STACK, p: 1 }}>
 								<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
-									<TextLine text={`${picked.size()} selected`} />
+									<TextLine text={`${selection.size()} selected`} />
 									<Button text="Clear" variant="text" size="small" onLeftClick={() => setPicked([])} />
-									<Button text="Remove" variant="outlined" size="small" onLeftClick={() => removeIds(picked)} />
+									<Button text="Remove" variant="outlined" size="small" onLeftClick={() => removeIds(selection)} />
 								</Stack>
 							</Paper>
 						)}
@@ -398,9 +422,19 @@ function TeamDirectory(args: Args) {
 									<Paper key={person.id} elevation="flat" sx={{ ...STACK, p: 2 }}>
 										<Stack direction="column" gap={1} sx={STACK}>
 											<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
-												<Checkbox value={hasId(picked, person.id)} onChange={(value: boolean) => toggle(person.id, value)} />
+												<Checkbox value={hasId(selection, person.id)} onChange={(value: boolean) => toggle(person.id, value)} />
 												<NameCell name={person.name} />
-												<MoreButton id={person.id} onOpen={openMenu} />
+												<MoreButton
+													id={person.id}
+													onOpen={openMenu}
+													pin={
+														menuOpen && person.id === "avery"
+															? (instance) => {
+																	if (anchor !== instance) setAnchor(instance);
+																}
+															: undefined
+													}
+												/>
 											</Stack>
 											<TextLine text={`${person.role} · ${person.team}`} variant="caption" color="textSecondary" />
 											<StatusCell status={person.status} />
@@ -449,14 +483,14 @@ function TeamDirectory(args: Args) {
 			/>
 			<Drawer open={narrow && editorOpen} edge="right" width={340} onClose={() => setEditorOpen(false)}>
 				<Stack direction="column" gap={2} sx={{ ...STACK, p: 2 }}>
-					<TextLine text={draft.id === undefined ? "Add member" : "Edit member"} variant="h3" />
+					<TextLine text={shownDraft.id === undefined ? "Add member" : "Edit member"} variant="h3" />
 					{form}
 					{saveButton}
 				</Stack>
 			</Drawer>
 			<Dialog
 				open={!narrow && editorOpen}
-				title={draft.id === undefined ? "Add member" : "Edit member"}
+				title={shownDraft.id === undefined ? "Add member" : "Edit member"}
 				onClose={() => setEditorOpen(false)}
 				actions={saveButton}
 			>
@@ -469,13 +503,15 @@ function TeamDirectory(args: Args) {
 export default {
 	title: "Scenarios/Team Directory",
 	description: "People directory with search, filters, summary cards, a rich table, phone cards, bulk selection, and an editor.",
-	args: { viewport: "desktop", phase: "ready", page: 1, menuOpen: false, editorOpen: false },
+	args: { viewport: "desktop", phase: "ready", page: 1, menuOpen: false, editorOpen: false, bulk: false, editing: false },
 	argTypes: {
 		viewport: { type: "enum", options: ["phone", "desktop"] },
 		phase: { type: "enum", options: ["ready", "loading", "empty", "error"] },
 		page: { type: "number", min: 1, max: 3, step: 1 },
 		menuOpen: { type: "boolean" },
 		editorOpen: { type: "boolean" },
+		bulk: { type: "boolean" },
+		editing: { type: "boolean" },
 	},
 	preview: { width: 1100, height: 760 },
 	tags: ["scenario", "parity"],
