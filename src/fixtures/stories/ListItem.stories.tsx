@@ -12,7 +12,7 @@ interface Args {
 
 export default {
 	title: "Components/List Item",
-	args: { text: "Primary", secondary: "Secondary", selected: false, disabled: false, dense: false, divider: true },
+	args: { text: "Primary", secondary: "Secondary", selected: true, disabled: false, dense: false, divider: true },
 	argTypes: {
 		text: { type: "string" },
 		secondary: { type: "string" },
