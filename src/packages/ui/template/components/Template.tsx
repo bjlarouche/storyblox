@@ -342,6 +342,7 @@ function Template({
 		const clock = createCaseClock();
 		task.spawn(() => {
 			task.wait();
+			const started = os.clock();
 			const result = runCase(
 				name,
 				body as Parameters<typeof runCase>[1],
@@ -355,15 +356,16 @@ function Template({
 				},
 				() => mounted.current !== key,
 			);
+			const finished = { ...result, elapsed: os.clock() - started };
 			clock.cancel();
 			setCaseRunning(undefined);
 			setCaseResults((current) => {
 				const updated = new Array<CaseResult>();
 				for (const item of current) updated.push(item);
-				updated.push(result);
+				updated.push(finished);
 				return updated;
 			});
-			onCaseResult?.(result);
+			onCaseResult?.(finished);
 		});
 	}, [activeCaseRequest]);
 

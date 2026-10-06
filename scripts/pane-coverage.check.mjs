@@ -30,6 +30,7 @@ const required = [
 		title: "Shell/Interactions",
 		check: "scripts/story-cases.check.mjs",
 		needles: ["interactions"],
+		templateNeedles: ["elapsed"],
 	},
 	{
 		id: "docs",
