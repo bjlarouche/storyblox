@@ -69,6 +69,7 @@ const required = [
 			'key="Orientation"',
 			'key="Background"',
 			'id="Remount"',
+			'key="Density"',
 			'id="Theme"',
 		],
 	},
@@ -95,7 +96,7 @@ const required = [
 		title: "Shell/Globals",
 		check: "scripts/define-story.check.mjs",
 		needles: [],
-		templateNeedles: ["globals: story.globals", "parameters: story.parameters"],
+		templateNeedles: ["mergeGlobals", "parameters: story.parameters"],
 	},
 	{
 		id: "chrome-shortcuts",

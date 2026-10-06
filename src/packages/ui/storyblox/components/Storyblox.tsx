@@ -213,6 +213,7 @@ function Storyblox(props: StorybloxProps) {
 	}, []);
 
 	const [theme, setTheme] = useState(themeName === "light" ? secondaryTheme : primaryTheme);
+	const [density, setDensity] = useState<"compact" | "comfortable">("compact");
 	const [favoriteList, setFavoriteList] = useState(parseFavorites(favorites));
 	const favoritesRef = useRef(favoriteList);
 	favoritesRef.current = favoriteList;
@@ -349,6 +350,11 @@ function Storyblox(props: StorybloxProps) {
 		if (onThemeChange) onThemeChange(name);
 		controlRoot(root)?.SetAttribute("storyblox-theme", name);
 	};
+	const toggleDensity = () => {
+		const chosen = density === "compact" ? "comfortable" : "compact";
+		setDensity(chosen);
+		controlRoot(root)?.SetAttribute("storyblox-density", chosen);
+	};
 	const toggleInspector = () => {
 		const open = !inspectorShown;
 		setInspectorShown(open);
@@ -379,6 +385,12 @@ function Storyblox(props: StorybloxProps) {
 		};
 		const selectConn = marker.GetAttributeChangedSignal("storyblox-select").Connect(onSelect);
 		const themeConn = marker.GetAttributeChangedSignal("storyblox-theme").Connect(onTheme);
+		const onDensity = () => {
+			const name = marker.GetAttribute("storyblox-density");
+			if (name !== "compact" && name !== "comfortable") return;
+			setDensity(name);
+		};
+		const densityConn = marker.GetAttributeChangedSignal("storyblox-density").Connect(onDensity);
 		const favoriteConn = marker.GetAttributeChangedSignal("storyblox-favorite").Connect(() => {
 			const title = marker.GetAttribute("storyblox-favorite");
 			if (typeOf(title) !== "string" || (title as string).size() === 0) return;
@@ -487,6 +499,7 @@ function Storyblox(props: StorybloxProps) {
 			requestConn.Disconnect();
 			selectConn.Disconnect();
 			themeConn.Disconnect();
+			densityConn.Disconnect();
 			favoriteConn.Disconnect();
 			paneConn.Disconnect();
 			focusConn.Disconnect();
@@ -622,6 +635,8 @@ function Storyblox(props: StorybloxProps) {
 										}
 										primaryThemeEnabled={primaryThemeEnabled}
 										onToggleTheme={toggleTheme}
+										density={density}
+										onToggleDensity={toggleDensity}
 										inspectorOpen={inspectorShown}
 										onToggleInspector={toggleInspector}
 										starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
@@ -649,6 +664,8 @@ function Storyblox(props: StorybloxProps) {
 								onRenderError={onRenderError}
 								primaryThemeEnabled={primaryThemeEnabled}
 								onToggleTheme={toggleTheme}
+								density={density}
+								onToggleDensity={toggleDensity}
 								inspectorOpen={inspectorShown}
 								onToggleInspector={toggleInspector}
 								starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
@@ -732,7 +749,7 @@ function Storyblox(props: StorybloxProps) {
 	const narrow = narrowShell(shellWidth);
 
 	return (
-		<ThemeProvider theme={theme}>
+		<ThemeProvider theme={{ ...theme, density }}>
 			<frame
 				key="Storyblox"
 				ref={(frame: Frame | undefined) => {
