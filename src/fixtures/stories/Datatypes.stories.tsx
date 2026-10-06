@@ -1,4 +1,51 @@
 import React from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
+
+type Args = {
+	paint: Color3;
+	brick: BrickColor;
+	shift: Vector2;
+	place: Vector3;
+	gap: UDim;
+	span: UDim2;
+	font: Enum.Font;
+	face: Font;
+	gradient: ColorSequence;
+	fade: NumberSequence;
+	icon: number;
+	origin: CFrame;
+	bounds: Rect;
+	spanRange: NumberRange;
+	beam: Ray;
+	material: PhysicalProperties;
+	wash: {
+		color: ColorSequence;
+		transparency: NumberSequence;
+		rotation: number;
+		offset: Vector2;
+		enabled: boolean;
+	};
+};
+
+function DataTypesDemo(args: Args) {
+	const { theme } = useTheme();
+	return (
+		<textlabel
+			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y} rect=${args.bounds.Width} range=${args.spanRange.Min} ray=${args.beam.Direction.Z} dens=${args.material.Density} wash=${args.wash.rotation}`}
+			Size={new UDim2(1, -16, 1, -16)}
+			Position={new UDim2(0, 8, 0, 8)}
+			BackgroundTransparency={1}
+			TextSize={16}
+			FontFace={args.face}
+			TextColor3={theme.palette.text.primary}
+			TextXAlignment={Enum.TextXAlignment.Left}
+			TextYAlignment={Enum.TextYAlignment.Top}
+			TextWrapped={true}
+			TextTruncate={Enum.TextTruncate.AtEnd}
+			ClipsDescendants={true}
+		/>
+	);
+}
 
 export default {
 	title: "Layout/Data Types",
@@ -55,43 +102,5 @@ export default {
 		material: { type: "physicalProperties" },
 		wash: { type: "gradient" },
 	},
-	render: (args: {
-		paint: Color3;
-		brick: BrickColor;
-		shift: Vector2;
-		place: Vector3;
-		gap: UDim;
-		span: UDim2;
-		font: Enum.Font;
-		face: Font;
-		gradient: ColorSequence;
-		fade: NumberSequence;
-		icon: number;
-		origin: CFrame;
-		bounds: Rect;
-		spanRange: NumberRange;
-		beam: Ray;
-		material: PhysicalProperties;
-		wash: {
-			color: ColorSequence;
-			transparency: NumberSequence;
-			rotation: number;
-			offset: Vector2;
-			enabled: boolean;
-		};
-	}) => (
-		<textlabel
-			Text={`R=${args.paint.R} brick=${args.brick.Name} shift=${args.shift.X} X=${args.place.X} offset=${args.gap.Offset} span=${args.span.Y.Offset} font=${args.font.Name} face=${args.face.Family} stops=${args.gradient.Keypoints.size()} fade=${args.fade.Keypoints.size()} icon=${args.icon} Y=${args.origin.Y} rect=${args.bounds.Width} range=${args.spanRange.Min} ray=${args.beam.Direction.Z} dens=${args.material.Density} wash=${args.wash.rotation}`}
-			Size={new UDim2(1, -16, 1, -16)}
-			Position={new UDim2(0, 8, 0, 8)}
-			BackgroundTransparency={1}
-			TextSize={16}
-			FontFace={args.face}
-			TextXAlignment={Enum.TextXAlignment.Left}
-			TextYAlignment={Enum.TextYAlignment.Top}
-			TextWrapped={true}
-			TextTruncate={Enum.TextTruncate.AtEnd}
-			ClipsDescendants={true}
-		/>
-	),
+	render: (args: Args) => <DataTypesDemo {...args} />,
 };
