@@ -17,15 +17,18 @@ local function crashed(message)
 end
 
 return function(plugin, widget, root)
-	plugin:SetSetting("watchRoots", "ServerStorage.StorybloxPlugin.stories")
 	widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	local stories = script.Parent:WaitForChild("stories")
 	local saved = plugin:GetSetting("theme")
 	local savedFavorites = plugin:GetSetting("favorites")
 	local savedInspector = plugin:GetSetting("inspectorOpen")
+	local savedExtra = plugin:GetSetting("extraRoots")
+	local savedLast = plugin:GetSetting("lastStory")
+	if type(savedLast) == "string" and savedLast ~= "" then
+		stories:SetAttribute("storyblox-select", savedLast)
+	end
 	local handle = ReactRoblox.createRoot(root)
 	handle:render(React.createElement(ErrorBoundary, { fallback = crashed }, React.createElement(Storyblox, {
-		root = stories,
 		themeName = saved == "light" and "light" or "dark",
 		onThemeChange = function(name)
 			plugin:SetSetting("theme", name)
@@ -37,6 +40,14 @@ return function(plugin, widget, root)
 		inspectorOpen = savedInspector ~= false,
 		onInspectorOpenChange = function(open)
 			plugin:SetSetting("inspectorOpen", open)
+		end,
+		extraRoots = type(savedExtra) == "string" and savedExtra or "",
+		onExtraRootsChange = function(value)
+			plugin:SetSetting("extraRoots", value)
+		end,
+		lastStory = type(savedLast) == "string" and savedLast or "",
+		onLastStoryChange = function(title)
+			plugin:SetSetting("lastStory", title)
 		end,
 	})))
 	local stopHarness

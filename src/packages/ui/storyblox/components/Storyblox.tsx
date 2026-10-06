@@ -24,7 +24,9 @@ import { createStorySession, keepSelection } from "../storyRegistry";
 import { ClaimedId, claimStoryId, releaseStoryId } from "packages/defineStory";
 import { checkRequest, PROTOCOL_VERSION } from "packages/bridgeProtocol";
 import { filterStoriesByTags, parseTagList } from "packages/storyTags";
+import { STORY_ROOT_CLASSES, mergeStoryRootPaths, parseRootList, splitRootPath } from "packages/storyRoots";
 import { narrowShell } from "../shellLayout";
+import SettingsPanel from "./SettingsPanel";
 
 const DEFAULT_EXTENSION = ".stories";
 const SIDEBAR_WIDTH = 180;
@@ -95,18 +97,46 @@ function adaptStory(normalized: ReturnType<typeof normalizeExport>) {
 		workspaceAllowed: () => ((pluginStories()?.GetAttribute("storyblox-workspace") as number | undefined) ?? 0) > 0,
 	});
 }
-const VALID_ROOT_TYPES = [
-	"Folder",
-	"Script",
-	"ModuleScript",
-	"LocalScript",
-	"Model",
-	"ReplicatedStorage",
-	"Workspace",
-	"ServerStorage",
-	"ServerScriptService",
-	"Player",
-];
+function lookupRootPath(path: string): Instance | undefined {
+	const parts = splitRootPath(path);
+	if (parts.size() === 0) return undefined;
+	let current = game.FindFirstChild(parts[0]);
+	for (let index = 1; index < parts.size(); index++) {
+		if (current === undefined) return undefined;
+		current = current.FindFirstChild(parts[index]);
+	}
+	return current;
+}
+
+function collapseScanRoots(roots: Instance[]): Instance[] {
+	const unique = new Array<Instance>();
+	for (const root of roots) {
+		if (!unique.includes(root)) unique.push(root);
+	}
+	const kept = new Array<Instance>();
+	for (const root of unique) {
+		let nested = false;
+		for (const other of unique) {
+			if (other !== root && root.IsDescendantOf(other)) {
+				nested = true;
+				break;
+			}
+		}
+		if (!nested) kept.push(root);
+	}
+	return kept;
+}
+
+function storyScanRoots(explicit: Instance | undefined, extraRoots: string): Instance[] {
+	const resolved = new Array<Instance>();
+	if (explicit !== undefined) resolved.push(explicit);
+	for (const path of mergeStoryRootPaths(parseRootList(extraRoots))) {
+		const inst = lookupRootPath(path);
+		if (inst !== undefined) resolved.push(inst);
+	}
+	const collapsed = collapseScanRoots(resolved);
+	return collapsed.size() > 0 ? collapsed : [ReplicatedStorage];
+}
 
 export interface StorybloxProps {
 	root?: Instance;
@@ -122,6 +152,10 @@ export interface StorybloxProps {
 	onFavoritesChange?: (favorites: string) => void;
 	inspectorOpen?: boolean;
 	onInspectorOpenChange?: (open: boolean) => void;
+	extraRoots?: string;
+	onExtraRootsChange?: (value: string) => void;
+	lastStory?: string;
+	onLastStoryChange?: (title: string) => void;
 }
 
 function Storyblox(props: StorybloxProps) {
@@ -139,6 +173,10 @@ function Storyblox(props: StorybloxProps) {
 		onFavoritesChange,
 		inspectorOpen = true,
 		onInspectorOpenChange,
+		extraRoots = "",
+		onExtraRootsChange,
+		lastStory = "",
+		onLastStoryChange,
 	} = props;
 
 	const [stories, setStories] = useState<Story[]>([]);
@@ -152,6 +190,10 @@ function Storyblox(props: StorybloxProps) {
 	const [inspectorFrame, setInspectorFrame] = useState<ScrollingFrame>();
 	const [inspectorShown, setInspectorShown] = useState(inspectorOpen !== false);
 	const [pane, setPane] = useState("canvas");
+	const [settingsOpen, setSettingsOpen] = useState(false);
+	const [extraList, setExtraList] = useState(extraRoots);
+	const seenModules = useRef<ModuleScript[]>([]);
+	const lastTitle = useRef("");
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
 	const [chromeCommand, setChromeCommand] = useState<{ kind: string; id: number } | undefined>();
@@ -216,7 +258,13 @@ function Storyblox(props: StorybloxProps) {
 				const { title } = story;
 
 				session.upsert(story);
-				const preferred = pluginStories()?.GetAttribute("storyblox-select") as string | undefined;
+				const fromMarker = pluginStories()?.GetAttribute("storyblox-select") as string | undefined;
+				const preferred =
+					typeOf(fromMarker) === "string" && (fromMarker as string).size() > 0
+						? fromMarker
+						: lastStory.size() > 0
+							? lastStory
+							: undefined;
 				setSelectedStory((current) => keepSelection(current, story, preferred));
 
 				logDebug(`Tracking story: ${title}`);
@@ -224,7 +272,7 @@ function Storyblox(props: StorybloxProps) {
 				logDebug(`Issue tracking story ${story.title}: ${error}`);
 			}
 		},
-		[session, logDebug],
+		[session, logDebug, lastStory],
 	);
 
 	const findStories = useCallback(
@@ -233,6 +281,8 @@ function Storyblox(props: StorybloxProps) {
 			task.spawn(() => {
 				if (generation.current !== token) return;
 				if (root.IsA("ModuleScript") && root.Name.sub(-extension.size()) === extension) {
+					if (seenModules.current.includes(root)) return;
+					seenModules.current.push(root);
 					try {
 						const story = adaptStory(normalizeExport(loadStoryModule(root), root.Name, extension));
 						if (story === undefined) {
@@ -277,9 +327,11 @@ function Storyblox(props: StorybloxProps) {
 						}
 						warn(`Storyblox could not load ${root.GetFullName()}: ${error}`);
 					}
-				} else if (VALID_ROOT_TYPES.includes(root.ClassName)) {
+				} else if (STORY_ROOT_CLASSES.includes(root.ClassName)) {
 					for (const child of root.GetDescendants()) {
-						findStories(child);
+						if (child.IsA("ModuleScript") && child.Name.sub(-extension.size()) === extension) {
+							findStories(child);
+						}
 					}
 				} else {
 					logDebug(`${root.GetFullName()} has invalid root type: ${root.ClassName}`);
@@ -294,17 +346,25 @@ function Storyblox(props: StorybloxProps) {
 		const token = nextGeneration(generation.current);
 		generation.current = token;
 		failed.current = false;
-		const storiesRoot = root || ReplicatedStorage;
-		const added = root?.DescendantAdded.Connect((descendant) => {
-			findStories(descendant);
-			logDebug(`Descendant added: ${descendant.GetFullName()} checking for stories`);
-		});
-
-		findStories(storiesRoot);
-		logDebug(`Finding stories in ${storiesRoot.GetFullName()}`);
+		seenModules.current = [];
+		setStories([]);
+		storyIds.current = [];
+		const scanRoots = storyScanRoots(root, extraList);
+		const added = new Array<RBXScriptConnection>();
+		for (const storiesRoot of scanRoots) {
+			added.push(
+				storiesRoot.DescendantAdded.Connect((descendant) => {
+					findStories(descendant);
+					logDebug(`Descendant added: ${descendant.GetFullName()} checking for stories`);
+				}),
+			);
+			findStories(storiesRoot);
+			logDebug(`Finding stories in ${storiesRoot.GetFullName()}`);
+		}
 		const pending = task.delay(0.3, () => {
 			if (!acceptGeneration(token, generation.current, failed.current)) return;
-			const markerRoot = pluginStories() ?? storiesRoot;
+			const markerRoot = pluginStories() ?? scanRoots[0];
+			if (markerRoot === undefined) return;
 			const previous = (markerRoot.GetAttribute("storyblox-build") as number | undefined) ?? 0;
 			markerRoot.SetAttribute("storyblox-build", previous + 1);
 			setPreviewKey((key) => key + 1);
@@ -312,9 +372,9 @@ function Storyblox(props: StorybloxProps) {
 
 		return () => {
 			task.cancel(pending);
-			added?.Disconnect();
+			for (const conn of added) conn.Disconnect();
 		};
-	}, [root, findStories, logDebug]);
+	}, [root, extraList, findStories, logDebug]);
 
 	const primaryThemeEnabled = theme === primaryTheme;
 	const toggleTheme = () => {
@@ -335,6 +395,20 @@ function Storyblox(props: StorybloxProps) {
 		if (!open) setPane((current) => (current === "inspector" ? "canvas" : current));
 		if (onInspectorOpenChange) onInspectorOpenChange(open);
 	};
+	const toggleSettings = () => {
+		setSettingsOpen((open) => {
+			const shown = !open;
+			if (shown) setPane("canvas");
+			return shown;
+		});
+	};
+
+	useEffect(() => {
+		const title = selectedStory?.title;
+		if (title === undefined || title === lastTitle.current) return;
+		lastTitle.current = title;
+		if (onLastStoryChange) onLastStoryChange(title);
+	}, [selectedStory, onLastStoryChange]);
 
 	useEffect(() => {
 		const marker = controlRoot(root);
@@ -576,13 +650,51 @@ function Storyblox(props: StorybloxProps) {
 			/>
 		</SafeBoundary>
 	);
+	const chrome = {
+		primaryThemeEnabled,
+		onToggleTheme: toggleTheme,
+		density,
+		onToggleDensity: toggleDensity,
+		inspectorOpen: inspectorShown,
+		onToggleInspector: toggleInspector,
+		settingsOpen,
+		onToggleSettings: toggleSettings,
+		starred: selectedStory !== undefined && favoriteList.includes(selectedStory.title),
+		onToggleFavorite: selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined,
+	};
+	const settingsCanvas = (
+		<frame key="SettingsHost" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+			<textbutton
+				key="CloseSettings"
+				Text="Close"
+				Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+				AutomaticSize={Enum.AutomaticSize.X}
+				Position={new UDim2(1, 0, 0, 0)}
+				AnchorPoint={new Vector2(1, 0)}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.semibold}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.palette.primary.main}
+				Event={{ MouseButton1Click: toggleSettings }}
+			/>
+			<frame key="SettingsBody" Size={new UDim2(1, 0, 1, -theme.spacing.calc(2))} Position={new UDim2(0, 0, 0, theme.spacing.calc(2))} BackgroundTransparency={1}>
+				<SettingsPanel
+					extraRoots={extraList}
+					onExtraRootsChange={(value) => {
+						setExtraList(value);
+						if (onExtraRootsChange) onExtraRootsChange(value);
+					}}
+				/>
+			</frame>
+		</frame>
+	);
 	const onRenderError = (failure: unknown | undefined) => {
 		renderError.current = failure;
 		const marker = controlRoot(root);
 		if (marker === undefined) return;
 		marker.SetAttribute("storyblox-error", failure === undefined ? undefined : `${failure}`);
 	};
-	const canvas = (
+	const storyCanvas = (
 						<ErrorBoundary
 							key={`preview-${previewKey}-${boundaryKey}`}
 							fallback={(e) => {
@@ -601,16 +713,7 @@ function Storyblox(props: StorybloxProps) {
 												template: () => errorComponnt,
 											}) as Story
 										}
-										primaryThemeEnabled={primaryThemeEnabled}
-										onToggleTheme={toggleTheme}
-										density={density}
-										onToggleDensity={toggleDensity}
-										inspectorOpen={inspectorShown}
-										onToggleInspector={toggleInspector}
-										starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
-										onToggleFavorite={
-											selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined
-										}
+										{...chrome}
 									/>
 								);
 							}}
@@ -630,19 +733,11 @@ function Storyblox(props: StorybloxProps) {
 									respond(marker, { requestId, ok: result.passed, generation: bridgeGeneration.current, result });
 								}}
 								onRenderError={onRenderError}
-								primaryThemeEnabled={primaryThemeEnabled}
-								onToggleTheme={toggleTheme}
-								density={density}
-								onToggleDensity={toggleDensity}
-								inspectorOpen={inspectorShown}
-								onToggleInspector={toggleInspector}
-								starred={selectedStory !== undefined && favoriteList.includes(selectedStory.title)}
-								onToggleFavorite={
-									selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined
-								}
+								{...chrome}
 							/>
 						</ErrorBoundary>
 	);
+	const canvas = settingsOpen ? settingsCanvas : storyCanvas;
 	const inspector = (
 		<SafeBoundary resetKey={`meta:${selectedStory?.title ?? ""}`}>
 			<scrollingframe
