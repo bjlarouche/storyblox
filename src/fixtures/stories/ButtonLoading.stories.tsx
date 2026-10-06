@@ -1,4 +1,5 @@
 import React, { useState } from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
 import { Button } from "./kit";
 
 interface Args {
@@ -13,6 +14,7 @@ interface Args {
 }
 
 function LoadingStory(args: Args) {
+	const { theme } = useTheme();
 	const [clicks, setClicks] = useState(0);
 	return (
 		<frame Size={new UDim2(0, 280, 0, 72)} BackgroundTransparency={1}>
@@ -38,6 +40,7 @@ function LoadingStory(args: Args) {
 				Text={tostring(clicks)}
 				Size={new UDim2(0, 32, 0, 24)}
 				BackgroundTransparency={1}
+				TextColor3={theme.palette.text.primary}
 				TextSize={16}
 				Font={Enum.Font.SourceSans}
 			/>
