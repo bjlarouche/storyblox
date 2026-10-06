@@ -189,9 +189,13 @@ function runLoaders(
 ) {
 	const loaded: { [key: string]: unknown } = {};
 	for (const loader of loaders) {
-		const [ok, chunk] = pcall(() => loader({ args, globals, parameters }));
-		if (!ok || typeOf(chunk) !== "table") continue;
-		for (const [key, value] of pairs(chunk as object)) loaded[key as string] = value;
+		try {
+			const chunk = loader({ args, globals, parameters });
+			if (typeOf(chunk) !== "table") continue;
+			for (const [key, value] of pairs(chunk as object)) loaded[key as string] = value;
+		} catch {
+			// skip failing loaders; render still proceeds with partial loaded data
+		}
 	}
 	return loaded;
 }
@@ -207,10 +211,10 @@ function mergeLoaded(args: unknown, loaded: { [key: string]: unknown }) {
 
 function attachLoaded(context: unknown, loaded: { [key: string]: unknown }) {
 	const base = typeOf(context) === "table" ? (context as { [key: string]: unknown }) : {};
-	const next: { [key: string]: unknown } = {};
-	for (const [key, value] of pairs(base)) next[key] = value;
-	next.loaded = loaded;
-	return next;
+	const attached: { [key: string]: unknown } = {};
+	for (const [key, value] of pairs(base)) attached[key] = value;
+	attached.loaded = loaded;
+	return attached;
 }
 
 function featureFlags(value: unknown) {
