@@ -66,7 +66,7 @@ export default {
 	args: {
 		kind: "circular",
 		value: 0.4,
-		indeterminate: true,
+		indeterminate: false,
 		tone: "primary",
 		reducedMotion: false,
 		disabled: false,
