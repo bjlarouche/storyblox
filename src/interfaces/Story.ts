@@ -12,4 +12,5 @@ export default interface Story<P = {}> {
 		? () => StoryElement
 		: (props: P) => React.Element | LuaTuple<[StoryElement, StoryCallback]>;
 	props?: P extends keyof never ? unknown : P;
+	source?: string;
 }
