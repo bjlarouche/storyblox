@@ -31,7 +31,7 @@ function SliderStory(args: Args) {
 
 export default {
 	title: "Components/Slider",
-	args: { value: 40, min: 0, max: 100, step: 5, disabled: false, marks: true, color: "accent", size: "small" },
+	args: { value: 40, min: 0, max: 100, step: 5, disabled: false, marks: true, color: "accent", size: "medium" },
 	argTypes: {
 		value: { type: "number", control: "slider", min: 0, max: 100, step: 5 },
 		min: { type: "number" },
