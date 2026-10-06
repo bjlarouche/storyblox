@@ -11,7 +11,7 @@ interface Args {
 
 export default {
 	title: "Components/Avatar",
-	args: { name: "Ada Lovelace", size: 40, variant: "rounded", image: Icons.Settings },
+	args: { name: "Ada Lovelace", size: 40, variant: "circular", image: Icons.Settings },
 	argTypes: {
 		name: { type: "string" },
 		size: { type: "number" },
