@@ -25,7 +25,7 @@ function CheckboxStory(args: Args) {
 
 export default {
 	title: "Components/Checkbox",
-	args: { value: false, disabled: false, label: "Checkbox", size: "medium" },
+	args: { value: true, disabled: false, label: "Checkbox", size: "medium" },
 	argTypes: {
 		value: { type: "boolean" },
 		disabled: { type: "boolean" },
