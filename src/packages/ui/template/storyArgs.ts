@@ -50,9 +50,10 @@ export function choiceOptions(options: unknown): Array<{ label: string; value: s
 export function enumItems(enumType?: string, options?: unknown): EnumItem[] {
 	const items = new Array<EnumItem>();
 	if (typeOf(enumType) === "string") {
-		const enumObj = (Enum as unknown as { [key: string]: { GetEnumItems?: () => EnumItem[] } })[enumType as string];
-		if (enumObj !== undefined && typeOf(enumObj.GetEnumItems) === "function") {
-			for (const item of enumObj.GetEnumItems!()) items.push(item);
+		// Type as Enum so roblox-ts emits enumObj:GetEnumItems() (dot call drops self).
+		const enumObj = (Enum as unknown as { [key: string]: Enum | undefined })[enumType as string];
+		if (enumObj !== undefined) {
+			for (const item of enumObj.GetEnumItems()) items.push(item);
 		}
 	}
 	if (typeOf(options) !== "table" || (options as Array<unknown>).size() === 0) return items;
