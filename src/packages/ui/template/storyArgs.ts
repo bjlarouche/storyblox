@@ -47,16 +47,38 @@ export function choiceOptions(options: unknown): Array<{ label: string; value: s
 	return chosen;
 }
 
-export function enumItemOptions(enumType?: string, options?: unknown): Array<{ label: string; value: string }> {
+export function enumItems(enumType?: string, options?: unknown): EnumItem[] {
+	const items = new Array<EnumItem>();
 	if (typeOf(enumType) === "string") {
 		const enumObj = (Enum as unknown as { [key: string]: { GetEnumItems?: () => EnumItem[] } })[enumType as string];
 		if (enumObj !== undefined && typeOf(enumObj.GetEnumItems) === "function") {
-			const chosen = new Array<{ label: string; value: string }>();
-			for (const item of enumObj.GetEnumItems!()) {
-				chosen.push({ label: item.Name, value: item.Name });
-			}
-			if (chosen.size() > 0) return chosen;
+			for (const item of enumObj.GetEnumItems!()) items.push(item);
 		}
+	}
+	if (typeOf(options) !== "table" || (options as Array<unknown>).size() === 0) return items;
+	const names = new Array<string>();
+	for (const option of options as Array<unknown>) {
+		if (typeOf(option) === "string") names.push(option as string);
+	}
+	if (names.size() === 0) return items;
+	const filtered = new Array<EnumItem>();
+	for (const item of items) {
+		for (const name of names) {
+			if (item.Name === name) {
+				filtered.push(item);
+				break;
+			}
+		}
+	}
+	return filtered.size() > 0 ? filtered : items;
+}
+
+export function enumItemOptions(enumType?: string, options?: unknown): Array<{ label: string; value: string }> {
+	const items = enumItems(enumType, options);
+	if (items.size() > 0) {
+		const chosen = new Array<{ label: string; value: string }>();
+		for (const item of items) chosen.push({ label: item.Name, value: item.Name });
+		return chosen;
 	}
 	return choiceOptions(options);
 }
@@ -67,4 +89,18 @@ export function commitNumberText(text: string): number | undefined {
 	if (typeOf(value) !== "number") return undefined;
 	if (value !== value || value === math.huge || value === -math.huge) return undefined;
 	return value;
+}
+
+export function assetText(value: unknown): string {
+	if (typeOf(value) === "number") return tostring(value);
+	if (typeOf(value) === "string") return value as string;
+	return "";
+}
+
+export function assetId(text: string): number | undefined {
+	let digits = text;
+	if (digits.sub(1, 13) === "rbxassetid://") digits = digits.sub(14);
+	const id = commitNumberText(digits);
+	if (id === undefined || id < 0 || id % 1 !== 0) return undefined;
+	return id;
 }
