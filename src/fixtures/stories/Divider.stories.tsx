@@ -14,13 +14,14 @@ export default {
 		text: { type: "string" },
 	},
 	render: (args: Args) => (
-		<frame Size={new UDim2(0, 240, 0, 120)} BackgroundTransparency={1} BorderSizePixel={0}>
+		<frame Size={new UDim2(0, 240, 0, 120)} BackgroundTransparency={1} BorderSizePixel={0} ClipsDescendants={true}>
 			<textlabel
 				Size={new UDim2(1, 0, 0, 24)}
 				BackgroundTransparency={1}
 				Text="Above"
 				TextColor3={Color3.fromRGB(220, 220, 220)}
 				TextXAlignment={Enum.TextXAlignment.Left}
+				TextTruncate={Enum.TextTruncate.AtEnd}
 			/>
 			<frame
 				Size={
@@ -31,6 +32,7 @@ export default {
 				Position={new UDim2(0, 0, 0, 28)}
 				BackgroundTransparency={1}
 				BorderSizePixel={0}
+				ClipsDescendants={true}
 			>
 				<Divider orientation={args.orientation} text={args.text === "" ? undefined : args.text} />
 			</frame>
@@ -41,6 +43,7 @@ export default {
 				Text="Below"
 				TextColor3={Color3.fromRGB(220, 220, 220)}
 				TextXAlignment={Enum.TextXAlignment.Left}
+				TextTruncate={Enum.TextTruncate.AtEnd}
 			/>
 		</frame>
 	),

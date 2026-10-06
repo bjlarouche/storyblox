@@ -16,6 +16,7 @@ function SnackbarStory(args: Args) {
 			open={open}
 			action={args.action === "" ? undefined : args.action}
 			variant={args.variant}
+			duration={1e6}
 			onAction={() => setOpen(false)}
 			onDismiss={() => setOpen(false)}
 		/>
