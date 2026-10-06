@@ -381,9 +381,16 @@ function Template({
 		}
 
 		try {
-			const render = story.template as (props: unknown, context: { theme: Theme }) => unknown;
+			const render = story.template as (
+				props: unknown,
+				context: { theme: Theme; globals?: { [key: string]: unknown }; parameters?: { [key: string]: unknown } },
+			) => unknown;
 			const props = args;
-			const [element, callback] = render(props, { theme: previewTheme }) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
+			const [element, callback] = render(props, {
+				theme: previewTheme,
+				globals: story.globals,
+				parameters: story.parameters,
+			}) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
 			const inset = theme.padding.calc(2);
 			const logical = (

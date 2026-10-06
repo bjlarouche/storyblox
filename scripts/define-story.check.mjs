@@ -186,4 +186,26 @@ if (flags.actions !== true || flags.docs !== false || flags.measure !== false) t
 if (configured.story.features.actions !== true || configured.story.features.docs !== false) throw new Error("features");
 if (configured.story.template() !== "wrapped:Continue") throw new Error("decorator");
 
+const withContext = normalizeExport(
+	{
+		default: defineStory({
+			title: "Shell/Globals",
+			globals: { brand: "storyblox" },
+			parameters: { layout: "centered" },
+			render: (_args, context) => `${context?.globals?.brand}:${context?.parameters?.layout}`,
+		}),
+	},
+	"Globals.stories",
+	".stories",
+);
+if (withContext.kind !== "react") throw new Error("context story");
+if (
+	withContext.story.template(
+		{},
+		{ theme: {}, globals: withContext.story.globals, parameters: withContext.story.parameters },
+	) !== "storyblox:centered"
+) {
+	throw new Error("render context globals/parameters");
+}
+
 console.log("define story ok");

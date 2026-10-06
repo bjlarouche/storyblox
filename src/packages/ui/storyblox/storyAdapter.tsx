@@ -25,6 +25,8 @@ export function storyFromExport(normalized: NormalizedStory, options?: StoryAdap
 		cases: normalized.cases,
 		description: normalized.description,
 		tags: normalized.tags,
+		globals: normalized.globals as Story["globals"],
+		parameters: normalized.parameters as Story["parameters"],
 		nativeSession: session,
 		component: () => <frame />,
 		template: (props: unknown, context?: unknown) => {
