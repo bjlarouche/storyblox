@@ -8,6 +8,7 @@ interface Args {
 	siblingCount: number;
 	boundaryCount: number;
 	size: "small" | "medium" | "large";
+	variant: "text" | "outlined";
 }
 
 function PaginationStory(args: Args) {
@@ -20,6 +21,7 @@ function PaginationStory(args: Args) {
 			siblingCount={args.siblingCount}
 			boundaryCount={args.boundaryCount}
 			size={args.size}
+			variant={args.variant}
 			onChange={setPage}
 		/>
 	);
@@ -27,7 +29,7 @@ function PaginationStory(args: Args) {
 
 export default {
 	title: "Components/Pagination",
-	args: { count: 10, page: 5, disabled: false, siblingCount: 1, boundaryCount: 1, size: "medium" },
+	args: { count: 10, page: 5, disabled: false, siblingCount: 1, boundaryCount: 1, size: "medium", variant: "outlined" },
 	argTypes: {
 		count: { type: "number" },
 		page: { type: "number" },
@@ -35,6 +37,7 @@ export default {
 		siblingCount: { type: "number", min: 0, max: 3, step: 1 },
 		boundaryCount: { type: "number", min: 1, max: 3, step: 1 },
 		size: { type: "enum", options: ["small", "medium", "large"] },
+		variant: { type: "enum", options: ["text", "outlined"] },
 	},
 	render: (args: Args) => <PaginationStory {...args} />,
 };
