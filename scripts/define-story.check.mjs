@@ -208,4 +208,22 @@ if (
 	throw new Error("render context globals/parameters");
 }
 
+const withLoaders = normalizeExport(
+	{
+		default: defineStory({
+			title: "Shell/Loaders",
+			args: { label: "world" },
+			argTypes: { label: controls.string() },
+			loaders: [() => ({ greeting: "hello" }), (context) => ({ label: `${context.args.label}!` })],
+			render: (args) => `${args.greeting} ${args.label}`,
+		}),
+	},
+	"Loaders.stories",
+	".stories",
+);
+if (withLoaders.kind !== "react") throw new Error("loaders story");
+if (withLoaders.story.template({ label: "world" }, { theme: {} }) !== "hello world!") {
+	throw new Error("loaders merge");
+}
+
 console.log("define story ok");

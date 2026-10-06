@@ -127,6 +127,7 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		parameters?: unknown;
 		globals?: unknown;
 		decorators?: unknown;
+		loaders?: unknown;
 		features?: unknown;
 	};
 	if (typeOf(story.title) !== "string" || typeOf(story.render) !== "function") return undefined;
@@ -135,6 +136,10 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 	const render = story.render as (args: unknown, context?: unknown) => unknown;
 	const args = story.args;
 	const decorators = decoratorsOf(story.decorators);
+	const loaders = loadersOf(story.loaders);
+	const globals = typeOf(story.globals) === "table" ? (story.globals as { [key: string]: unknown }) : undefined;
+	const parameters =
+		typeOf(story.parameters) === "table" ? (story.parameters as { [key: string]: unknown }) : undefined;
 	return {
 		id: typeOf(story.id) === "string" ? (story.id as string) : undefined,
 		title: story.title as string,
@@ -145,19 +150,67 @@ function modernStory(value: unknown): ReactStoryShape | undefined {
 		cases: story.cases,
 		description: story.description,
 		tags: typeOf(story.tags) === "table" ? story.tags : undefined,
-		parameters: typeOf(story.parameters) === "table" ? story.parameters : undefined,
-		globals: typeOf(story.globals) === "table" ? story.globals : undefined,
+		parameters,
+		globals,
 		features: featureFlags(story.features),
 		props: args,
 		component: story.component,
 		template: (props: unknown, context: unknown) => {
 			const value = props !== undefined ? props : args;
-			if (decorators.size() === 0) return render(value, context);
-			let wrapped = (incoming: unknown) => render(incoming, context);
+			const loaded = runLoaders(loaders, value, globals, parameters);
+			const merged = mergeLoaded(value, loaded);
+			const nextContext = attachLoaded(context, loaded);
+			if (decorators.size() === 0) return render(merged, nextContext);
+			let wrapped = (incoming: unknown) => render(incoming, nextContext);
 			for (let index = decorators.size() - 1; index >= 0; index--) wrapped = decorators[index](wrapped);
-			return wrapped(value);
+			return wrapped(merged);
 		},
 	};
+}
+
+function loadersOf(
+	value: unknown,
+): Array<(context: { args: unknown; globals?: unknown; parameters?: unknown }) => unknown> {
+	if (typeOf(value) !== "table") return [];
+	const kept = new Array<(context: { args: unknown; globals?: unknown; parameters?: unknown }) => unknown>();
+	for (const item of value as Array<unknown>) {
+		if (typeOf(item) === "function") {
+			kept.push(item as (context: { args: unknown; globals?: unknown; parameters?: unknown }) => unknown);
+		}
+	}
+	return kept;
+}
+
+function runLoaders(
+	loaders: Array<(context: { args: unknown; globals?: unknown; parameters?: unknown }) => unknown>,
+	args: unknown,
+	globals?: { [key: string]: unknown },
+	parameters?: { [key: string]: unknown },
+) {
+	const loaded: { [key: string]: unknown } = {};
+	for (const loader of loaders) {
+		const [ok, chunk] = pcall(() => loader({ args, globals, parameters }));
+		if (!ok || typeOf(chunk) !== "table") continue;
+		for (const [key, value] of pairs(chunk as object)) loaded[key as string] = value;
+	}
+	return loaded;
+}
+
+function mergeLoaded(args: unknown, loaded: { [key: string]: unknown }) {
+	const merged: { [key: string]: unknown } = {};
+	if (typeOf(args) === "table") {
+		for (const [key, value] of pairs(args as object)) merged[key as string] = value;
+	}
+	for (const [key, value] of pairs(loaded)) merged[key] = value;
+	return merged;
+}
+
+function attachLoaded(context: unknown, loaded: { [key: string]: unknown }) {
+	const base = typeOf(context) === "table" ? (context as { [key: string]: unknown }) : {};
+	const next: { [key: string]: unknown } = {};
+	for (const [key, value] of pairs(base)) next[key] = value;
+	next.loaded = loaded;
+	return next;
 }
 
 function featureFlags(value: unknown) {

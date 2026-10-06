@@ -104,6 +104,12 @@ const required = [
 		needles: [],
 		templateNeedles: ["chromeCommand"],
 	},
+	{
+		id: "loaders",
+		title: "Shell/Loaders",
+		check: "scripts/define-story.check.mjs",
+		needles: [],
+	},
 ];
 
 for (const pane of required) {
