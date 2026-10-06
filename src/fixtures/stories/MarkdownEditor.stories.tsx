@@ -33,6 +33,8 @@ const HTML_SAMPLE = `<h1>From HTML</h1><p>Hello <strong>world</strong> and <em>f
 interface Args {
 	mode: "split" | "edit" | "preview";
 	fullscreen: boolean;
+	resizable: boolean;
+	height: number;
 	value: string;
 }
 
@@ -40,8 +42,9 @@ function MarkdownEditorStory(args: Args) {
 	const [value, setValue] = useArg(args.value);
 	const [mode, setMode] = useArg(args.mode);
 	const [fullscreen, setFullscreen] = useArg(args.fullscreen);
+	const [height, setHeight] = useArg(args.height);
 	return (
-		<frame Size={fullscreen ? UDim2.fromScale(1, 1) : new UDim2(1, 0, 0, 360)} BorderSizePixel={0} BackgroundTransparency={1}>
+		<frame Size={fullscreen ? UDim2.fromScale(1, 1) : new UDim2(1, 0, 0, 600)} BorderSizePixel={0} BackgroundTransparency={1}>
 			<MarkdownEditor
 				value={value}
 				onChange={setValue}
@@ -49,6 +52,11 @@ function MarkdownEditorStory(args: Args) {
 				onModeChange={setMode}
 				fullscreen={fullscreen}
 				onFullscreenChange={setFullscreen}
+				resizable={args.resizable}
+				height={height}
+				minHeight={240}
+				maxHeight={560}
+				onHeightChange={setHeight}
 			/>
 		</frame>
 	);
@@ -56,10 +64,12 @@ function MarkdownEditorStory(args: Args) {
 
 export default {
 	title: "Inputs/Markdown",
-	args: { mode: "split", fullscreen: false, value: SAMPLE },
+	args: { mode: "split", fullscreen: false, resizable: true, height: 360, value: SAMPLE },
 	argTypes: {
 		mode: { type: "enum", options: ["split", "edit", "preview"] },
 		fullscreen: { type: "boolean" },
+		resizable: { type: "boolean" },
+		height: { type: "number", min: 120, max: 680, step: 16 },
 		value: { type: "string" },
 	},
 	// HTML_SAMPLE: paste into value then use Paste HTML → preview
