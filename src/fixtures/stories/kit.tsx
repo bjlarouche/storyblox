@@ -48,6 +48,7 @@ interface SliderProps {
 	disabled?: boolean;
 	marks?: boolean | ReadonlyArray<number>;
 	color?: "primary" | "accent";
+	size?: "small" | "medium" | "large";
 }
 
 interface SplitProps {
