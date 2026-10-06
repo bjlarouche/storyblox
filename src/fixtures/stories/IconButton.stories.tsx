@@ -24,7 +24,7 @@ function IconButtonStory(args: Args) {
 
 export default {
 	title: "Components/Icon Button",
-	args: { selected: true, disabled: false, loading: false, size: "lg" },
+	args: { selected: true, disabled: false, loading: false, size: "md" },
 	argTypes: {
 		selected: { type: "boolean" },
 		disabled: { type: "boolean" },
