@@ -9,7 +9,7 @@ interface Args {
 
 export default {
 	title: "Components/AppBar",
-	args: { title: "Storyblox", elevation: "raised", color: "default" },
+	args: { title: "Storyblox", elevation: "raised", color: "primary" },
 	argTypes: {
 		title: { type: "string" },
 		elevation: { type: "enum", options: ["flat", "raised"] },
