@@ -38,7 +38,7 @@ function DrawerStory(args: Args) {
 
 export default {
 	title: "Components/Drawer",
-	args: { open: true, edge: "left", width: 0 },
+	args: { open: true, edge: "left", width: 240 },
 	argTypes: {
 		open: { type: "boolean" },
 		edge: { type: "enum", options: ["left", "right"] },
