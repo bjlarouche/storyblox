@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 globalThis.typeOf = (value) => (value === null || value === undefined ? "nil" : typeof value === "object" ? "table" : typeof value);
 globalThis.pairs = (record) => Object.entries(record);
 Array.prototype.size = function () {
@@ -21,6 +24,20 @@ if (names.join(",") !== "brand,flag") {
 }
 if (flipDensity("compact") !== "comfortable" || flipDensity("comfortable") !== "compact") {
 	throw new Error("flip density");
+}
+
+const root = process.cwd();
+const template = readFileSync(join(root, "src/packages/ui/template/components/Template.tsx"), "utf8");
+const shell = readFileSync(join(root, "src/packages/ui/storyblox/components/Storyblox.tsx"), "utf8");
+const storyChange = template.slice(template.indexOf("if (storyKey !== argsStory)"), template.indexOf("const loaderFns"));
+if (!storyChange.includes("setGlobalPatch({})") || storyChange.includes("setDensity")) {
+	throw new Error("story change must clear the global patch and keep density");
+}
+for (const needle of ['resetKey={`toolbar:', 'key="Density"', 'key="ResetGlobals"', "setGlobalPatch({})"]) {
+	if (!template.includes(needle)) throw new Error(`toolbar missing ${needle}`);
+}
+for (const needle of ['SetAttribute("storyblox-theme"', 'SetAttribute("storyblox-density"', "storyblox-theme", "storyblox-density"]) {
+	if (!shell.includes(needle)) throw new Error(`shell missing ${needle}`);
 }
 
 console.log("story globals ok");
