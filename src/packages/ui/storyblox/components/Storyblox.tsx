@@ -538,6 +538,17 @@ function Storyblox(props: StorybloxProps) {
 			),
 		[stories, includeTags, excludeTags],
 	);
+
+	useEffect(() => {
+		const marker = controlRoot(root);
+		if (marker === undefined) return;
+		marker.SetAttribute("storyblox-visible-count", visibleStories.size());
+		const tags = (selectedStory as { tags?: string[] } | undefined)?.tags;
+		marker.SetAttribute(
+			"storyblox-tags",
+			tags !== undefined && tags.size() > 0 ? (tags as string[]).join(",") : undefined,
+		);
+	}, [root, visibleStories, selectedStory]);
 	const rememberWidth = (rbx: Frame) => {
 		const x = rbx.AbsoluteSize.X;
 		setShellWidth((current) => (current === x ? current : x));

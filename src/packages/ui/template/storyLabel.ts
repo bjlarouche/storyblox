@@ -4,6 +4,7 @@ export function storyInspector(story: {
 	language?: string;
 	source?: string;
 	description?: string;
+	tags?: string[];
 	argTypes?: { [key: string]: unknown };
 } | undefined) {
 	if (story === undefined || typeOf(story.title) !== "string") return "No story selected";
@@ -11,6 +12,13 @@ export function storyInspector(story: {
 	const lines = [`${story.title}`, story.language !== undefined ? `${kind} · ${story.language}` : kind];
 	if (typeOf(story.source) === "string" && (story.source as string).size() > 0) lines.push(story.source as string);
 	if (typeOf(story.description) === "string" && (story.description as string).size() > 0) lines.push(story.description as string);
+	const tags = new Array<string>();
+	if (typeOf(story.tags) === "table") {
+		for (const tag of story.tags as Array<unknown>) {
+			if (typeOf(tag) === "string" && (tag as string).size() > 0) tags.push(tag as string);
+		}
+	}
+	if (tags.size() > 0) lines.push(`Tags: ${tags.join(", ")}`);
 	const names = new Array<string>();
 	if (typeOf(story.argTypes) === "table") {
 		for (const [name] of pairs(story.argTypes as object)) names.push(name as string);

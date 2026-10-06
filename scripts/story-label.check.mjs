@@ -44,10 +44,20 @@ if (
 		language: "TS",
 		source: "ServerStorage.stories.Button",
 		description: "A button",
+		tags: ["dev", "shell"],
 		argTypes: { text: {}, disabled: {} },
-	}) !== "Components/Button\nreact · TS\nServerStorage.stories.Button\nA button\ndisabled, text"
+	}) !== "Components/Button\nreact · TS\nServerStorage.stories.Button\nA button\nTags: dev, shell\ndisabled, text"
 ) {
 	throw new Error("inspector lines");
+}
+if (
+	storyInspector({
+		title: "Basics/Native Label",
+		renderer: "native",
+		tags: ["dev", "native"],
+	}) !== "Basics/Native Label\nnative\nTags: dev, native"
+) {
+	throw new Error("native tags");
 }
 
 console.log("story label ok");
