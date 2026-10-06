@@ -6,16 +6,23 @@ Array.prototype.size = function () {
 
 globalThis.typeOf = (value) => (value === null || value === undefined ? "nil" : typeof value === "object" ? "table" : typeof value);
 
-const { previewScale, gridLineCount, GRID_CELL, stepZoom, previewSize } = await import(
+const { previewScale, gridLineCount, GRID_CELL, stepZoom, previewSize, flipOrientation } = await import(
 	"../src/packages/previewScale.ts"
 );
 
 const phone = previewSize({ preset: "phone" });
 if (phone?.width !== 390 || phone?.height !== 844) throw new Error("phone preset");
+const phoneLandscape = previewSize({ preset: "phone" }, "landscape");
+if (phoneLandscape?.width !== 844 || phoneLandscape?.height !== 390) throw new Error("phone landscape");
+const tabletPortrait = previewSize({ preset: "tablet", orientation: "portrait" });
+if (tabletPortrait?.width !== 768 || tabletPortrait?.height !== 1024) throw new Error("tablet portrait");
 const custom = previewSize({ preset: "phone", width: 320, height: 48 });
 if (custom?.width !== 320 || custom?.height !== 48) throw new Error("custom size wins");
 if (previewSize({ preset: "watch" }) !== undefined) throw new Error("unknown preset");
 if (previewSize(undefined) !== undefined) throw new Error("no preview");
+if (flipOrientation("portrait") !== "landscape" || flipOrientation("landscape") !== "portrait") {
+	throw new Error("flip orientation");
+}
 
 if (previewScale("actual", 200, 100, 10, 10) !== 1) throw new Error("100 percent ignores the dock");
 if (previewScale("fit", 200, 100, 100, 100) !== 0.5) throw new Error("fit width");

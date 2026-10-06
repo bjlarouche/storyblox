@@ -19,14 +19,32 @@ const PRESETS: { [name: string]: { width: number; height: number } } = {
 	console: { width: 1920, height: 1080 },
 };
 
-export function previewSize(preview: unknown) {
+export function previewSize(preview: unknown, orientation?: "portrait" | "landscape") {
 	if (typeOf(preview) !== "table") return undefined;
-	const described = preview as { preset?: unknown; width?: unknown; height?: unknown };
+	const described = preview as { preset?: unknown; width?: unknown; height?: unknown; orientation?: unknown };
+	let size: { width: number; height: number } | undefined;
 	if (typeOf(described.width) === "number" && typeOf(described.height) === "number") {
-		return { width: described.width as number, height: described.height as number };
+		size = { width: described.width as number, height: described.height as number };
+	} else if (typeOf(described.preset) === "string") {
+		size = PRESETS[described.preset as string];
 	}
-	if (typeOf(described.preset) === "string") return PRESETS[described.preset as string];
-	return undefined;
+	if (size === undefined) return undefined;
+	const mode =
+		orientation ??
+		(described.orientation === "portrait" || described.orientation === "landscape"
+			? (described.orientation as "portrait" | "landscape")
+			: undefined);
+	if (mode === "landscape" && size.width < size.height) {
+		return { width: size.height, height: size.width };
+	}
+	if (mode === "portrait" && size.width > size.height) {
+		return { width: size.height, height: size.width };
+	}
+	return size;
+}
+
+export function flipOrientation(current: "portrait" | "landscape"): "portrait" | "landscape" {
+	return current === "portrait" ? "landscape" : "portrait";
 }
 
 export const ZOOM_STEPS = [0.5, 1, 2];

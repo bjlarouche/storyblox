@@ -62,7 +62,15 @@ const required = [
 		title: "Shell/Chrome",
 		check: "scripts/preview-scale.check.mjs",
 		needles: [],
-		templateNeedles: ['key="ZoomOut"', 'key="Grid"', 'key="Fit"', 'id="Remount"', 'id="Theme"'],
+		templateNeedles: [
+			'key="ZoomOut"',
+			'key="Grid"',
+			'key="Fit"',
+			'key="Orientation"',
+			'key="Background"',
+			'id="Remount"',
+			'id="Theme"',
+		],
 	},
 	{
 		id: "crash-control",
