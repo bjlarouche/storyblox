@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "@rbxts/react";
-import { VirtualList, VirtualListAlign, VirtualListHandle } from "@rbxts/uiblox";
+import { useTheme, VirtualList, VirtualListAlign, VirtualListHandle } from "@rbxts/uiblox";
 
 interface Args {
 	count: number;
@@ -10,6 +10,7 @@ interface Args {
 }
 
 function VirtualListStory(args: Args) {
+	const { theme } = useTheme();
 	const listRef = useRef<VirtualListHandle>();
 	const items: number[] = [];
 	for (let i = 0; i < args.count; i++) items.push(i);
@@ -26,13 +27,14 @@ function VirtualListStory(args: Args) {
 				itemHeight={args.itemHeight}
 				overscan={args.overscan}
 				listRef={listRef}
-				empty={<textlabel Size={UDim2.fromScale(1, 1)} BackgroundTransparency={1} Text="No rows" TextSize={16} />}
+				empty={<textlabel Size={UDim2.fromScale(1, 1)} BackgroundTransparency={1} Text="No rows" TextSize={16} TextColor3={theme.palette.text.primary} />}
 				renderItem={(item) => (
 					<textlabel
 						Size={UDim2.fromScale(1, 1)}
 						BackgroundTransparency={item === args.scrollTo ? 0.6 : 1}
 						Text={`Row ${item}`}
 						TextSize={16}
+						TextColor3={theme.palette.text.primary}
 						TextXAlignment={Enum.TextXAlignment.Left}
 					/>
 				)}
