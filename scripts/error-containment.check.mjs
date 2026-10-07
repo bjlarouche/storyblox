@@ -50,6 +50,9 @@ const host = read("plugin/host/init.luau");
 if (!host.includes("ErrorBoundary") || !host.includes("Storyblox crashed")) {
 	throw new Error("host root ErrorBoundary must remain last resort");
 }
+if (host.includes("press Reload")) {
+	throw new Error("host crash copy must not assume a Reload toolbar button");
+}
 
 const controlFixture = read("src/fixtures/stories/CrashControl.stories.tsx");
 const storyFixture = read("src/fixtures/stories/CrashStory.stories.tsx");
@@ -65,9 +68,13 @@ if (!pack.includes("!out/fixtures/**")) {
 	throw new Error("fixtures must stay excluded from npm pack");
 }
 
-const release = read("scripts/plugin-fixtures.check.mjs");
-if (!release.includes('globIgnorePaths = ["**/fixtures/**"]')) {
-	throw new Error("release plugin must ignore fixtures");
+const releaseProject = read("plugin/release.project.json");
+if (!releaseProject.includes('"**/fixtures/**"') || releaseProject.includes("fixtures/stories")) {
+	throw new Error("release.project.json must ignore fixtures and omit fixture story mounts");
+}
+const releaseScript = read("scripts/plugin-release.mjs");
+if (!releaseScript.includes("dist/storyblox.rbxm") || !releaseScript.includes('endsWith(".stories")')) {
+	throw new Error("plugin-release must write dist/storyblox.rbxm and reject bundled stories");
 }
 
 for (const rel of readdirSync(join(root, "src/packages"), { recursive: true })) {

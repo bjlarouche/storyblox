@@ -12,7 +12,7 @@ local function crashed(message)
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
-		Text = `Storyblox crashed. Fix the error and press Reload.\n\n{message}`,
+		Text = `Storyblox crashed. Fix the error and remount.\n\n{message}`,
 	})
 end
 
