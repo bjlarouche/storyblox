@@ -9,16 +9,16 @@ importers:
   .:
     dependencies:
       '@rbxts/log':
-        specifier: ^0.6.3
+        specifier: 0.6.3
         version: 0.6.3
       '@rbxts/react':
-        specifier: ^17.2.1
+        specifier: 17.2.1
         version: 17.2.1
       '@rbxts/react-roblox':
-        specifier: ^17.2.1
+        specifier: 17.2.1
         version: 17.2.1
       '@rbxts/services':
-        specifier: ^1.5.5
+        specifier: 1.5.5
         version: 1.5.5
       '@rbxts/uiblox':
         specifier: 0.2.0-alpha.36

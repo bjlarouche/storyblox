@@ -18,4 +18,12 @@ pnpm plugin:fixtures
 pnpm plugin:install:local
 ```
 
-That builds an rbxm into your Roblox Plugins folder (`$HOME/Documents/Roblox/Plugins` on macOS). The shell loads `ServerStorage.StorybloxPlugin`.
+That builds an rbxm into your Roblox Plugins folder (`$HOME/Documents/Roblox/Plugins` on macOS). The shell loads `ServerStorage.StorybloxPlugin` with fixtures.
+
+## Store rbxm
+
+```
+pnpm plugin:release
+```
+
+Writes `dist/storyblox.rbxm` (no fixtures). Does not publish.

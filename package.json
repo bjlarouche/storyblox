@@ -17,6 +17,7 @@
 		"prepublishOnly": "pnpm build",
 		"plugin:build": "pnpm build",
 		"plugin:install:local": "rojo build plugin/shell.project.json -o \"$HOME/Documents/Roblox/Plugins/storyblox-plugin.rbxm\"",
+		"plugin:release": "node scripts/plugin-release.mjs",
 		"plugin:fixtures": "node scripts/plugin-fixtures.check.mjs"
 	},
 	"keywords": [
@@ -56,10 +57,10 @@
 		"typescript": "^5.6.3"
 	},
 	"dependencies": {
-		"@rbxts/log": "^0.6.3",
-		"@rbxts/react": "^17.2.1",
-		"@rbxts/react-roblox": "^17.2.1",
-		"@rbxts/services": "^1.5.5",
+		"@rbxts/log": "0.6.3",
+		"@rbxts/react": "17.2.1",
+		"@rbxts/react-roblox": "17.2.1",
+		"@rbxts/services": "1.5.5",
 		"@rbxts/uiblox": "0.2.0-alpha.36"
 	},
 	"directories": {

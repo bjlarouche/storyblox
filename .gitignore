@@ -119,3 +119,4 @@ out/tsconfig.tsbuildinfo
 **build.rbxl
 *.tgz
 src/constants/version.generated.ts
+plugin/.release.generated.project.json

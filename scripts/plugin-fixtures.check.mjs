@@ -17,12 +17,16 @@ if (!readFileSync(join(root, "plugin/host/init.luau"), "utf8").includes("fixture
 	throw new Error("plugin host does not wire viewport harness from storyblox fixtures");
 }
 
-const release = JSON.parse(JSON.stringify(dev));
-release.name = "storyblox-release";
-release.globIgnorePaths = ["**/fixtures/**"];
-release.tree.ServerStorage.StorybloxPlugin.stories = { $className: "Folder" };
-if (JSON.stringify(release).includes("fixtures/stories")) {
+const release = JSON.parse(readFileSync(join(root, "plugin/release.project.json"), "utf8"));
+if (!Array.isArray(release.globIgnorePaths) || !release.globIgnorePaths.includes("**/fixtures/**")) {
+	throw new Error("release.project.json must ignore **/fixtures/**");
+}
+if (JSON.stringify(release).includes("fixtures/stories") || JSON.stringify(release).includes("../fixtures/")) {
 	throw new Error("release project still mounts fixture stories");
+}
+const releaseStories = release.tree.StorybloxPlugin?.stories;
+if (!releaseStories || releaseStories.$path || Object.keys(releaseStories).some((k) => k !== "$className")) {
+	throw new Error("release.project.json must ship an empty stories folder");
 }
 
 const dir = mkdtempSync(join(tmpdir(), "storyblox-plugin-"));

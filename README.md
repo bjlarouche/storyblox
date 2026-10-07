@@ -263,3 +263,5 @@ export default story;
 # Try it out
 
 See it in action in the pre-release version's test game [Storyblox Pre-Release Experience](https://www.roblox.com/games/9159382473)
+
+Store rbxm (no fixtures): `pnpm plugin:release` → `dist/storyblox.rbxm`
