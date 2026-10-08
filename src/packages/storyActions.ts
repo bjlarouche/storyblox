@@ -40,21 +40,39 @@ export function runSetup(setup: (tools: { onCleanup: (job: () => void) => void }
 	return dispose;
 }
 
-export function bindActionArgs(args: unknown, record: (name: string, ...values: unknown[]) => void) {
-	if (typeOf(args) !== "table") return args;
-	const bound: { [key: string]: unknown } = {};
-	for (const [key, value] of pairs(args as object)) {
-		if (typeOf(value) === "function") {
-			const fn = value as (...incoming: unknown[]) => unknown;
-			bound[key as string] = (...incoming: unknown[]) => {
-				record(key as string, ...incoming);
-				return fn(...incoming);
-			};
-		} else {
-			bound[key as string] = value;
-		}
+function bindValue(
+	value: unknown,
+	path: string,
+	record: (name: string, ...values: unknown[]) => void,
+	seen: Array<defined>,
+): unknown {
+	if (typeOf(value) === "function") {
+		if (path.size() === 0) return value;
+		const fn = value as (...incoming: unknown[]) => unknown;
+		return (...incoming: unknown[]) => {
+			record(path, ...incoming);
+			return fn(...incoming);
+		};
 	}
-	return bound;
+	if (typeOf(value) !== "table") return value;
+	for (const item of seen) {
+		if (item === value) return value;
+	}
+	seen.push(value as defined);
+	const bound: { [key: string]: unknown } = {};
+	let changed = false;
+	for (const [key, child] of pairs(value as object)) {
+		const name = tostring(key);
+		const childPath = path.size() === 0 ? name : `${path}.${name}`;
+		const wrapped = bindValue(child, childPath, record, seen);
+		bound[key as string] = wrapped;
+		if (wrapped !== child) changed = true;
+	}
+	return changed ? bound : value;
+}
+
+export function bindActionArgs(args: unknown, record: (name: string, ...values: unknown[]) => void) {
+	return bindValue(args, "", record, new Array<defined>());
 }
 
 export function wrapStory(
