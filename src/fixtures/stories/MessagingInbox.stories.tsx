@@ -192,13 +192,7 @@ function ConversationList(props: {
 }
 
 function DaySeparator() {
-	return (
-		<Stack direction="row" gap={1} alignItems="center" sx={{ ...STACK, py: 1 }}>
-			<Divider />
-			<Typography text="Today" variant="caption" color="textSecondary" />
-			<Divider />
-		</Stack>
-	);
+	return <Divider text="Today" />;
 }
 
 function MessageRow(props: {
@@ -354,7 +348,12 @@ function ThreadView(props: {
 					{props.messages.map((message) => (
 						<MessageRow key={message.id} message={message} onMenu={props.onMenu} />
 					))}
-					<Typography text={`${props.thread.name} is typing…`} variant="caption" color="textSecondary" sx={{ px: 1 }} />
+					<Typography
+						text={`${props.thread.name} is typing…`}
+						variant="caption"
+						color="textSecondary"
+						sx={{ px: 1, Size: new UDim2(1, 0, 0, 18) }}
+					/>
 				</Stack>
 			</ScrollView>
 			<frame
