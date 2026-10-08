@@ -22,7 +22,7 @@ import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
 import { searchStories, stepSearchIndex, StorySearchHit } from "../storySearch";
-import { adoptTree, favoriteBranch, sortByTitle, storyBranches } from "../storyTree";
+import { adoptTree, favoriteBranch, orderedStoryTitles, sortByTitle, stepStoryTitle, storyBranches } from "../storyTree";
 
 const SEARCH_DELAY = 0.2;
 
@@ -77,7 +77,11 @@ function StoriesSidebar({
 	const hitsRef = useRef<StorySearchHit[]>([]);
 	const activeRef = useRef(0);
 	const storiesRef = useRef(stories);
+	const selectedRef = useRef(selected);
+	const onClickRef = useRef(onClick);
 	storiesRef.current = stories;
+	selectedRef.current = selected;
+	onClickRef.current = onClick;
 
 	useEffect(() => {
 		if (focusSearch === 0) return;
@@ -161,23 +165,37 @@ function StoriesSidebar({
 
 	useEffect(() => {
 		const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
-			if (gameProcessed) return;
 			const box = UserInputService.GetFocusedTextBox();
 			const host = sidebar.current?.Parent;
-			if (box === undefined || host === undefined || !box.IsDescendantOf(host)) return;
 			const key = input.KeyCode;
-			if (key === Enum.KeyCode.Escape) {
-				clear();
+			const searchFocused = box !== undefined && host !== undefined && box.IsDescendantOf(host);
+			if (searchFocused) {
+				if (gameProcessed) return;
+				if (key === Enum.KeyCode.Escape) {
+					clear();
+					return;
+				}
+				if (!searchingRef.current) return;
+				const count = hitsRef.current.size();
+				if (count === 0) return;
+				if (key === Enum.KeyCode.Up) {
+					setActive((current) => stepSearchIndex(current, -1, count));
+				} else if (key === Enum.KeyCode.Down) {
+					setActive((current) => stepSearchIndex(current, 1, count));
+				}
 				return;
 			}
-			if (!searchingRef.current) return;
-			const count = hitsRef.current.size();
-			if (count === 0) return;
-			if (key === Enum.KeyCode.Up) {
-				setActive((current) => stepSearchIndex(current, -1, count));
-			} else if (key === Enum.KeyCode.Down) {
-				setActive((current) => stepSearchIndex(current, 1, count));
-			}
+			if (box !== undefined || searchingRef.current) return;
+			const alt = UserInputService.IsKeyDown(Enum.KeyCode.LeftAlt) || UserInputService.IsKeyDown(Enum.KeyCode.RightAlt);
+			if (!alt) return;
+			const delta = key === Enum.KeyCode.Down ? 1 : key === Enum.KeyCode.Up ? -1 : 0;
+			if (delta === 0) return;
+			const icons = { folder: "", story: "", starred: "" };
+			const nodes = storiesRef.current.map((story) => ({ title: story.title, onClick: () => {} }));
+			const chosen = stepStoryTitle(orderedStoryTitles(storyBranches(nodes, icons)), selectedRef.current, delta);
+			if (chosen === undefined) return;
+			const story = storiesRef.current.find((item) => item.title === chosen);
+			if (story !== undefined) onClickRef.current(story);
 		});
 		return () => connection.Disconnect();
 	}, []);

@@ -28,6 +28,8 @@ import { STORY_ROOT_CLASSES, mergeStoryRootPaths, parseRootList, splitRootPath }
 import { narrowShell } from "../shellLayout";
 import SettingsPanel from "./SettingsPanel";
 
+declare function setclipboard(value: string): void;
+
 const DEFAULT_EXTENSION = ".stories";
 const SIDEBAR_WIDTH = 180;
 const SIDEBAR_MIN = 140;
@@ -800,17 +802,41 @@ function Storyblox(props: StorybloxProps) {
 					Padding={new UDim(0, theme.padding.calc(1))}
 					SortOrder={Enum.SortOrder.LayoutOrder}
 				/>
-				<textlabel
-					key="InspectorTitle"
-					Text="Inspector"
+				<frame
+					key="InspectorHeader"
 					LayoutOrder={1}
 					Size={new UDim2(1, 0, 0, theme.spacing.calc(1.5))}
 					BackgroundTransparency={1}
-					Font={theme.typography.fontFamilies.semibold}
-					TextSize={theme.typography.fontSizes.caption}
-					TextColor3={theme.palette.text.secondary}
-					TextXAlignment={Enum.TextXAlignment.Left}
-				/>
+				>
+					<textlabel
+						key="InspectorTitle"
+						Text="Inspector"
+						Size={new UDim2(1, -theme.spacing.calc(5), 1, 0)}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.semibold}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.text.secondary}
+						TextXAlignment={Enum.TextXAlignment.Left}
+					/>
+					{selectedStory !== undefined && (
+						<textbutton
+							key="CopyId"
+							Text="Copy id"
+							AnchorPoint={new Vector2(1, 0)}
+							Position={new UDim2(1, 0, 0, 0)}
+							Size={new UDim2(0, theme.spacing.calc(5), 1, 0)}
+							BackgroundTransparency={1}
+							Font={theme.typography.fontFamilies.semibold}
+							TextSize={theme.typography.fontSizes.caption}
+							TextColor3={theme.palette.primary.main}
+							Event={{
+								MouseButton1Click: () => {
+									pcall(() => setclipboard(selectedStory.title));
+								},
+							}}
+						/>
+					)}
+				</frame>
 				<textlabel
 					key="InspectorBody"
 					Text={storyInspector(selectedStory as never)}

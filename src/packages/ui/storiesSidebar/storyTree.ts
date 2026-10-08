@@ -70,6 +70,37 @@ export function favoriteBranch(stories: StoryNode[], titles: string[], icons: St
 	return { title: "Starred", leaves, icon: icons.starred };
 }
 
+export function orderedStoryTitles(branches: StoryBranch[]): string[] {
+	const titles = new Array<string>();
+	const walk = (nodes: StoryBranch[], prefix: string) => {
+		for (const branch of nodes) {
+			const path = prefix.size() === 0 ? branch.title : `${prefix}/${branch.title}`;
+			for (const leaf of branch.leaves) titles.push(`${path}/${leaf.title}`);
+			if (branch.branches !== undefined && branch.branches.size() > 0) walk(branch.branches, path);
+		}
+	};
+	walk(branches, "");
+	return titles;
+}
+
+export function stepStoryTitle(titles: string[], current: string | undefined, delta: number): string | undefined {
+	if (titles.size() === 0 || delta === 0) return undefined;
+	let index = -1;
+	if (current !== undefined) {
+		for (let cursor = 0; cursor < titles.size(); cursor++) {
+			if (titles[cursor] === current) {
+				index = cursor;
+				break;
+			}
+		}
+	}
+	const start = index >= 0 ? index : delta > 0 ? -1 : 0;
+	let cursor = start + delta;
+	if (cursor < 0) cursor = titles.size() - 1;
+	else if (cursor >= titles.size()) cursor = 0;
+	return titles[cursor];
+}
+
 export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBranch[] {
 	const roots: StoryBranch[] = [];
 
