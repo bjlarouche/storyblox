@@ -45,6 +45,12 @@ export function matchesStoryName(name: string, suffix: string): boolean {
 	return suffix.size() > 0 && name.size() >= suffix.size() && name.sub(-suffix.size()) === suffix;
 }
 
+export function storyModuleSuffix(name: string, extension = ".stories"): string | undefined {
+	if (matchesStoryName(name, extension)) return extension;
+	if (extension !== ".story" && matchesStoryName(name, ".story")) return ".story";
+	return undefined;
+}
+
 export function titleFromModuleName(name: string, suffix: string): string {
 	return `${name.sub(1, name.size() - suffix.size())}/Native`;
 }

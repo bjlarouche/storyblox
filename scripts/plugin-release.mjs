@@ -43,7 +43,7 @@ try {
 
 	const xml = readFileSync(checkModel, "utf8");
 	const names = [...xml.matchAll(/<string name="Name">([^<]*)<\/string>/g)].map(([, name]) => name);
-	const storyModules = names.filter((name) => name.endsWith(".stories"));
+	const storyModules = names.filter((name) => name.endsWith(".stories") || name.endsWith(".story"));
 	if (storyModules.length > 0) throw new Error(`release bundles stories: ${storyModules.join(", ")}`);
 
 	const devTitles = [...xml.matchAll(/title = "((?:Scenarios|Dev|Fixture|Shell|Docs)\/[^"]*)"/g)].map(([, title]) => title);

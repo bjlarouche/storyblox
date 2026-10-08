@@ -20,6 +20,9 @@
           "Native.stories": {
             "$path": "../fixtures/native"
           },
+          "FunctionLabel.story": {
+            "$path": "../fixtures/functionStory"
+          },
           "Controlled.stories": {
             "$path": "../fixtures/controlled"
           },

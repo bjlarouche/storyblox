@@ -3,7 +3,7 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { HttpService, StarterGui, Workspace } from "@rbxts/services";
 import { DarkTheme, LightTheme, ThemeProvider } from "@rbxts/uiblox";
 import { Story } from "interfaces";
-import { normalizeExport } from "packages/ui/storyblox/normalizeStory";
+import { normalizeExport, storyModuleSuffix } from "packages/ui/storyblox/normalizeStory";
 import { storyFromExport } from "packages/ui/storyblox/storyAdapter";
 import { readTemplateResult } from "packages/ui/template/cleanupGate";
 import { applyArg, copyArgs } from "packages/ui/template/storyArgs";
@@ -59,10 +59,11 @@ function buildCatalog(root: Instance): CatalogEntry[] {
 	const seen: { [title: string]: boolean } = {};
 	for (const descendant of root.GetDescendants()) {
 		if (!descendant.IsA("ModuleScript")) continue;
-		if (descendant.Name.size() < SUFFIX.size() || descendant.Name.sub(-SUFFIX.size()) !== SUFFIX) continue;
+		const suffix = storyModuleSuffix(descendant.Name, SUFFIX);
+		if (suffix === undefined) continue;
 		const [ok, mod] = pcall(() => loadStoryModule(descendant));
 		if (!ok) continue;
-		const story = storyFromExport(normalizeExport(mod, descendant.Name, SUFFIX));
+		const story = storyFromExport(normalizeExport(mod, descendant.Name, suffix));
 		if (story === undefined) continue;
 		if (seen[story.title]) continue;
 		seen[story.title] = true;
