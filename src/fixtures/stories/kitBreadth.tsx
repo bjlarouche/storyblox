@@ -24,6 +24,7 @@ export const AvatarGroup = kit.AvatarGroup;
 export const Drawer = kit.Drawer;
 export const Breadcrumbs = kit.Breadcrumbs;
 export const Pagination = kit.Pagination;
+export const Pager = kit.Pager;
 export const Stepper = kit.Stepper;
 export const Timeline = kit.Timeline;
 export const RangeSlider = kit.RangeSlider;
