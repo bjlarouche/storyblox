@@ -1,4 +1,5 @@
 import React, { useState } from "@rbxts/react";
+import { Typography } from "@rbxts/uiblox";
 import { ButtonGroup } from "./kitBreadth";
 
 function GroupStory() {
@@ -13,7 +14,7 @@ function GroupStory() {
 					setPicked(labels[index] ?? "None");
 				}}
 			/>
-			<textlabel Text={picked} Size={new UDim2(0, 80, 0, 20)} BackgroundTransparency={1} TextSize={14} LayoutOrder={1} />
+			<Typography text={picked} sx={{ LayoutOrder: 1, Size: new UDim2(0, 80, 0, 20) }} />
 		</frame>
 	);
 }
