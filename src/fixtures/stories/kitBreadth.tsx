@@ -19,6 +19,7 @@ export const Card = kit.Card;
 export const Chip = kit.Chip;
 export const Badge = kit.Badge;
 export const Avatar = kit.Avatar;
+export const AvatarGroup = kit.AvatarGroup;
 export const Drawer = kit.Drawer;
 export const Breadcrumbs = kit.Breadcrumbs;
 export const Pagination = kit.Pagination;
