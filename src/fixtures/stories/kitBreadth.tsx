@@ -23,6 +23,7 @@ export const Drawer = kit.Drawer;
 export const Breadcrumbs = kit.Breadcrumbs;
 export const Pagination = kit.Pagination;
 export const Stepper = kit.Stepper;
+export const Timeline = kit.Timeline;
 export const Accordion = kit.Accordion;
 export const Snackbar = kit.Snackbar;
 export const Table = kit.Table;
