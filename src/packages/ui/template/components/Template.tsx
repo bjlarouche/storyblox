@@ -10,7 +10,7 @@ import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from 
 import { flipOrientation, GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
 import { extraGlobalEntries, mergeGlobals } from "packages/storyGlobals";
 import { collectLoaders, settleLoaders } from "packages/storyLoaders";
-import { createActionLog } from "packages/storyActions";
+import { bindActionArgs, createActionLog } from "packages/storyActions";
 import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
 import { BoxRect, collectGuiBoxes, guiBox } from "packages/layoutTools";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
@@ -481,10 +481,11 @@ function Template({
 			return;
 		}
 
+		const renderArgs = actionsEnabled ? bindActionArgs(args, actionApi.record) : args;
 		const session = (story as { nativeSession?: { update?: (args: unknown) => void } }).nativeSession;
 		if (native && mounted.current === mountKey && themeMounted.current === previewTheme && session?.update !== undefined) {
 			try {
-				session.update(args);
+				session.update(renderArgs);
 				setFailure(undefined);
 				onRenderError?.(undefined);
 			} catch (error) {
@@ -504,7 +505,7 @@ function Template({
 					preloaded?: { [key: string]: unknown };
 				},
 			) => unknown;
-			const props = args;
+			const props = renderArgs;
 			const themeName = primaryThemeEnabled ? "dark" : "light";
 			const globals = mergeGlobals(story.globals, globalPatch, themeName, density);
 			const [element, callback] = render(props, {

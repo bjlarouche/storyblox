@@ -40,6 +40,23 @@ export function runSetup(setup: (tools: { onCleanup: (job: () => void) => void }
 	return dispose;
 }
 
+export function bindActionArgs(args: unknown, record: (name: string, ...values: unknown[]) => void) {
+	if (typeOf(args) !== "table") return args;
+	const bound: { [key: string]: unknown } = {};
+	for (const [key, value] of pairs(args as object)) {
+		if (typeOf(value) === "function") {
+			const fn = value as (...incoming: unknown[]) => unknown;
+			bound[key as string] = (...incoming: unknown[]) => {
+				record(key as string, ...incoming);
+				return fn(...incoming);
+			};
+		} else {
+			bound[key as string] = value;
+		}
+	}
+	return bound;
+}
+
 export function wrapStory(
 	render: (args: unknown) => unknown,
 	decorators: Array<(inner: (args: unknown) => unknown) => (args: unknown) => unknown>,
