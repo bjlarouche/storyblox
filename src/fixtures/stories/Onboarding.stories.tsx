@@ -58,13 +58,16 @@ function Illustration(props: { step: number; done: boolean; tall: number }) {
 			sx={{
 				Size: new UDim2(1, 0, 0, props.tall),
 				AutomaticSize: Enum.AutomaticSize.None,
+				BackgroundColor3: Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency: 0,
 				radius: 2,
 				p: 3,
 				gradient: { colors: [wash, Color3.fromRGB(244, 240, 232)], rotation: 28 },
 			}}
 		>
-			<Typography text={word} variant="h1" />
-			<Typography text="A quiet first visit." color="textSecondary" />
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 4)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<Typography text={word} variant="h1" sx={{ Size: new UDim2(1, 0, 0, 40) }} />
+			<Typography text="A quiet first visit." color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 		</Box>
 	);
 }
