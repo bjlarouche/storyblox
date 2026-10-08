@@ -259,7 +259,7 @@ function SettingsDashboard(args: Args) {
 			>
 				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, 12)} SortOrder={Enum.SortOrder.LayoutOrder} />
 				{!narrow && (
-					<Paper elevation="outlined" sx={{ LayoutOrder: 0, Size: new UDim2(0, 220, 1, 0) }}>
+					<Paper elevation="outlined" sx={{ LayoutOrder: 0, Size: new UDim2(0, 220, 1, 0), AutomaticSize: Enum.AutomaticSize.None }}>
 						<SectionNav section={section} onPick={pick} />
 					</Paper>
 				)}
