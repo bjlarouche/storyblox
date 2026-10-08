@@ -18,7 +18,7 @@ end
 
 return function(plugin, widget, root)
 	widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	local stories = script.Parent:WaitForChild("stories")
+	local stories = game:GetService("ServerStorage"):WaitForChild("StorybloxPlugin"):WaitForChild("stories")
 	local saved = plugin:GetSetting("theme")
 	local savedFavorites = plugin:GetSetting("favorites")
 	local savedInspector = plugin:GetSetting("inspectorOpen")
