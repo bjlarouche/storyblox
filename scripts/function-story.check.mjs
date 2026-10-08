@@ -38,6 +38,21 @@ if (loaded.kind !== "native" || loaded.title !== "FunctionLabel/Native" || loade
 const rejected = normalizeExport(fn, "FunctionLabel.story", ".stories");
 if (rejected.kind !== "reject") throw new Error("wrong suffix should reject");
 
+const withArgs = normalizeExport(
+	{
+		fn,
+		args: { label: "Hi" },
+		controls: { label: { type: "string" } },
+	},
+	"FunctionLabel.story",
+	".story",
+);
+if (withArgs.kind !== "native" || withArgs.title !== "FunctionLabel/Native" || withArgs.args.label !== "Hi" || withArgs.argTypes.label.type !== "string") {
+	throw new Error("function table");
+}
+const named = normalizeExport({ fn, title: "Panel/Base", args: { count: "nope" }, argTypes: { count: { type: "number" } } }, "FunctionLabel.story", ".story");
+if (named.kind !== "reject" || named.reason !== "args") throw new Error("function table args");
+
 const target = { Name: "canvas", mounted: false, cleaned: false };
 const host = mountNative(loaded.mount, target, {}, {});
 if (!target.mounted || host.update !== undefined) throw new Error("mount target");
