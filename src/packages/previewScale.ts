@@ -19,6 +19,36 @@ const PRESETS: { [name: string]: { width: number; height: number } } = {
 	console: { width: 1920, height: 1080 },
 };
 
+export const PREVIEW_PRESETS = ["phone", "tablet", "desktop", "console"];
+
+const PRESET_LABELS: { [name: string]: string } = {
+	phone: "Phone",
+	tablet: "Tablet",
+	desktop: "Desktop",
+	console: "Console",
+};
+
+export function stepPreviewPreset(current: string | undefined) {
+	if (current === undefined) return PREVIEW_PRESETS[0];
+	for (let i = 0; i < PREVIEW_PRESETS.size(); i++) {
+		if (PREVIEW_PRESETS[i] === current) {
+			const step = i + 1;
+			return step < PREVIEW_PRESETS.size() ? PREVIEW_PRESETS[step] : undefined;
+		}
+	}
+	return undefined;
+}
+
+export function previewPresetLabel(current: string | undefined) {
+	if (current === undefined) return "Size";
+	return PRESET_LABELS[current] ?? "Size";
+}
+
+export function activePreview(storyPreview: unknown, picked: string | undefined) {
+	if (picked !== undefined) return { preset: picked };
+	return storyPreview;
+}
+
 export function previewSize(preview: unknown, orientation?: "portrait" | "landscape") {
 	if (typeOf(preview) !== "table") return undefined;
 	const described = preview as { preset?: unknown; width?: unknown; height?: unknown; orientation?: unknown };

@@ -6,9 +6,8 @@ Array.prototype.size = function () {
 
 globalThis.typeOf = (value) => (value === null || value === undefined ? "nil" : typeof value === "object" ? "table" : typeof value);
 
-const { previewScale, gridLineCount, GRID_CELL, stepZoom, previewSize, flipOrientation } = await import(
-	"../src/packages/previewScale.ts"
-);
+const { previewScale, gridLineCount, GRID_CELL, stepZoom, previewSize, flipOrientation, stepPreviewPreset, previewPresetLabel, activePreview } =
+	await import("../src/packages/previewScale.ts");
 
 const phone = previewSize({ preset: "phone" });
 if (phone?.width !== 390 || phone?.height !== 844) throw new Error("phone preset");
@@ -35,5 +34,16 @@ if (stepZoom(1, 1) !== 2) throw new Error("zoom in");
 if (stepZoom(1, -1) !== 0.5) throw new Error("zoom out");
 if (stepZoom(2, 1) !== 2) throw new Error("zoom stays at 200");
 if (stepZoom(0.5, -1) !== 0.5) throw new Error("zoom stays at 50");
+if (stepPreviewPreset(undefined) !== "phone") throw new Error("size starts at phone");
+if (stepPreviewPreset("phone") !== "tablet" || stepPreviewPreset("tablet") !== "desktop" || stepPreviewPreset("desktop") !== "console") {
+	throw new Error("size cycle");
+}
+if (stepPreviewPreset("console") !== undefined || stepPreviewPreset("watch") !== undefined) throw new Error("size returns to story");
+if (previewPresetLabel(undefined) !== "Size" || previewPresetLabel("phone") !== "Phone" || previewPresetLabel("console") !== "Console") {
+	throw new Error("size label");
+}
+const storySize = { width: 320, height: 48, preset: "phone" };
+if (previewSize(activePreview(storySize, undefined))?.width !== 320) throw new Error("story size stays");
+if (previewSize(activePreview(storySize, "tablet"))?.width !== 1024) throw new Error("picked preset");
 
 console.log("preview scale ok");
