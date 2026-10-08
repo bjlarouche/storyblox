@@ -2,7 +2,13 @@
 local ss = game:GetService("ServerStorage")
 local toolbar = plugin:CreateToolbar("Storyblox")
 local toggle = toolbar:CreateButton("Storyblox (dev)", "Toggle Storyblox", "rbxassetid://9311703342")
-local reloadBtn = toolbar:CreateButton("Reload", "Reload StorybloxPlugin", "rbxassetid://75431112013973")
+local refreshLight = "rbxasset://studio_svg_textures/Lua/FileSync/Light/Standard/Refresh.png"
+local refreshDark = "rbxasset://studio_svg_textures/Lua/FileSync/Dark/Standard/Refresh.png"
+local function refreshIcon()
+	local bg = settings().Studio.Theme:GetColor(Enum.StudioStyleGuideColor.MainBackground)
+	return if bg.R + bg.G + bg.B < 1.5 then refreshDark else refreshLight
+end
+local reloadBtn = toolbar:CreateButton("Reload", "Reload StorybloxPlugin", refreshIcon())
 local widget = plugin:CreateDockWidgetPluginGui("StorybloxDev", DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, true, false, 420, 320, 240, 180))
 widget.Title = "Storyblox (dev)"
 widget.Name = "StorybloxDev"
@@ -134,6 +140,9 @@ end))
 
 toggle.Click:Connect(function() widget.Enabled = not widget.Enabled end)
 reloadBtn.Click:Connect(load)
+table.insert(lifetime, settings().Studio.ThemeChanged:Connect(function()
+	reloadBtn.Icon = refreshIcon()
+end))
 table.insert(lifetime, ss.ChildAdded:Connect(onFolder))
 table.insert(lifetime, ss.ChildRemoved:Connect(onFolder))
 plugin.Unloading:Connect(function()
