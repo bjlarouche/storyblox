@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 String.prototype.size = function size() {
 	return this.length;
 };
@@ -59,5 +61,14 @@ if (
 ) {
 	throw new Error("native tags");
 }
+
+const docs = readFileSync("src/packages/ui/template/components/DocsPanel.tsx", "utf8");
+if (!docs.includes('key="Source"') || !docs.includes("TextEditable={false}") || !docs.includes("ClearTextOnFocus={false}")) {
+	throw new Error("docs source box");
+}
+const host = readFileSync("src/packages/ui/storyblox/components/Storyblox.tsx", "utf8");
+if (!host.includes("function moduleSource") || !host.includes("sourceText: moduleSource(root)")) throw new Error("module source");
+const template = readFileSync("src/packages/ui/template/components/Template.tsx", "utf8");
+if (!template.includes("sourceText")) throw new Error("docs uses module source");
 
 console.log("story label ok");
