@@ -17,13 +17,19 @@ const LIGHT_BG = Color3.fromRGB(245, 245, 247);
 interface CatalogEntry {
 	title: string;
 	module: ModuleScript;
+	suffix: string;
+}
+
+function storyModuleForRequire(moduleScript: ModuleScript): ModuleScript {
+	const nested = script.Parent?.FindFirstChild("stories")?.FindFirstChild(moduleScript.Name);
+	return nested !== undefined && nested.IsA("ModuleScript") ? nested : moduleScript;
 }
 
 function loadStoryModule(moduleScript: ModuleScript): unknown {
 	const runtime = (_G as never as Record<string, { import: (context: Instance, module: ModuleScript) => unknown }>)[
 		script as never as string
 	];
-	return runtime.import(script, moduleScript);
+	return runtime.import(script, storyModuleForRequire(moduleScript));
 }
 
 function parseSize(raw: unknown): Vector2 | undefined {
@@ -67,7 +73,7 @@ function buildCatalog(root: Instance): CatalogEntry[] {
 		if (story === undefined) continue;
 		if (seen[story.title]) continue;
 		seen[story.title] = true;
-		entries.push({ title: story.title, module: descendant });
+		entries.push({ title: story.title, module: descendant, suffix });
 	}
 	entries.sort((a, b) => a.title < b.title);
 	return entries;
@@ -97,7 +103,7 @@ function destroyGui() {
 function resolveStory(entry: CatalogEntry): Story | undefined {
 	const [ok, mod] = pcall(() => loadStoryModule(entry.module));
 	if (!ok) return undefined;
-	return storyFromExport(normalizeExport(mod, entry.module.Name, SUFFIX), { workspaceAllowed: () => true });
+	return storyFromExport(normalizeExport(mod, entry.module.Name, entry.suffix), { workspaceAllowed: () => true });
 }
 
 export = function (storiesRoot: Instance) {

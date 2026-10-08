@@ -60,8 +60,8 @@ const hostPlugin = findHostPlugin();
 // The dev shell clones StorybloxPlugin, then scans the original. Those modules import the other react, so useState's dispatcher is nil.
 function runningModule(moduleScript: ModuleScript): ModuleScript {
 	const original = ServerStorage.FindFirstChild("StorybloxPlugin");
-	if (hostPlugin === undefined || original === undefined || hostPlugin === original) return moduleScript;
-	if (!moduleScript.IsDescendantOf(original)) return moduleScript;
+	if (hostPlugin === undefined || original === undefined || hostPlugin === original) return storyModuleForRequire(moduleScript);
+	if (!moduleScript.IsDescendantOf(original)) return storyModuleForRequire(moduleScript);
 	const names = new Array<string>();
 	let current: Instance | undefined = moduleScript;
 	while (current !== undefined && current !== original) {
@@ -71,10 +71,23 @@ function runningModule(moduleScript: ModuleScript): ModuleScript {
 	let found: Instance = hostPlugin;
 	for (let index = names.size() - 1; index >= 0; index--) {
 		const child = found.FindFirstChild(names[index]);
-		if (child === undefined) return moduleScript;
+		if (child === undefined) return storyModuleForRequire(moduleScript);
 		found = child;
 	}
-	return found.IsA("ModuleScript") ? found : moduleScript;
+	const resolved = found.IsA("ModuleScript") ? found : moduleScript;
+	return storyModuleForRequire(resolved);
+}
+
+function storyModuleForRequire(moduleScript: ModuleScript): ModuleScript {
+	const storiesFolder = moduleScript.Parent;
+	if (storiesFolder === undefined || storiesFolder.Name !== "stories") return moduleScript;
+	const nested = storiesFolder.Parent?.FindFirstChild("node_modules")
+		?.FindFirstChild("@rbxts")
+		?.FindFirstChild("storyblox")
+		?.FindFirstChild("fixtures")
+		?.FindFirstChild("stories")
+		?.FindFirstChild(moduleScript.Name);
+	return nested !== undefined && nested.IsA("ModuleScript") ? nested : moduleScript;
 }
 
 function controlRoot(root?: Instance) {
