@@ -121,14 +121,15 @@ function Preview(props: { asset: Asset }) {
 		<Box
 			sx={{
 				Size: new UDim2(1, 0, 0, 220),
+				AutomaticSize: Enum.AutomaticSize.None,
 				bgcolor: asset.color,
 				gradient: { colors: [asset.color, Color3.fromRGB(244, 240, 230)], rotation: 128 },
 				radius: 12,
 				p: 2,
 			}}
 		>
-			<Typography text={asset.name} variant="h6" sx={{ TextColor3: Color3.fromRGB(28, 32, 30) }} />
-			<Typography text={asset.note} sx={{ TextColor3: Color3.fromRGB(28, 32, 30) }} />
+			<Typography text={asset.name} variant="h6" sx={{ TextColor3: Color3.fromRGB(28, 32, 30), Size: new UDim2(1, 0, 0, 22) }} />
+			<Typography text={asset.note} sx={{ TextColor3: Color3.fromRGB(28, 32, 30), Size: new UDim2(1, 0, 0, 20), Position: UDim2.fromOffset(0, 26) }} />
 		</Box>
 	);
 }
@@ -182,8 +183,8 @@ function MediaLibrary(args: Args) {
 					<ChoiceRow options={KINDS} value={kind} onChange={setKind} />
 					<ChoiceRow options={TAGS} value={tag} onChange={setTag} />
 					<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
-						<Typography text={`${visible.size()} assets`} color="textSecondary" />
-						<Typography text={`${picked.size()} selected`} color="textSecondary" />
+						<Typography text={`${visible.size()} assets`} color="textSecondary" sx={{ Size: UDim2.fromOffset(0, 18), AutomaticSize: Enum.AutomaticSize.X }} />
+						<Typography text={`${picked.size()} selected`} color="textSecondary" sx={{ Size: UDim2.fromOffset(0, 18), AutomaticSize: Enum.AutomaticSize.X }} />
 						<Button ref={setMenuAnchor} text={sort} size="small" variant="outlined" onLeftClick={() => setMenuOpen(true)} />
 						{picked.size() > 0 && (
 							<>
@@ -233,11 +234,11 @@ function MediaLibrary(args: Args) {
 				{focused !== undefined && (
 					<Stack direction="column" gap={1} sx={{ ...STACK, p: 2 }}>
 						<Preview asset={focused} />
-						<Typography text={focused.kind} variant="subtitle2" />
-						<Typography text={focused.note} />
-						<Typography text={`Tag ${focused.tag}`} color="textSecondary" />
-						<Typography text={focused.size} color="textSecondary" />
-						<Typography text={`Updated ${focused.updated}`} color="textSecondary" />
+						<Typography text={focused.kind} variant="subtitle2" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
+						<Typography text={focused.note} sx={{ Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }} />
+						<Typography text={`Tag ${focused.tag}`} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 18) }} />
+						<Typography text={focused.size} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 18) }} />
+						<Typography text={`Updated ${focused.updated}`} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 18) }} />
 					</Stack>
 				)}
 			</Drawer>

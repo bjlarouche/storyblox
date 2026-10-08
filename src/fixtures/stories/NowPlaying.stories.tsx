@@ -258,10 +258,10 @@ function NowPlaying(args: Args) {
 						gradient: { colors: [current.wash, PAPER], rotation: 28 },
 					}}
 				/>
-				<Typography text={current.title} variant="h2" />
-				<Typography text={current.creator} color="textSecondary" />
+				<Typography text={current.title} variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
+				<Typography text={current.creator} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 				<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
-					<Typography text={clock(elapsed)} color="textSecondary" />
+					<Typography text={clock(elapsed)} color="textSecondary" sx={{ Size: UDim2.fromOffset(0, 18), AutomaticSize: Enum.AutomaticSize.X }} />
 					<frame Size={new UDim2(1, -108, 0, 28)} BackgroundTransparency={1} BorderSizePixel={0}>
 						<Scrub
 							value={elapsed}
@@ -275,7 +275,7 @@ function NowPlaying(args: Args) {
 							}}
 						/>
 					</frame>
-					<Typography text={clock(duration - elapsed)} color="textSecondary" />
+					<Typography text={clock(duration - elapsed)} color="textSecondary" sx={{ Size: UDim2.fromOffset(0, 18), AutomaticSize: Enum.AutomaticSize.X }} />
 				</Stack>
 				<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
 					<Tooltip text="Previous">
@@ -319,7 +319,7 @@ function NowPlaying(args: Args) {
 						onLeftClick={() => setMenuOpen(true)}
 					/>
 				</Stack>
-				<Typography text={`Volume ${volume}`} color="textSecondary" variant="caption" />
+				<Typography text={`Volume ${volume}`} color="textSecondary" variant="caption" sx={{ Size: new UDim2(1, 0, 0, 16) }} />
 				<Slider value={volume} min={0} max={100} step={1} onChange={setVolume} />
 			</Stack>
 		);
@@ -335,7 +335,7 @@ function NowPlaying(args: Args) {
 			<EmptyListHint text="Queue is empty." height={72} />
 		) : (
 			<Stack direction="column" gap={0} sx={STACK}>
-				<Typography text="Queue" variant="h3" />
+				<Typography text="Queue" variant="h3" sx={{ Size: new UDim2(1, 0, 0, 24) }} />
 				{tracks.map((track) => (
 					<QueueRow
 						key={track.id}

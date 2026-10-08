@@ -121,15 +121,16 @@ function formatStamp(stamp?: number) {
 	return `${MONTHS[(math.floor(stamp / 100) % 100) - 1] ?? "Day"} ${stamp % 100}`;
 }
 
-function TextLine(props: { text: string; variant?: "h2" | "h3" | "body" | "caption"; color?: "textPrimary" | "textSecondary" | "error"; wrap?: boolean }) {
+function TextLine(props: { text: string; variant?: "h2" | "h3" | "body" | "caption"; color?: "textPrimary" | "textSecondary" | "error"; wrap?: boolean; fit?: boolean }) {
+	const height = props.variant === "h2" ? 32 : 20;
 	return (
 		<Typography
 			text={props.text}
 			variant={props.variant ?? "body"}
 			color={props.color ?? "textPrimary"}
 			sx={{
-				Size: new UDim2(1, 0, 0, props.wrap ? 0 : props.variant === "h2" ? 32 : 20),
-				AutomaticSize: props.wrap ? Enum.AutomaticSize.Y : Enum.AutomaticSize.None,
+				Size: props.fit ? new UDim2(0, 0, 0, height) : new UDim2(1, 0, 0, props.wrap ? 0 : height),
+				AutomaticSize: props.fit ? Enum.AutomaticSize.X : props.wrap ? Enum.AutomaticSize.Y : Enum.AutomaticSize.None,
 			}}
 		/>
 	);
@@ -150,10 +151,10 @@ function Summary(props: { room: Room; nights: number; promo: string; arrival: st
 			<TextLine text={props.room.name} wrap />
 			<TextLine text={`${props.nights} nights · ${props.arrival}`} variant="caption" color="textSecondary" />
 			<TextLine text={`Room ${stay}`} />
-			<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
-				<TextLine text="Cleaning 12" />
+			<Stack direction="row" gap={1} alignItems="center" sx={{ Size: new UDim2(0, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.XY }}>
+				<TextLine text="Cleaning 12" fit />
 				<Tooltip text="A flat house fee. It does not change with guests.">
-					<TextLine text="Why" variant="caption" color="textSecondary" />
+					<TextLine text="Why" variant="caption" color="textSecondary" fit />
 				</Tooltip>
 			</Stack>
 			<TextLine text={discount > 0 ? "Welcome credit 20" : "No credit yet"} color="textSecondary" />

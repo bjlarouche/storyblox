@@ -226,7 +226,7 @@ function PlaceList(props: { places: Place[]; selected: string; onPick: (id: stri
 	const ordered = nearby(props.places, props.selected);
 	return (
 		<Stack direction="column" gap={0} sx={STACK}>
-			<Typography text="Nearby" variant="h3" />
+			<Typography text="Nearby" variant="h3" sx={{ Size: new UDim2(1, 0, 0, 24) }} />
 			{ordered.size() === 0 ? (
 				<EmptyListHint text="No places match this search." height={72} />
 			) : (
@@ -248,9 +248,9 @@ function PlaceList(props: { places: Place[]; selected: string; onPick: (id: stri
 function PlaceSheet(props: { place: Place; onLink: (payload: LinkPayload) => void; onKeep: () => void }) {
 	return (
 		<Stack direction="column" gap={1} sx={{ ...STACK, p: 2 }}>
-			<Typography text={props.place.kind} color="textSecondary" variant="caption" />
-			<Typography text={props.place.name} variant="h2" />
-			<Typography text={`About ${props.place.minutes} min on foot`} color="textSecondary" />
+			<Typography text={props.place.kind} color="textSecondary" variant="caption" sx={{ Size: new UDim2(1, 0, 0, 16) }} />
+			<Typography text={props.place.name} variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
+			<Typography text={`About ${props.place.minutes} min on foot`} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 			<Preview value={props.place.blurb} onLink={props.onLink} />
 			<Stack direction="row" gap={1} wrap sx={STACK}>
 				{props.place.tags.map((tag) => (
@@ -296,7 +296,7 @@ function WorldMap(args: Args) {
 		<frame Size={new UDim2(0, size.width, 0, size.height)} BackgroundColor3={theme.palette.surface.canvas} BorderSizePixel={0} ClipsDescendants>
 			<ScrollView sx={{ Size: new UDim2(1, 0, 1, 0), p: { phone: 1, desktop: 2 } }}>
 				<Stack direction="column" gap={1} sx={STACK}>
-					<Typography text="Field map" variant="h2" />
+					<Typography text="Field map" variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
 					<Input text={query} placeholder="Search places" width={new UDim(1, 0)} onInput={setQuery} />
 					<Stack direction="row" gap={1} wrap sx={STACK}>
 						{KINDS.map((name) => (
