@@ -28,6 +28,7 @@ export const Timeline = kit.Timeline;
 export const RangeSlider = kit.RangeSlider;
 export const Accordion = kit.Accordion;
 export const Collapse = kit.Collapse;
+export const ButtonGroup = kit.ButtonGroup;
 export const Snackbar = kit.Snackbar;
 export const Table = kit.Table;
 export const Autocomplete = kit.Autocomplete;
