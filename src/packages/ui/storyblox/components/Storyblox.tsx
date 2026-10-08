@@ -38,6 +38,39 @@ function pluginStories(): Instance | undefined {
 	return ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
 }
 
+function findHostPlugin() {
+	let current: Instance | undefined = script;
+	while (current !== undefined) {
+		if (current.FindFirstChild("node_modules") !== undefined && current.FindFirstChild("stories") !== undefined) {
+			return current;
+		}
+		current = current.Parent;
+	}
+	return undefined;
+}
+
+const hostPlugin = findHostPlugin();
+
+// The dev shell clones StorybloxPlugin, then scans the original. Those modules import the other react, so useState's dispatcher is nil.
+function runningModule(moduleScript: ModuleScript): ModuleScript {
+	const original = ServerStorage.FindFirstChild("StorybloxPlugin");
+	if (hostPlugin === undefined || original === undefined || hostPlugin === original) return moduleScript;
+	if (!moduleScript.IsDescendantOf(original)) return moduleScript;
+	const names = new Array<string>();
+	let current: Instance | undefined = moduleScript;
+	while (current !== undefined && current !== original) {
+		names.push(current.Name);
+		current = current.Parent;
+	}
+	let found: Instance = hostPlugin;
+	for (let index = names.size() - 1; index >= 0; index--) {
+		const child = found.FindFirstChild(names[index]);
+		if (child === undefined) return moduleScript;
+		found = child;
+	}
+	return found.IsA("ModuleScript") ? found : moduleScript;
+}
+
 function controlRoot(root?: Instance) {
 	return pluginStories() ?? root;
 }
@@ -89,7 +122,7 @@ function loadStoryModule(moduleScript: ModuleScript): unknown {
 	const runtime = (_G as never as Record<string, { import: (context: Instance, module: ModuleScript) => unknown }>)[
 		script as never as string
 	];
-	return runtime.import(script, moduleScript);
+	return runtime.import(script, runningModule(moduleScript));
 }
 
 function adaptStory(normalized: ReturnType<typeof normalizeExport>) {
