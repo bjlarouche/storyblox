@@ -74,6 +74,11 @@ const root = process.cwd();
 const sidebar = readFileSync(join(root, "src/packages/ui/storiesSidebar/components/StoriesSidebar.tsx"), "utf8");
 const storyblox = readFileSync(join(root, "src/packages/ui/storyblox/components/Storyblox.tsx"), "utf8");
 if (!sidebar.includes("KeyCode.LeftAlt") || !sidebar.includes("stepStoryTitle")) throw new Error("keyboard nav");
-if (!storyblox.includes('key="CopyId"') || !storyblox.includes("setclipboard")) throw new Error("copy id");
+if (!storyblox.includes('key="CopyId"') || !storyblox.includes("copyText") || !storyblox.includes('key="CopyIdBox"')) {
+	throw new Error("copy id");
+}
+if (!readFileSync(join(root, "src/packages/ui/template/components/ErrorPanel.tsx"), "utf8").includes("export function selectText")) {
+	throw new Error("copy fallback");
+}
 
 console.log("story tree ok");

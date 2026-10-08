@@ -7,7 +7,7 @@ export { default as InspectorPane } from "./components/InspectorPane";
 export { InspectorPaneProps, InspectorTab } from "./components/InspectorPane";
 export { default as SafeBoundary } from "./components/SafeBoundary";
 export { SafeBoundaryProps } from "./components/SafeBoundary";
-export { default as ErrorPanel } from "./components/ErrorPanel";
+export { default as ErrorPanel, copyText, selectText } from "./components/ErrorPanel";
 export { ErrorPanelProps } from "./components/ErrorPanel";
 export { ActionLogContext, useActionLog } from "./actionLogContext";
 export { ActionLogApi } from "./actionLogContext";

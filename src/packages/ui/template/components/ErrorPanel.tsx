@@ -3,8 +3,14 @@ import { useTheme } from "@rbxts/uiblox";
 
 declare function setclipboard(value: string): void;
 
-function copyError(text: string) {
-	return pcall(() => setclipboard(text))[0];
+export function copyText(text: string) {
+	return pcall(() => setclipboard(text))[0] === true;
+}
+
+export function selectText(box: TextBox) {
+	box.CaptureFocus();
+	box.SelectionStart = 1;
+	box.CursorPosition = box.Text.size() + 1;
 }
 
 export interface ErrorPanelProps {
@@ -59,12 +65,9 @@ function ErrorPanel({ message, title = "Error", compact = false, onRetry }: Erro
 					TextColor3={theme.palette.status.error.main}
 				/>
 				{action("Copy", "Copy", 2, () => {
-					if (copyError(message)) return;
+					if (copyText(message)) return;
 					const rbx = box.current;
-					if (rbx === undefined) return;
-					rbx.CaptureFocus();
-					rbx.SelectionStart = 1;
-					rbx.CursorPosition = rbx.Text.size() + 1;
+					if (rbx !== undefined) selectText(rbx);
 				})}
 				{onRetry !== undefined && action("Retry", "Retry", 3, onRetry)}
 			</frame>
