@@ -71,6 +71,19 @@ if (stepStoryTitle(order, undefined, 1) !== "Examples/Button/Primary") throw new
 if (stepStoryTitle([], "Layout/Controls", 1) !== undefined) throw new Error("empty stories");
 const nav = navStoryTitles([{ title: "Layout/Controls" }, { title: "Plain" }, { title: "/Hidden" }, { title: "Examples/Button/Primary" }]);
 if (nav.join(",") !== "Examples/Button/Primary,Layout/Controls,/Hidden,Plain") throw new Error(`loose nav ${nav.join(",")}`);
+const looseTree = storyBranches(
+	[
+		{ title: "Layout/Controls", onClick: click },
+		{ title: "Plain", onClick: click },
+		{ title: "/Hidden", onClick: click },
+		{ title: "Alpha", onClick: click },
+	],
+	icons,
+);
+if (looseTree.map((branch) => branch.title).join() !== "Alpha,Layout,Plain") throw new Error(`loose leaves ${looseTree.map((branch) => branch.title).join()}`);
+const plain = looseTree.find((branch) => branch.title === "Plain");
+if (plain?.icon !== "story" || plain.leaves.length !== 0 || plain.onClick !== click) throw new Error("plain leaf");
+if (looseTree.some((branch) => branch.title === "/Hidden" || branch.title === "Hidden")) throw new Error("slash title stays out");
 
 const root = process.cwd();
 const sidebar = readFileSync(join(root, "src/packages/ui/storiesSidebar/components/StoriesSidebar.tsx"), "utf8");

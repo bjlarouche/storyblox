@@ -13,6 +13,7 @@ export interface StoryBranch {
 	title: string;
 	leaves: StoryLeaf[];
 	branches?: StoryBranch[];
+	onClick?: () => void;
 	icon?: string;
 }
 
@@ -123,10 +124,14 @@ export function navStoryTitles(stories: Array<{ title: string }>): string[] {
 
 export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBranch[] {
 	const roots: StoryBranch[] = [];
+	const loose = new Array<StoryNode>();
 
 	for (const story of stories) {
 		const parts = story.title.split("/");
-		if (parts.size() < 2 || parts[0].size() === 0) continue;
+		if (parts.size() < 2 || parts[0].size() === 0) {
+			if (parts.size() === 1 && story.title.size() > 0) loose.push(story);
+			continue;
+		}
 
 		let level = roots;
 		const last = parts.size() - 1;
@@ -154,5 +159,14 @@ export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBra
 		}
 	};
 	paint(roots);
+	for (const story of loose) {
+		roots.push({
+			title: story.title,
+			leaves: [],
+			onClick: story.onClick,
+			icon: icons.story,
+		});
+	}
+	sortByTitle(roots);
 	return roots;
 }

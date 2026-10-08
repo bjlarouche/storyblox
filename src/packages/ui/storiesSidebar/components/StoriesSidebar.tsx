@@ -114,7 +114,7 @@ function StoriesSidebar({
 		};
 
 		stories.forEach((story) => {
-			if (story.title.split("/").size() < 2) {
+			if (story.title.size() === 0) {
 				Log.Error("Story title is empty should follow the pattern '<componentName>/<storyName>'");
 			}
 		});
