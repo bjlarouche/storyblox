@@ -4,6 +4,7 @@ import { useActionLog } from "packages/ui/template/actionLogContext";
 
 interface Args {
 	disabled: boolean;
+	onClick?: () => void;
 }
 
 function ActionsDemo(args: Args) {
@@ -33,6 +34,14 @@ function ActionsDemo(args: Args) {
 				TextColor3={theme.palette.text.primary}
 				Event={{ Activated: () => record("press", 1) }}
 			/>
+			<textbutton
+				key="Callback"
+				Text="callback"
+				Size={new UDim2(0, 72, 1, 0)}
+				BackgroundColor3={theme.palette.primary.main}
+				TextColor3={theme.palette.text.primary}
+				Event={{ Activated: () => args.onClick?.() }}
+			/>
 			<textlabel
 				key="Hint"
 				Text="Open the Actions inspector tab"
@@ -51,7 +60,7 @@ export default {
 	title: "Shell/Actions",
 	description: "Capped action log with clear.",
 	features: { actions: true },
-	args: { disabled: false },
+	args: { disabled: false, onClick: () => {} },
 	argTypes: { disabled: { type: "boolean" } },
 	render: (args: Args) => <ActionsDemo {...args} />,
 };
