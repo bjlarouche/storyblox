@@ -177,10 +177,10 @@ function NoteBody(props: { article: Article; onOpen: (id: string) => void; onVot
 	return (
 		<ScrollView sx={FILL}>
 			<Stack direction="column" gap={1} sx={{ ...STACK, p: 2 }}>
-				<Typography text={props.article.topic} color="textSecondary" variant="caption" />
-				<Typography text={props.article.title} variant="h2" />
+				<Typography text={props.article.topic} color="textSecondary" variant="caption" sx={{ Size: new UDim2(1, 0, 0, 16) }} />
+				<Typography text={props.article.title} variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
 				<Markdown value={props.article.body} />
-				<Typography text="Related" variant="h3" />
+				<Typography text="Related" variant="h3" sx={{ Size: new UDim2(1, 0, 0, 24) }} />
 				{props.article.related.map((id) => {
 					const article = findArticle(id);
 					return (

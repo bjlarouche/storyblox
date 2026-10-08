@@ -191,7 +191,12 @@ function AlertRow(props: {
 					onActivated={() => props.onOpen(props.note.id)}
 				/>
 			</frame>
-			<Typography text={props.note.when} color="textSecondary" variant="caption" />
+			<Typography
+				text={props.note.when}
+				color="textSecondary"
+				variant="caption"
+				sx={{ LayoutOrder: 1, Size: UDim2.fromOffset(0, 16), AutomaticSize: Enum.AutomaticSize.X }}
+			/>
 			<Tooltip text="More actions">
 				<Button
 					text="More"
@@ -274,9 +279,9 @@ function NotificationCenter(args: Args) {
 						<Stack direction="column" gap={1} sx={STACK}>
 							<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
 								<Badge count={unread} color="primary">
-									<Typography text="Alerts" variant="h2" />
+									<Typography text="Alerts" variant="h2" sx={{ Size: UDim2.fromOffset(0, 32), AutomaticSize: Enum.AutomaticSize.X }} />
 								</Badge>
-								<Typography text={`${unread} unread`} color="textSecondary" />
+								<Typography text={`${unread} unread`} color="textSecondary" sx={{ Size: UDim2.fromOffset(0, 20), AutomaticSize: Enum.AutomaticSize.X }} />
 								<Tooltip text="Mark every alert read">
 									<Button text="Mark all" size="small" variant="outlined" disabled={unread === 0} onLeftClick={markAll} />
 								</Tooltip>
@@ -305,7 +310,7 @@ function NotificationCenter(args: Args) {
 									if (rows.size() === 0) return undefined;
 									return (
 										<Stack key={group} direction="column" gap={0} sx={STACK}>
-											<Typography text={group} variant="h3" />
+											<Typography text={group} variant="h3" sx={{ Size: new UDim2(1, 0, 0, 24) }} />
 											{rows.map((note) => (
 												<AlertRow
 													key={note.id}
@@ -351,10 +356,10 @@ function NotificationCenter(args: Args) {
 			<Drawer open={openNoteData !== undefined} edge="right" width={narrow ? 320 : 400} onClose={() => setOpenId("")}>
 				{openNoteData !== undefined ? (
 					<Stack direction="column" gap={1} sx={{ ...STACK, p: 2 }}>
-						<Typography text={openNoteData.group} color="textSecondary" variant="caption" />
-						<Typography text={openNoteData.title} variant="h2" />
-						<Typography text={openNoteData.when} color="textSecondary" />
-						<Typography text={openNoteData.detail} />
+						<Typography text={openNoteData.group} color="textSecondary" variant="caption" sx={{ Size: new UDim2(1, 0, 0, 16) }} />
+						<Typography text={openNoteData.title} variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
+						<Typography text={openNoteData.when} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
+						<Typography text={openNoteData.detail} sx={{ Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }} />
 						<Button
 							text={openNoteData.read ? "Mark unread" : "Mark read"}
 							size="small"

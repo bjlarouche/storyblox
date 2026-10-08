@@ -119,7 +119,7 @@ function Slot(props: { ability: Ability; picked: boolean; ink: Color3; onUse: (i
 				</textbutton>
 				</Badge>
 			</Tooltip>
-			<Typography text={props.ability.key} variant="caption" color="textSecondary" />
+			<Typography text={props.ability.key} variant="caption" color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 16) }} />
 		</Stack>
 	);
 }
@@ -173,7 +173,7 @@ function AbilityBar(args: Args) {
 		<Stack direction="row" gap={2} wrap alignItems="center" sx={STACK}>
 			<Meter label="Health" value={health} max={100} tint={HEALTH_TINT} />
 			<Meter label="Energy" value={energy} max={100} tint={ENERGY_TINT} />
-			<Typography text={`Coins ${coins}`} variant="caption" />
+			<Typography text={`Coins ${coins}`} variant="caption" sx={{ Size: UDim2.fromOffset(0, 16), AutomaticSize: Enum.AutomaticSize.X }} />
 		</Stack>
 	);
 
@@ -191,12 +191,12 @@ function AbilityBar(args: Args) {
 		) : (
 			<Paper elevation="raised">
 				<Stack direction="column" gap={1} sx={STACK}>
-					<Typography text={picked.name} variant="h2" />
-					<Typography text={`Rank ${picked.rank}`} color="textSecondary" />
-					<Typography text={picked.blurb} />
-					<Typography text={`${picked.cost} energy · ${picked.cool}s cooldown`} variant="caption" color="textSecondary" />
+					<Typography text={picked.name} variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
+					<Typography text={`Rank ${picked.rank}`} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
+					<Typography text={picked.blurb} sx={{ Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }} />
+					<Typography text={`${picked.cost} energy · ${picked.cool}s cooldown`} variant="caption" color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 16) }} />
 					<LinearProgress value={picked.cool > 0 ? picked.left / picked.cool : 0} sx={{ Size: new UDim2(1, 0, 0, 8) }} />
-					{note.size() > 0 ? <Typography text={note} color="error" /> : undefined}
+					{note.size() > 0 ? <Typography text={note} color="error" sx={{ Size: new UDim2(1, 0, 0, 20) }} /> : undefined}
 				</Stack>
 			</Paper>
 		);

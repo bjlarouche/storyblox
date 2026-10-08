@@ -106,26 +106,26 @@ function Onboarding(args: Args) {
 
 	const body = done ? (
 		<Stack direction="column" gap={1} sx={STACK}>
-			<Typography text="You're set." variant="h2" />
-			<Typography text={`${name} can start from the ${tone} tone.`} />
-			<Typography text={chosen.size() > 0 ? `Places: ${chosen.join(", ")}` : "No places picked."} color="textSecondary" />
-			<Typography text={reminders ? "Reminders on." : "Reminders off."} color="textSecondary" />
-			<Typography text={quiet ? "Quiet hours on." : "Quiet hours off."} color="textSecondary" />
+			<Typography text="You're set." variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
+			<Typography text={`${name} can start from the ${tone} tone.`} sx={{ Size: new UDim2(1, 0, 0, 20) }} />
+			<Typography text={chosen.size() > 0 ? `Places: ${chosen.join(", ")}` : "No places picked."} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
+			<Typography text={reminders ? "Reminders on." : "Reminders off."} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
+			<Typography text={quiet ? "Quiet hours on." : "Quiet hours off."} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 		</Stack>
 	) : step === 0 ? (
 		<Stack direction="column" gap={1} sx={STACK}>
-			<Typography text="Welcome" variant="h2" />
-			<Typography text="Set a name, a few preferences, and a tone. Nothing here is loud." />
+			<Typography text="Welcome" variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
+			<Typography text="Set a name, a few preferences, and a tone. Nothing here is loud." sx={{ Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }} />
 		</Stack>
 	) : step === 1 ? (
 		<Stack direction="column" gap={1} sx={STACK}>
-			<Typography text="Your name" variant="h2" />
+			<Typography text="Your name" variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
 			<Input text={name} placeholder="What should we call you" onTextChanged={setName} />
 			{showError ? <FormHelperText text="Add at least two letters." hasError /> : undefined}
 		</Stack>
 	) : step === 2 ? (
 		<Stack direction="column" gap={1} sx={STACK}>
-			<Typography text="Preferences" variant="h2" />
+			<Typography text="Preferences" variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
 			<Stack direction="row" gap={1} wrap sx={STACK}>
 				{PLACES.map((label) => (
 					<Chip
@@ -142,7 +142,7 @@ function Onboarding(args: Args) {
 		</Stack>
 	) : (
 		<Stack direction="column" gap={1} sx={STACK}>
-			<Typography text="Tone" variant="h2" />
+			<Typography text="Tone" variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
 			<Stack direction="row" gap={1} sx={STACK}>
 				<Chip label="Light" selected={tone === "light"} variant={tone === "light" ? "filled" : "outlined"} onActivated={() => setTone("light")} />
 				<Chip label="Dark" selected={tone === "dark"} variant={tone === "dark" ? "filled" : "outlined"} onActivated={() => setTone("dark")} />
@@ -150,8 +150,8 @@ function Onboarding(args: Args) {
 			<ThemeProvider theme={tone === "dark" ? DarkTheme : LightTheme}>
 				<Paper elevation="raised">
 					<Stack direction="column" gap={1} sx={STACK}>
-						<Typography text={name.size() > 0 ? name : "Your name"} variant="h3" />
-						<Typography text="This card follows the tone you pick." />
+						<Typography text={name.size() > 0 ? name : "Your name"} variant="h3" sx={{ Size: new UDim2(1, 0, 0, 24) }} />
+						<Typography text="This card follows the tone you pick." sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 						<Button text="Continue" size="small" variant="contained" onLeftClick={() => undefined} />
 					</Stack>
 				</Paper>

@@ -268,9 +268,12 @@ function Preview(props: { draft: Draft; onPinned: (pinned: boolean) => void }) {
 						<Typography
 							text={draft.name}
 							variant={draft.typeScale}
-							sx={{ fontSize: draft.fontSize, TextColor3: draft.ink }}
+							sx={{ fontSize: draft.fontSize, TextColor3: draft.ink, Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }}
 						/>
-						<Typography text="Notes for the north dock stay with the lane." sx={{ TextColor3: draft.ink }} />
+						<Typography
+							text="Notes for the north dock stay with the lane."
+							sx={{ TextColor3: draft.ink, Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }}
+						/>
 						<Button
 							text="Save note"
 							variant="contained"
@@ -280,7 +283,7 @@ function Preview(props: { draft: Draft; onPinned: (pinned: boolean) => void }) {
 					</Stack>
 				</Box>
 				<Paper elevation={draft.raised ? "raised" : "flat"} sx={STACK}>
-					<Typography text="Lane card" variant="subtitle2" />
+					<Typography text="Lane card" variant="subtitle2" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 				</Paper>
 				<Input text="" placeholder="Field note" disabled={draft.disabled} onTextChanged={() => {}} />
 				<Stack direction="row" gap={1} sx={STACK}>
@@ -317,7 +320,7 @@ function Preview(props: { draft: Draft; onPinned: (pinned: boolean) => void }) {
 					onClose={() => setDialogOpen(false)}
 					actions={<Button text="Close" variant="contained" color="primary" onLeftClick={() => setDialogOpen(false)} />}
 				>
-					<Typography text="Keep this on the north dock." />
+					<Typography text="Keep this on the north dock." sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 				</Dialog>
 			</Stack>
 		</ThemeProvider>

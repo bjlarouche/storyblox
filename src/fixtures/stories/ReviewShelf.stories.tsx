@@ -191,7 +191,7 @@ function ReviewShelf(args: Args) {
 		<frame Size={new UDim2(0, size.width, 0, size.height)} BackgroundColor3={theme.palette.surface.canvas} BorderSizePixel={0} ClipsDescendants>
 			<ScrollView sx={{ Size: new UDim2(1, 0, 1, 0), p: 2 }}>
 				<Stack direction="column" gap={2} sx={STACK}>
-					<Typography text="Reviews" variant="h2" />
+					<Typography text="Reviews" variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
 					<Input text={query} placeholder="Search places" onTextChanged={setQuery} />
 					<Stack direction="row" gap={1} wrap sx={STACK}>
 						{FILTERS.map((name) => (
@@ -244,12 +244,12 @@ function ReviewShelf(args: Args) {
 			<Drawer open={open !== undefined} edge="right" width={narrow ? 320 : 420} onClose={() => setOpenId("")}>
 				{open !== undefined ? (
 					<Stack direction="column" gap={1} sx={{ ...STACK, p: 2 }}>
-						<Typography text={open.title} variant="h2" />
+						<Typography text={open.title} variant="h2" sx={{ Size: new UDim2(1, 0, 0, 32) }} />
 						<Stars value={open.stars} readOnly />
-						<Typography text={open.person} color="textSecondary" />
+						<Typography text={open.person} color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 						<Chip label={open.status} variant={open.status === "Posted" ? "filled" : "outlined"} />
 						<Typography text={open.note} sx={{ Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y, TextWrapped: true }} />
-						<Typography text={`${open.helpful} found this helpful`} variant="caption" color="textSecondary" />
+						<Typography text={`${open.helpful} found this helpful`} variant="caption" color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 16) }} />
 						<Stack direction="row" gap={1} sx={STACK}>
 							<Button text="Helpful" size="small" variant="outlined" onLeftClick={markHelpful} />
 							<Button text="Share" size="small" variant="text" onLeftClick={() => setNotice(`Kept ${open.title}`)} />

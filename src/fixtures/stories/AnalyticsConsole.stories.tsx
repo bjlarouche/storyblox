@@ -255,7 +255,7 @@ function AnalyticsConsole(args: Args) {
 					</frame>
 					<Stack direction="column" gap={2} sx={STACK}>
 							<Stack direction={narrow ? "column" : "row"} gap={1} alignItems="center" sx={STACK}>
-								<Stack direction="row" gap={1} sx={STACK}>
+								<Stack direction="row" gap={1} sx={{ Size: new UDim2(0, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.XY }}>
 									{SEGMENTS.map((label) => (
 										<Chip key={label} label={label} size="small" selected={segment === label} onActivated={() => { setSegment(label); setPage(1); }} />
 									))}
