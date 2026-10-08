@@ -67,6 +67,7 @@ const required = [
 			'key="ZoomOut"',
 			'key="Grid"',
 			'key="Fit"',
+			'key="Size"',
 			'key="Orientation"',
 			'key="Background"',
 			'id="Remount"',

@@ -7,7 +7,17 @@ import { StoryCallback, StoryElement } from "interfaces/Story";
 import { createCleanupGate, readTemplateResult } from "../cleanupGate";
 import { resolveStoryTools, StoryTools } from "packages/defineStory";
 import { CAMERA_DISTANCE, CAMERA_PITCH, dragYaw, ORBIT_STEP, orbitOffset } from "packages/previewCamera";
-import { flipOrientation, GRID_CELL, gridLineCount, previewScale, previewSize, stepZoom } from "packages/previewScale";
+import {
+	activePreview,
+	flipOrientation,
+	GRID_CELL,
+	gridLineCount,
+	previewPresetLabel,
+	previewScale,
+	previewSize,
+	stepPreviewPreset,
+	stepZoom,
+} from "packages/previewScale";
 import { extraGlobalEntries, mergeGlobals } from "packages/storyGlobals";
 import { collectLoaders, settleLoaders } from "packages/storyLoaders";
 import { bindActionArgs, createActionLog } from "packages/storyActions";
@@ -217,6 +227,7 @@ function Template({
 	const [zoom, setZoom] = useState(1);
 	const [yaw, setYaw] = useState(0);
 	const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
+	const [sizePick, setSizePick] = useState<string | undefined>();
 	const [bgStep, setBgStep] = useState(0);
 	const [globalPatch, setGlobalPatch] = useState<{ [key: string]: unknown }>({});
 	const [loaderPhase, setLoaderPhase] = useState<"loading" | "error" | "ready">("ready");
@@ -277,6 +288,7 @@ function Template({
 		setGlobalPatch({});
 		const previewOrientation = (story as { preview?: { orientation?: unknown } } | undefined)?.preview?.orientation;
 		setOrientation(previewOrientation === "landscape" ? "landscape" : "portrait");
+		setSizePick(undefined);
 	}
 	const loaderFns = (
 		story as {
@@ -317,7 +329,7 @@ function Template({
 	});
 	const hasStoryTools = storyTools.size() > 0;
 	const topBars = chromeHeight + (hasStoryTools ? storyBarHeight : 0);
-	const mountKey = `${storyKey}@${epoch}`;
+	const mountKey = `${storyKey}@${epoch}@${sizePick ?? ""}`;
 	const mounted = useRef("");
 	const themeMounted = useRef<Theme | undefined>(undefined);
 	const mountFrame = useRef<Frame>();
@@ -520,7 +532,7 @@ function Template({
 				}
 			).preview;
 			const viewport = logical?.kind === "viewport" && !native;
-			const size = previewSize(logical, orientation);
+			const size = previewSize(activePreview(logical, sizePick), orientation);
 			const declared = size !== undefined;
 			const logicalWidth = size?.width ?? dock.x;
 			const logicalHeight = size?.height ?? dock.y;
@@ -740,7 +752,20 @@ function Template({
 								TextColor3={theme.palette.primary.main}
 								Event={{ MouseButton1Click: () => setFit((current) => !current) }}
 							/>
-							{previewSize((story as { preview?: unknown } | undefined)?.preview) !== undefined && (
+							<textbutton
+								key="Size"
+								Text={previewPresetLabel(sizePick)}
+								LayoutOrder={10}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.primary.main}
+								TextTransparency={sizePick === undefined ? 0.45 : 0}
+								Event={{ MouseButton1Click: () => setSizePick((current) => stepPreviewPreset(current)) }}
+							/>
+							{previewSize(activePreview((story as { preview?: unknown } | undefined)?.preview, sizePick)) !== undefined && (
 								<textbutton
 									key="Orientation"
 									Text={orientation === "portrait" ? "Portrait" : "Landscape"}
