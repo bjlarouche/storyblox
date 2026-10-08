@@ -8,7 +8,7 @@ Array.prototype.size = function size() {
 	return this.length;
 };
 
-const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch, adoptTree, orderedStoryTitles, stepStoryTitle } = await import(
+const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch, adoptTree, orderedStoryTitles, stepStoryTitle, navStoryTitles } = await import(
 	"../src/packages/ui/storiesSidebar/storyTree.ts"
 );
 
@@ -69,6 +69,8 @@ if (stepStoryTitle(order, "Layout/Controls", 1) !== "Examples/Button/Primary") t
 if (stepStoryTitle(order, "Examples/Button/Primary", -1) !== "Layout/Controls") throw new Error("wrap previous");
 if (stepStoryTitle(order, undefined, 1) !== "Examples/Button/Primary") throw new Error("first story");
 if (stepStoryTitle([], "Layout/Controls", 1) !== undefined) throw new Error("empty stories");
+const nav = navStoryTitles([{ title: "Layout/Controls" }, { title: "Plain" }, { title: "/Hidden" }, { title: "Examples/Button/Primary" }]);
+if (nav.join(",") !== "Examples/Button/Primary,Layout/Controls,/Hidden,Plain") throw new Error(`loose nav ${nav.join(",")}`);
 
 const root = process.cwd();
 const sidebar = readFileSync(join(root, "src/packages/ui/storiesSidebar/components/StoriesSidebar.tsx"), "utf8");
