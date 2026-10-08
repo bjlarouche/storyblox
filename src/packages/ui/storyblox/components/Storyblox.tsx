@@ -16,7 +16,7 @@ import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
 import { parseFavorites, toggleFavorite } from "../../storiesSidebar/storyTree";
 import { useDragScroll } from "../../scroll";
-import { normalizeExport } from "../normalizeStory";
+import { normalizeExport, storyModuleSuffix } from "../normalizeStory";
 import { storyFromExport } from "../storyAdapter";
 import { acceptGeneration, nextGeneration } from "../storyGeneration";
 import { insideCanvas } from "../canvasReady";
@@ -313,11 +313,12 @@ function Storyblox(props: StorybloxProps) {
 			const token = generation.current;
 			task.spawn(() => {
 				if (generation.current !== token) return;
-				if (root.IsA("ModuleScript") && root.Name.sub(-extension.size()) === extension) {
+				const suffix = root.IsA("ModuleScript") ? storyModuleSuffix(root.Name, extension) : undefined;
+				if (root.IsA("ModuleScript") && suffix !== undefined) {
 					if (seenModules.current.includes(root)) return;
 					seenModules.current.push(root);
 					try {
-						const story = adaptStory(normalizeExport(loadStoryModule(root), root.Name, extension));
+						const story = adaptStory(normalizeExport(loadStoryModule(root), root.Name, suffix));
 						if (story === undefined) {
 							logDebug(`Rejected story export ${root.GetFullName()}`);
 							return;
@@ -327,7 +328,7 @@ function Storyblox(props: StorybloxProps) {
 						const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
 							logDebug(`Story source updated: ${root.GetFullName()}`);
 
-							const updatedStory = adaptStory(normalizeExport(loadStoryModule(root), root.Name, extension));
+							const updatedStory = adaptStory(normalizeExport(loadStoryModule(root), root.Name, suffix));
 							if (updatedStory === undefined) {
 								session.remove(story.title);
 								return;
@@ -362,7 +363,7 @@ function Storyblox(props: StorybloxProps) {
 					}
 				} else if (STORY_ROOT_CLASSES.includes(root.ClassName)) {
 					for (const child of root.GetDescendants()) {
-						if (child.IsA("ModuleScript") && child.Name.sub(-extension.size()) === extension) {
+						if (child.IsA("ModuleScript") && storyModuleSuffix(child.Name, extension) !== undefined) {
 							findStories(child);
 						}
 					}

@@ -7,7 +7,12 @@ const root = process.cwd();
 const dev = JSON.parse(readFileSync(join(root, "plugin/plugin.project.json"), "utf8"));
 const stories = dev.tree.ServerStorage.StorybloxPlugin.stories;
 const storyJson = JSON.stringify(stories);
-if (!storyJson.includes("fixtures/stories") || !storyJson.includes("fixtures/native") || !storyJson.includes("fixtures/viewport")) {
+if (
+	!storyJson.includes("fixtures/stories") ||
+	!storyJson.includes("fixtures/native") ||
+	!storyJson.includes("fixtures/viewport") ||
+	!storyJson.includes("fixtures/functionStory")
+) {
 	throw new Error("dev plugin project is missing fixture stories");
 }
 if (!existsSync(join(root, "out/fixtures/automation/init.luau"))) {
@@ -83,6 +88,7 @@ const needles = [
 	"Dev/Crash Story",
 	"intentional control crash",
 	"intentional story crash",
+	"function story",
 ];
 
 try {
