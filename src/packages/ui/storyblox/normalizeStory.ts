@@ -269,6 +269,21 @@ function decoratorsOf(value: unknown): Array<(inner: (args: unknown) => unknown)
 	return kept;
 }
 
+function functionTable(mod: { [key: string]: unknown }, moduleName: string, suffix: string): NormalizedStory | undefined {
+	if (mod.default !== undefined || mod.renderer !== undefined || typeOf(mod.mount) === "function") return undefined;
+	if (typeOf(mod.fn) !== "function") return undefined;
+	const argTypes = mod.argTypes !== undefined ? mod.argTypes : mod.controls;
+	if (!argsMatch(mod.args, argTypes)) return { kind: "reject", reason: "args" };
+	const title = typeOf(mod.title) === "string" ? (mod.title as string) : titleFromModuleName(moduleName, suffix);
+	return {
+		kind: "native",
+		title,
+		mount: mod.fn as (target: unknown) => unknown,
+		args: mod.args,
+		argTypes,
+	};
+}
+
 export function normalizeExport(mod: unknown, moduleName: string, suffix: string): NormalizedStory {
 	if (!matchesStoryName(moduleName, suffix)) {
 		return { kind: "reject", reason: "suffix" };
@@ -279,6 +294,8 @@ export function normalizeExport(mod: unknown, moduleName: string, suffix: string
 	if (typeOf(mod) !== "table") {
 		return { kind: "reject", reason: "export" };
 	}
+	const tableStory = functionTable(mod as { [key: string]: unknown }, moduleName, suffix);
+	if (tableStory !== undefined) return tableStory;
 	const exported = mod as { default?: unknown; renderer?: unknown; mount?: unknown; title?: unknown };
 	if (typeOf(exported.default) === "table") {
 		const candidate = exported.default as { template?: unknown; render?: unknown };
