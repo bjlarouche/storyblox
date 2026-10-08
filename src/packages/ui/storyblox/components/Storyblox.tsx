@@ -10,7 +10,7 @@ import {
 } from "@rbxts/uiblox";
 import { STORYBLOX_LOGO, VERSION } from "constants/AppConstants";
 import { Story } from "interfaces";
-import { ErrorPanel, SafeBoundary, SplitPane, Template } from "../../template";
+import { ErrorPanel, SafeBoundary, SplitPane, Template, copyText, selectText } from "../../template";
 import { withStoryControls } from "../../template/storyControls";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
@@ -27,8 +27,6 @@ import { filterStoriesByTags, parseTagList } from "packages/storyTags";
 import { STORY_ROOT_CLASSES, mergeStoryRootPaths, parseRootList, splitRootPath } from "packages/storyRoots";
 import { narrowShell } from "../shellLayout";
 import SettingsPanel from "./SettingsPanel";
-
-declare function setclipboard(value: string): void;
 
 const DEFAULT_EXTENSION = ".stories";
 const SIDEBAR_WIDTH = 180;
@@ -218,6 +216,8 @@ function Storyblox(props: StorybloxProps) {
 	const [includeTags, setIncludeTags] = useState<string[]>([]);
 	const [excludeTags, setExcludeTags] = useState<string[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
+	const [copyFailed, setCopyFailed] = useState(false);
+	const copyBox = useRef<TextBox>();
 	const [previewKey, setPreviewKey] = useState(0);
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
 	const [shellWidth, setShellWidth] = useState(0);
@@ -376,6 +376,16 @@ function Storyblox(props: StorybloxProps) {
 		},
 		[trackStory, logDebug],
 	);
+
+	useEffect(() => {
+		setCopyFailed(false);
+	}, [selectedStory?.title]);
+
+	useEffect(() => {
+		const rbx = copyBox.current;
+		if (!copyFailed || rbx === undefined) return;
+		selectText(rbx);
+	}, [copyFailed]);
 
 	// Did mount
 	useEffect(() => {
@@ -831,16 +841,36 @@ function Storyblox(props: StorybloxProps) {
 							TextColor3={theme.palette.primary.main}
 							Event={{
 								MouseButton1Click: () => {
-									pcall(() => setclipboard(selectedStory.title));
+									if (copyText(selectedStory.title)) {
+										setCopyFailed(false);
+										return;
+									}
+									setCopyFailed(true);
 								},
 							}}
 						/>
 					)}
 				</frame>
+				{copyFailed && selectedStory !== undefined && (
+					<textbox
+						key="CopyIdBox"
+						ref={copyBox}
+						Text={selectedStory.title}
+						LayoutOrder={2}
+						Size={new UDim2(1, 0, 0, theme.spacing.calc(2))}
+						ClearTextOnFocus={false}
+						TextEditable={true}
+						Font={theme.typography.fontFamilies.default}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.text.primary}
+						BackgroundColor3={theme.palette.surface.paper}
+						BorderSizePixel={0}
+					/>
+				)}
 				<textlabel
 					key="InspectorBody"
 					Text={storyInspector(selectedStory as never)}
-					LayoutOrder={2}
+					LayoutOrder={3}
 					Size={new UDim2(1, 0, 0, 0)}
 					AutomaticSize={Enum.AutomaticSize.Y}
 					TextWrapped={true}
