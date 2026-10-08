@@ -1103,7 +1103,7 @@ function Template({
 													title: storyKey,
 													description: (story as { description?: unknown } | undefined)?.description,
 													argTypes,
-													source: story?.source,
+													source: (story as { sourceText?: string } | undefined)?.sourceText ?? story?.source,
 												}
 											: undefined
 									}

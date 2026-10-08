@@ -151,9 +151,11 @@ function DocsPanel({ theme, title, description, argTypes, source }: DocsPanelPro
 		);
 		order += 1;
 		rows.push(
-			<textlabel
+			<textbox
 				key="Source"
 				Text={source as string}
+				ClearTextOnFocus={false}
+				TextEditable={false}
 				LayoutOrder={order}
 				Size={new UDim2(1, 0, 0, 0)}
 				AutomaticSize={Enum.AutomaticSize.Y}
@@ -163,6 +165,7 @@ function DocsPanel({ theme, title, description, argTypes, source }: DocsPanelPro
 				TextSize={theme.typography.fontSizes.caption}
 				TextColor3={muted}
 				TextXAlignment={Enum.TextXAlignment.Left}
+				TextYAlignment={Enum.TextYAlignment.Top}
 			/>,
 		);
 	}

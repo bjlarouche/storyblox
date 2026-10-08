@@ -34,6 +34,12 @@ const SIDEBAR_MIN = 140;
 const SIDEBAR_MAX = 360;
 const CASE_DEADLINE = 10;
 
+function moduleSource(root: ModuleScript) {
+	const text = root.Source;
+	if (text.size() > 0) return text;
+	return root.GetFullName();
+}
+
 function pluginStories(): Instance | undefined {
 	return ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
 }
@@ -341,11 +347,21 @@ function Storyblox(props: StorybloxProps) {
 								session.remove(story.title);
 							}
 
-							trackStory({ ...updatedStory, language: storyLanguage(root.Source), source: root.GetFullName() } as Story);
+							trackStory({
+								...updatedStory,
+								language: storyLanguage(root.Source),
+								source: root.GetFullName(),
+								sourceText: moduleSource(root),
+							} as Story);
 						});
 
 						// Start tracking story
-						trackStory({ ...story, language: storyLanguage(root.Source), source: root.GetFullName() } as Story);
+						trackStory({
+							...story,
+							language: storyLanguage(root.Source),
+							source: root.GetFullName(),
+							sourceText: moduleSource(root),
+						} as Story);
 
 						// Remove story if root is being removed
 						root.Destroying.Connect(() => {
