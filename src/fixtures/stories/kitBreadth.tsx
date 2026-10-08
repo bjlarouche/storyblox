@@ -14,6 +14,7 @@ const kit = Uiblox as unknown as Record<string, AnyComp>;
 export const Dialog = kit.Dialog;
 export const Paper = kit.Paper;
 export const Menu = kit.Menu;
+export const Popover = kit.Popover;
 export const ListItem = kit.ListItem;
 export const Card = kit.Card;
 export const Chip = kit.Chip;
