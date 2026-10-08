@@ -90,8 +90,8 @@ function StatCard(props: { label: string; value: string; width: number }) {
 			}}
 		>
 			<Stack direction="column" gap={0} sx={STACK}>
-				<Typography text={props.value} variant="h3" />
-				<Typography text={props.label} color="textSecondary" variant="caption" />
+				<Typography text={props.value} variant="h3" sx={STACK} />
+				<Typography text={props.label} color="textSecondary" variant="caption" sx={STACK} />
 			</Stack>
 		</Box>
 	);
@@ -100,7 +100,7 @@ function StatCard(props: { label: string; value: string; width: number }) {
 function PartyList(props: { onOpen: (name: string) => void }) {
 	return (
 		<Stack direction="column" gap={0} sx={STACK}>
-			<Typography text="Party" variant="h3" />
+			<Typography text="Party" variant="h3" sx={STACK} />
 			{FRIENDS.map((friend) => (
 				<ListItem
 					key={friend.id}
@@ -147,14 +147,14 @@ function ProfileBody(props: {
 				<Stack direction="column" gap={2} sx={STACK}>
 					{ENTRIES.map((entry) => (
 						<Stack key={entry.id} direction="column" gap={0} sx={STACK}>
-							<Typography text={entry.when} color="textSecondary" variant="caption" />
+							<Typography text={entry.when} color="textSecondary" variant="caption" sx={STACK} />
 							<Preview value={entry.body} onLink={props.onLink} />
 						</Stack>
 					))}
 				</Stack>
 			) : (
 				<Stack direction="column" gap={1} sx={STACK}>
-					<Typography text="Equipped" variant="subtitle2" />
+					<Typography text="Equipped" variant="subtitle2" sx={STACK} />
 					<Stack direction="row" gap={1} wrap sx={STACK}>
 						{EQUIPPED.map((label) => (
 							<Chip
@@ -166,7 +166,7 @@ function ProfileBody(props: {
 							/>
 						))}
 					</Stack>
-					<Typography text="Badges" variant="subtitle2" />
+					<Typography text="Badges" variant="subtitle2" sx={STACK} />
 					<Stack direction="row" gap={1} wrap sx={STACK}>
 						{BADGES.map((label) => (
 							<Chip key={label} label={label} variant="outlined" onActivated={() => props.onItem(label)} />
@@ -240,10 +240,10 @@ function PlayerProfile(args: Args) {
 						<Badge variant="dot" color="success">
 							<Avatar name={name} size={64} />
 						</Badge>
-						<Stack direction="column" gap={0} sx={STACK}>
-							<Typography text={name} variant="h2" />
-							<Typography text={presence} color="textSecondary" />
-							<Typography text="Level 12" variant="subtitle2" />
+						<Stack direction="column" gap={0} sx={narrow ? STACK : { Size: new UDim2(0, 240, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }}>
+							<Typography text={name} variant="h2" sx={STACK} />
+							<Typography text={presence} color="textSecondary" sx={STACK} />
+							<Typography text="Level 12" variant="subtitle2" sx={STACK} />
 						</Stack>
 						<Stack direction="row" gap={1} wrap sx={STACK}>
 							<Tooltip text="Keep this profile on your list">
