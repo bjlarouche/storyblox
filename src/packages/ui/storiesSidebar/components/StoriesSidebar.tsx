@@ -22,7 +22,7 @@ import useStoriesSidebarStyles from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
 import { searchStories, stepSearchIndex, StorySearchHit } from "../storySearch";
-import { adoptTree, favoriteBranch, orderedStoryTitles, sortByTitle, stepStoryTitle, storyBranches } from "../storyTree";
+import { adoptTree, favoriteBranch, navStoryTitles, sortByTitle, stepStoryTitle, storyBranches } from "../storyTree";
 
 const SEARCH_DELAY = 0.2;
 
@@ -190,9 +190,7 @@ function StoriesSidebar({
 			if (!alt) return;
 			const delta = key === Enum.KeyCode.Down ? 1 : key === Enum.KeyCode.Up ? -1 : 0;
 			if (delta === 0) return;
-			const icons = { folder: "", story: "", starred: "" };
-			const nodes = storiesRef.current.map((story) => ({ title: story.title, onClick: () => {} }));
-			const chosen = stepStoryTitle(orderedStoryTitles(storyBranches(nodes, icons)), selectedRef.current, delta);
+			const chosen = stepStoryTitle(navStoryTitles(storiesRef.current), selectedRef.current, delta);
 			if (chosen === undefined) return;
 			const story = storiesRef.current.find((item) => item.title === chosen);
 			if (story !== undefined) onClickRef.current(story);

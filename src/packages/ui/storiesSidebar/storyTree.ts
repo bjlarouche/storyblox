@@ -101,6 +101,26 @@ export function stepStoryTitle(titles: string[], current: string | undefined, de
 	return titles[cursor];
 }
 
+function looseTitle(title: string) {
+	if (title.size() === 0) return false;
+	const parts = title.split("/");
+	return parts.size() < 2 || parts[0].size() === 0;
+}
+
+export function navStoryTitles(stories: Array<{ title: string }>): string[] {
+	const icons = { folder: "", story: "", starred: "" };
+	const nodes = new Array<StoryNode>();
+	const loose = new Array<{ title: string }>();
+	for (const story of stories) {
+		nodes.push({ title: story.title, onClick: () => {} });
+		if (looseTitle(story.title)) loose.push(story);
+	}
+	sortByTitle(loose);
+	const titles = orderedStoryTitles(storyBranches(nodes, icons));
+	for (const story of loose) titles.push(story.title);
+	return titles;
+}
+
 export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBranch[] {
 	const roots: StoryBranch[] = [];
 
