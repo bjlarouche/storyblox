@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 Array.prototype.size = function size() {
 	return this.length;
 };
@@ -9,5 +11,9 @@ const box = { x: 10, y: 20, width: 40.6, height: 12.2, name: "Btn", className: "
 if (formatMeasure(box) !== "Btn 40×12 @ 10,20") throw new Error(`format ${formatMeasure(box)}`);
 const rel = relativeBox(box, { x: 5, y: 5, width: 100, height: 100, name: "Root", className: "Frame" });
 if (rel.x !== 5 || rel.y !== 15 || rel.width !== 40.6) throw new Error("relative");
+
+const template = readFileSync("src/packages/ui/template/components/Template.tsx", "utf8");
+if (template.includes("outlineEnabled") || template.includes("measureEnabled")) throw new Error("outline gate");
+if (!template.includes('key="Outline"') || !template.includes('key="Measure"')) throw new Error("toolbar");
 
 console.log("layout tools ok");

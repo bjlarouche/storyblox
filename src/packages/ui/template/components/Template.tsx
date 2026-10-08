@@ -244,14 +244,12 @@ function Template({
 	const actionLog = useMemo(() => createActionLog(), [storyKey]);
 	const features = (
 		story as {
-			features?: { actions?: boolean; interactions?: boolean; docs?: boolean; outline?: boolean; measure?: boolean };
+			features?: { actions?: boolean; interactions?: boolean; docs?: boolean };
 		} | undefined
 	)?.features;
 	const actionsEnabled = features?.actions === true;
 	const interactionsEnabled = features?.interactions === true;
 	const docsEnabled = features?.docs === true;
-	const outlineEnabled = features?.outline === true;
-	const measureEnabled = features?.measure === true;
 	const actionApi = useMemo(
 		() => ({
 			disabled: !actionsEnabled,
@@ -769,48 +767,44 @@ function Template({
 								TextTransparency={bgStep === 0 ? 0.45 : 0}
 								Event={{ MouseButton1Click: () => setBgStep((current) => (current + 1) % 3) }}
 							/>
-							{outlineEnabled && (
-								<textbutton
-									key="Outline"
-									Text={outline ? "Outline on" : "Outline"}
-									LayoutOrder={6}
-									AutomaticSize={Enum.AutomaticSize.X}
-									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-									BackgroundTransparency={1}
-									Font={theme.typography.fontFamilies.semibold}
-									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.palette.primary.main}
-									TextTransparency={outline ? 0 : 0.45}
-									Event={{
-										MouseButton1Click: () =>
-											setOutline((current) => {
-												if (current) setMeasure(false);
-												return !current;
-											}),
-									}}
-								/>
-							)}
-							{measureEnabled && (
-								<textbutton
-									key="Measure"
-									Text={measure ? "Measure on" : "Measure"}
-									LayoutOrder={7}
-									AutomaticSize={Enum.AutomaticSize.X}
-									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-									BackgroundTransparency={1}
-									Font={theme.typography.fontFamilies.semibold}
-									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.palette.primary.main}
-									TextTransparency={measure ? 0 : 0.45}
-									Event={{
-										MouseButton1Click: () =>
-											setMeasure((current) => {
-												if (!current) setOutline(true);
-												return !current;
-											}),
-									}}
-								/>
-							)}
+							<textbutton
+								key="Outline"
+								Text={outline ? "Outline on" : "Outline"}
+								LayoutOrder={6}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.primary.main}
+								TextTransparency={outline ? 0 : 0.45}
+								Event={{
+									MouseButton1Click: () =>
+										setOutline((current) => {
+											if (current) setMeasure(false);
+											return !current;
+										}),
+								}}
+							/>
+							<textbutton
+								key="Measure"
+								Text={measure ? "Measure on" : "Measure"}
+								LayoutOrder={7}
+								AutomaticSize={Enum.AutomaticSize.X}
+								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+								BackgroundTransparency={1}
+								Font={theme.typography.fontFamilies.semibold}
+								TextSize={theme.typography.fontSizes.caption}
+								TextColor3={theme.palette.primary.main}
+								TextTransparency={measure ? 0 : 0.45}
+								Event={{
+									MouseButton1Click: () =>
+										setMeasure((current) => {
+											if (!current) setOutline(true);
+											return !current;
+										}),
+								}}
+							/>
 							<IconButton
 								id="Remount"
 								icon={REMOUNT_ICON}
