@@ -37,10 +37,12 @@ function VirtualListStory(args: Args) {
 					<textlabel
 						Size={UDim2.fromScale(1, 1)}
 						BackgroundTransparency={item === args.scrollTo ? 0.6 : 1}
-						Text={`Row ${item}`}
+						Text={item === 1 ? "A longer row name that stays on one line" : `Row ${item}`}
 						TextSize={16}
 						TextColor3={theme.palette.text.primary}
 						TextXAlignment={Enum.TextXAlignment.Left}
+						TextTruncate={Enum.TextTruncate.AtEnd}
+						TextWrapped={false}
 					>
 						<uipadding PaddingLeft={inset} PaddingRight={inset} />
 					</textlabel>
