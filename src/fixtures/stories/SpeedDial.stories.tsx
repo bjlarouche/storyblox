@@ -21,8 +21,8 @@ function SpeedDialStory(args: Args) {
 				direction={args.direction}
 				openIcon={openIcon}
 				actions={[
-					{ icon: Icons.Save },
-					{ icon: Icons.Settings },
+					{ icon: Icons.Save, label: "Save" },
+					{ icon: Icons.Settings, label: "A longer action name" },
 					{ icon: Icons.Delete },
 				]}
 			/>
