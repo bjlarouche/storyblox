@@ -108,7 +108,7 @@ function NameCell(props: { name: string; you: boolean }) {
 
 function DeltaCell(props: { value: number }) {
 	const color = props.value > 0 ? "primary" : props.value < 0 ? "error" : "textSecondary";
-	return <Typography text={deltaText(props.value)} color={color} sx={SHRINK} />;
+	return <Typography text={deltaText(props.value)} color={color} align="right" sx={{ ...SHRINK, ...STACK }} />;
 }
 
 function Standings(args: Args) {
