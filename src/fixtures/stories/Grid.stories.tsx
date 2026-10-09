@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
 import { Grid } from "./kitBreadth";
 
 interface Args {
@@ -23,8 +24,57 @@ function Cell(props: { order: number; text: string }) {
 	);
 }
 
+function GridStory(args: Args) {
+	const { theme } = useTheme();
+	return (
+		<frame Size={new UDim2(0, 280, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+			<uilistlayout
+				FillDirection={Enum.FillDirection.Vertical}
+				Padding={new UDim(0, 16)}
+				SortOrder={Enum.SortOrder.LayoutOrder}
+			/>
+			<frame LayoutOrder={1} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<Grid
+					cellSize={UDim2.fromOffset(args.cell, args.cell)}
+					gap={args.gap}
+					columns={args.columns}
+					startCorner={args.startCorner}
+					fillDirection={
+						args.fillDirection === "Vertical" ? Enum.FillDirection.Vertical : Enum.FillDirection.Horizontal
+					}
+				>
+					<Cell order={0} text="1" />
+					<Cell order={1} text="2" />
+					<Cell order={2} text="3" />
+					<Cell order={3} text="4" />
+					<Cell order={4} text="5" />
+					<Cell order={5} text="6" />
+				</Grid>
+			</frame>
+			<frame
+				LayoutOrder={2}
+				Size={new UDim2(1, 0, 0, 88)}
+				BackgroundColor3={theme.palette.surface.paper}
+				BorderSizePixel={0}
+			>
+				<Grid
+					gap={1}
+					columns={3}
+					cellSize={UDim2.fromOffset(64, 28)}
+					sx={{ Size: UDim2.fromScale(1, 1), AutomaticSize: Enum.AutomaticSize.None, p: 1 }}
+				>
+					<Cell order={0} text="A" />
+					<Cell order={1} text="B" />
+					<Cell order={2} text="C" />
+				</Grid>
+			</frame>
+		</frame>
+	);
+}
+
 export default {
 	title: "Layout/Grid",
+	preview: { kind: "gui", width: 300, height: 280 },
 	args: { columns: 3, cell: 64, gap: 1, startCorner: "top-left", fillDirection: "Horizontal" },
 	argTypes: {
 		columns: { type: "number", min: 1, max: 6, step: 1 },
@@ -36,22 +86,5 @@ export default {
 		},
 		fillDirection: { type: "enum", options: ["Horizontal", "Vertical"] },
 	},
-	render: (args: Args) => (
-		<Grid
-			cellSize={UDim2.fromOffset(args.cell, args.cell)}
-			gap={args.gap}
-			columns={args.columns}
-			startCorner={args.startCorner}
-			fillDirection={
-				args.fillDirection === "Vertical" ? Enum.FillDirection.Vertical : Enum.FillDirection.Horizontal
-			}
-		>
-			<Cell order={0} text="1" />
-			<Cell order={1} text="2" />
-			<Cell order={2} text="3" />
-			<Cell order={3} text="4" />
-			<Cell order={4} text="5" />
-			<Cell order={5} text="6" />
-		</Grid>
-	),
+	render: (args: Args) => <GridStory {...args} />,
 };
