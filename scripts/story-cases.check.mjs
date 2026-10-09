@@ -73,5 +73,8 @@ if (pointerClick({ IsA: () => false, AbsolutePosition: { X: 0, Y: 0 }, AbsoluteS
 }
 const template = readFileSync(join(process.cwd(), "src/packages/ui/template/components/Template.tsx"), "utf8");
 if (!template.includes("pointerClick(") || !template.includes("VirtualInputManager")) throw new Error("click wiring");
+if (!readFileSync(join(process.cwd(), "src/packages/storyCases.ts"), "utf8").includes("IsA(className: string): boolean")) {
+	throw new Error("IsA must be a method so it compiles to a colon call");
+}
 
 console.log("story cases ok");
