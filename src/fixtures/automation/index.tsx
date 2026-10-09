@@ -47,6 +47,31 @@ function loadStoryModule(moduleScript: ModuleScript): unknown {
 	return runtime.import(script, moduleScript);
 }
 
+function wantsFit(raw: unknown) {
+	return raw === true || raw === 1 || raw === "1" || raw === "fit";
+}
+
+function applyFit(storiesRoot: Instance, host: Frame) {
+	const story = host.FindFirstChild("Story");
+	if (story === undefined || !story.IsA("GuiObject")) return;
+	const existing = story.FindFirstChild("Fit");
+	if (!wantsFit(storiesRoot.GetAttribute("storyblox-viewport-fit"))) {
+		if (existing !== undefined && existing.IsA("UIScale")) existing.Destroy();
+		return;
+	}
+	const content = story.FindFirstChildWhichIsA("GuiObject");
+	const width = content?.Size.X.Offset ?? 0;
+	const height = content?.Size.Y.Offset ?? 0;
+	if (content === undefined || width <= 0 || height <= 0 || host.AbsoluteSize.X <= 0 || host.AbsoluteSize.Y <= 0) return;
+	let scale = existing;
+	if (scale === undefined || !scale.IsA("UIScale")) {
+		scale = new Instance("UIScale");
+		scale.Name = "Fit";
+		scale.Parent = story;
+	}
+	(scale as UIScale).Scale = math.min(host.AbsoluteSize.X / width, host.AbsoluteSize.Y / height, 1);
+}
+
 function parseSize(raw: unknown): Vector2 | undefined {
 	if (typeOf(raw) !== "string") return undefined;
 	const text = raw as string;
@@ -134,11 +159,18 @@ export = function (storiesRoot: Instance) {
 		HttpService.JSONEncode(catalog.map((entry) => entry.title)),
 	);
 
+	const unmountRoot = (root: ReactRoblox.Root) => {
+		const [flushed] = pcall(() => {
+			ReactRoblox.act(() => root.unmount());
+		});
+		if (!flushed) pcall(() => root.unmount());
+	};
+
 	const teardown = () => {
 		templateCleanup?.();
 		templateCleanup = undefined;
 		if (reactRoot !== undefined) {
-			pcall(() => reactRoot!.unmount());
+			unmountRoot(reactRoot);
 			reactRoot = undefined;
 		}
 		destroyGui();
@@ -228,6 +260,7 @@ export = function (storiesRoot: Instance) {
 				task.delay(0.05, settle);
 				return;
 			}
+			applyFit(storiesRoot, host);
 			const stats = collectLayoutStats(host, viewport);
 			storiesRoot.SetAttribute("storyblox-viewport-stats", HttpService.JSONEncode(stats));
 			storiesRoot.SetAttribute("storyblox-viewport-ready", `${title}@${token}`);
@@ -309,6 +342,7 @@ export = function (storiesRoot: Instance) {
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-theme").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-args").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-size").Connect(remount),
+		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-fit").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-bg").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-scan").Connect(runScan),
 		...roots.map((root) =>
