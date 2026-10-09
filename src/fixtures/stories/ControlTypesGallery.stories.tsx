@@ -42,8 +42,8 @@ function attempt<T>(run: () => T): T | undefined {
 
 function enumList(enumType: string) {
 	const items = new Array<EnumItem>();
-	const enumObj = (Enum as unknown as { [key: string]: { GetEnumItems?: () => EnumItem[] } })[enumType];
-	if (enumObj?.GetEnumItems) for (const item of enumObj.GetEnumItems()) items.push(item);
+	const enumObj = (Enum as unknown as { [key: string]: Enum | undefined })[enumType];
+	if (enumObj !== undefined) for (const item of enumObj.GetEnumItems()) items.push(item);
 	return items;
 }
 
