@@ -2,7 +2,7 @@ import React from "@rbxts/react";
 import { DarkTheme } from "@rbxts/uiblox";
 import { Workspace } from "@rbxts/services";
 import { Story } from "interfaces";
-import { mountNative } from "./nativeMount";
+import { mountNative, placeNativeHost } from "./nativeMount";
 import { NormalizedStory } from "./normalizeStory";
 
 export interface StoryAdapterOptions {
@@ -97,7 +97,7 @@ export function storyFromExport(normalized: NormalizedStory, options?: StoryAdap
 						Size={new UDim2(1, 0, 1, 0)}
 						BackgroundTransparency={1}
 						ref={(parent: Frame | undefined) => {
-							if (parent) target.Parent = parent;
+							placeNativeHost(target, parent);
 						}}
 					/>
 					{restore !== undefined ? (

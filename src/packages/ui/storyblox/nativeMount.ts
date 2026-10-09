@@ -40,6 +40,14 @@ export interface NativeHost {
 
 const MAX_ACTIONS = 32;
 
+// The canvas destroys its host frame on remount. Unparent first so that destroy does not lock this container.
+export function placeNativeHost(target: { Parent?: unknown }, parent: unknown) {
+	const host = typeOf(parent) === "Instance" ? parent : undefined;
+	pcall(() => {
+		target.Parent = host;
+	});
+}
+
 function createScope() {
 	let jobs: Array<Cleanup> = [];
 	return {
