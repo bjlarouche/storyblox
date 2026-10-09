@@ -3,6 +3,8 @@ import ReactRoblox from "@rbxts/react-roblox";
 import { HttpService, StarterGui, Workspace } from "@rbxts/services";
 import { DarkTheme, LightTheme, ThemeProvider } from "@rbxts/uiblox";
 import { Story } from "interfaces";
+import { mergeGlobals } from "packages/storyGlobals";
+import { canvasLayout } from "packages/storyParameters";
 import { normalizeExport, storyModuleSuffix } from "packages/ui/storyblox/normalizeStory";
 import { storyFromExport } from "packages/ui/storyblox/storyAdapter";
 import { readTemplateResult } from "packages/ui/template/cleanupGate";
@@ -208,8 +210,15 @@ export = function (storiesRoot: Instance) {
 
 		const [ok, rendered] = pcall(() => {
 			const [element, cleanup] = (
-				story.template as (props: unknown, context: { theme: unknown }) => LuaTuple<[unknown, unknown]>
-			)(args, { theme });
+				story.template as (
+					props: unknown,
+					context: { theme: unknown; globals: unknown; parameters: unknown },
+				) => LuaTuple<[unknown, unknown]>
+			)(args, {
+				theme,
+				globals: mergeGlobals(story.globals, {}, themeName, "compact"),
+				parameters: story.parameters,
+			});
 			return readTemplateResult(element, cleanup);
 		});
 		if (!ok) {
@@ -240,6 +249,14 @@ export = function (storiesRoot: Instance) {
 		reactRoot.render(
 			<ThemeProvider theme={theme}>
 				<frame key="Story" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
+					{canvasLayout(story.parameters) === "centered" ? (
+						<uilistlayout
+							key="Center"
+							FillDirection={Enum.FillDirection.Vertical}
+							HorizontalAlignment={Enum.HorizontalAlignment.Center}
+							VerticalAlignment={Enum.VerticalAlignment.Center}
+						/>
+					) : undefined}
 					{parsed.element as React.Element}
 				</frame>
 			</ThemeProvider>,
