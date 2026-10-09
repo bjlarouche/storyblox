@@ -52,7 +52,9 @@ function panelWord(step: number, done: boolean) {
 
 function Illustration(props: { step: number; done: boolean; tall: number }) {
 	const word = panelWord(props.step, props.done);
-	const wash = WASH[props.done ? 4 : props.step] ?? WASH[0];
+	const { theme } = useTheme();
+	const paper = theme.palette.surface.paper;
+	const wash = (WASH[props.done ? 4 : props.step] ?? WASH[0]).Lerp(paper, 0.5);
 	return (
 		<Box
 			sx={{
@@ -62,12 +64,12 @@ function Illustration(props: { step: number; done: boolean; tall: number }) {
 				BackgroundTransparency: 0,
 				radius: 2,
 				p: 3,
-				gradient: { colors: [wash, Color3.fromRGB(244, 240, 232)], rotation: 28 },
+				gradient: { colors: [wash, paper], rotation: 28 },
 			}}
 		>
 			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 4)} SortOrder={Enum.SortOrder.LayoutOrder} />
 			<Typography text={word} variant="h1" sx={{ Size: new UDim2(1, 0, 0, 40) }} />
-			<Typography text="A quiet first visit." color="textSecondary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
+			<Typography text="A quiet first visit." color="textPrimary" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
 		</Box>
 	);
 }
