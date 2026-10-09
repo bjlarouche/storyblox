@@ -567,9 +567,10 @@ function Template({
 					Size={declared ? new UDim2(0, logicalWidth, 0, logicalHeight) : new UDim2(1, 0, 1, 0)}
 					BackgroundColor3={background ?? theme.palette.surface.canvas}
 					BackgroundTransparency={background !== undefined ? 0 : 1}
+					BorderSizePixel={0}
 				>
 					<uiscale key="Scale" Scale={scale} />
-					{declared ? <uistroke key="Bounds" Thickness={1} Color={gridColor} Transparency={0.45} /> : undefined}
+					{declared && grid ? <uistroke key="Bounds" Thickness={1} Color={gridColor} Transparency={0.45} /> : undefined}
 					{grid ? gridLines(logicalWidth, logicalHeight, gridColor) : undefined}
 					<uipadding
 						key="Inset"
