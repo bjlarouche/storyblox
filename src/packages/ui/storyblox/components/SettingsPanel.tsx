@@ -5,6 +5,19 @@ import { DEFAULT_STORY_ROOTS, encodeRootList, parseRootList } from "packages/sto
 const row = (order: number) =>
 	({ LayoutOrder: order, Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }) as WriteableStyle<TextLabel>;
 
+const SHORTCUTS = [
+	"Storyblox: Focus search",
+	"Storyblox: Remount story",
+	"Storyblox: Zoom in",
+	"Storyblox: Zoom out",
+	"Storyblox: Toggle grid",
+	"Storyblox: Toggle fit",
+	"Storyblox: Reload stories",
+	"Storyblox: Flip orientation",
+	"Storyblox: Cycle background",
+	"Storyblox: Allow workspace preview",
+];
+
 export interface SettingsPanelProps {
 	extraRoots?: string;
 	onExtraRootsChange?: (value: string) => void;
@@ -100,6 +113,19 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 				className={{ LayoutOrder: 41 } as WriteableStyle<TextButton>}
 				onLeftClick={add}
 			/>
+			<Typography key="Shortcuts" text="Shortcuts" variant="h6" className={row(50)} />
+			<Typography
+				key="ShortcutsHint"
+				text="Bind these in Studio"
+				variant="caption"
+				color="secondary"
+				className={row(51)}
+			/>
+			<>
+				{SHORTCUTS.map((label, index) => (
+					<Typography key={label} text={label} variant="body" className={row(52 + index)} />
+				))}
+			</>
 		</scrollingframe>
 	);
 }
