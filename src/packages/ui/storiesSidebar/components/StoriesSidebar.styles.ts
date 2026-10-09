@@ -102,19 +102,18 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ZIndex: 5001,
 		} as WriteableStyle<Frame>,
 		versionLabel: {
-			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(1)),
+			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(2)),
 			Position: new UDim2(0, theme.padding.calc(2), 1, -theme.padding.calc(2)),
 			AnchorPoint: new Vector2(0, 1),
-			FontSize: theme.typography.fontSizes.caption,
-			Font: theme.typography.fontFamilies.light,
+			TextSize: theme.typography.fontSizes.caption,
+			Font: theme.typography.fontFamilies.default,
 			TextColor3: theme.palette.text.secondary,
-			TextScaled: true,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 			ZIndex: 5100,
 		} as WriteableStyle<TextLabel>,
 		statusLabel: {
-			Position: new UDim2(0, theme.padding.calc(2), 1, -(theme.padding.calc(3) + theme.spacing.calc(1))),
+			Position: new UDim2(0, theme.padding.calc(2), 1, -(theme.padding.calc(3) + theme.spacing.calc(2))),
 		} as WriteableStyle<TextLabel>,
 	});
 });
