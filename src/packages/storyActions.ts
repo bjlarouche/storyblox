@@ -80,10 +80,35 @@ export function bindActionArgs(
 	return bindValue(args, "", record, new Array<defined>(), allow);
 }
 
-export function wrapStory(
-	render: (args: unknown) => unknown,
-	decorators: Array<(inner: (args: unknown) => unknown) => (args: unknown) => unknown>,
-) {
+type StoryDecorator = (inner: (args: unknown) => unknown) => (args: unknown) => unknown;
+
+export function decoratorsFrom(value: unknown): StoryDecorator[] {
+	if (typeOf(value) !== "table") return [];
+	const exported = value as { decorators?: unknown; default?: unknown };
+	let listed = exported.decorators;
+	if (listed === undefined && typeOf(exported.default) === "table") {
+		listed = (exported.default as { decorators?: unknown }).decorators;
+	}
+	if (typeOf(listed) !== "table") return [];
+	const kept = new Array<StoryDecorator>();
+	for (const item of listed as Array<unknown>) {
+		if (typeOf(item) === "function") kept.push(item as StoryDecorator);
+	}
+	return kept;
+}
+
+export function stackDecorators(nearestFirst: StoryDecorator[][]): StoryDecorator[] {
+	let collected = new Array<StoryDecorator>();
+	for (const list of nearestFirst) {
+		const stacked = new Array<StoryDecorator>();
+		for (const item of list) stacked.push(item);
+		for (const item of collected) stacked.push(item);
+		collected = stacked;
+	}
+	return collected;
+}
+
+export function wrapStory(render: (args: unknown) => unknown, decorators: StoryDecorator[]) {
 	let wrapped = render;
 	for (let index = decorators.size() - 1; index >= 0; index--) wrapped = decorators[index](wrapped);
 	return wrapped;
