@@ -63,6 +63,7 @@ interface RowProps {
 
 const Row = ListItem as unknown as (props: RowProps) => React.Element;
 const STACK = { Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y };
+const FIT = { Size: new UDim2(0, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.XY };
 const VIEWPORT = {
 	phone: { width: 390, height: 780 },
 	desktop: { width: 1100, height: 760 },
@@ -149,9 +150,9 @@ function DayGroup(props: { stamp: number; events: Block[]; onOpen: (block: Block
 	const blocks = blocksOn(props.events, props.stamp);
 	return (
 		<Stack direction="column" gap={0} sx={STACK}>
-			<Typography text={dayLabel(props.stamp)} variant="h3" />
+			<Typography text={dayLabel(props.stamp)} variant="h3" sx={STACK} />
 			{blocks.size() === 0 ? (
-				<Typography text="Nothing scheduled" color="textSecondary" />
+				<Typography text="Nothing scheduled" color="textSecondary" sx={STACK} />
 			) : (
 				blocks.map((block) => (
 					<Row
@@ -342,12 +343,12 @@ function DayPlanner(args: Args) {
 			<ScrollView sx={{ Size: new UDim2(1, 0, 1, 0), p: { phone: 1, desktop: 2 } }}>
 				<Stack direction="column" gap={2} sx={STACK}>
 					<Stack direction={narrow ? "column" : "row"} gap={1} alignItems="center" sx={STACK}>
-						<Stack direction="row" gap={1} alignItems="center" sx={STACK}>
+						<Stack direction="row" gap={1} alignItems="center" sx={FIT}>
 							<Button text="Prev" size="small" variant="outlined" onLeftClick={() => move(-1)} />
-							<Typography text={heading} variant="h3" />
+							<Typography text={heading} variant="h3" sx={FIT} />
 							<Button text="Next" size="small" variant="outlined" onLeftClick={() => move(1)} />
 						</Stack>
-						<Tabs value={view} options={VIEWS} onChange={setView} />
+						<Tabs value={view} options={VIEWS} onChange={setView} sx={{ Size: UDim2.fromOffset(120, theme.spacing.calc(4)) }} />
 						<Button text="New block" size="small" variant="contained" onLeftClick={openNew} />
 					</Stack>
 					{phase === "error" ? (
