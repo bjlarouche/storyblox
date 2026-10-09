@@ -52,6 +52,33 @@ function enumNamed(enumType: string, name: string) {
 	return undefined;
 }
 
+interface DockDraft {
+	state: Enum.InitialDockState;
+	enabled: boolean;
+	overrideRestore: boolean;
+	floatX: number;
+	floatY: number;
+	minWidth: number;
+	minHeight: number;
+}
+
+function dockValue(draft: DockDraft) {
+	const info = attempt(
+		() =>
+			new DockWidgetPluginGuiInfo(
+				draft.state,
+				draft.enabled,
+				draft.overrideRestore,
+				draft.floatX,
+				draft.floatY,
+				draft.minWidth,
+				draft.minHeight,
+			),
+	);
+	if (info === undefined) return undefined;
+	return { draft, info };
+}
+
 function numberText(text: string) {
 	if (text.size() === 0) return undefined;
 	const value = tonumber(text);
@@ -226,8 +253,31 @@ function Gallery() {
 	const [sides, setSides] = useState(new Faces(Enum.NormalId.Front, Enum.NormalId.Back));
 	const [when, setWhen] = useState(DateTime.fromUnixTimestamp(0));
 	const [ease, setEase] = useState(new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 1, false, 0));
-	const [dock, setDock] = useState(new DockWidgetPluginGuiInfo(Enum.InitialDockState.Right, true, false, 200, 200, 100, 80));
+	const [dock, setDock] = useState(
+		() =>
+			dockValue({
+				state: Enum.InitialDockState.Right,
+				enabled: true,
+				overrideRestore: false,
+				floatX: 200,
+				floatY: 200,
+				minWidth: 100,
+				minHeight: 80,
+			})!,
+	);
 	const [point, setPoint] = useState(new PathWaypoint(new Vector3(1, 2, 3), Enum.PathWaypointAction.Walk, "lane"));
+	const applyDock = (patch: Partial<DockDraft>) => {
+		const built = dockValue({
+			state: patch.state ?? dock.draft.state,
+			enabled: patch.enabled ?? dock.draft.enabled,
+			overrideRestore: patch.overrideRestore ?? dock.draft.overrideRestore,
+			floatX: patch.floatX ?? dock.draft.floatX,
+			floatY: patch.floatY ?? dock.draft.floatY,
+			minWidth: patch.minWidth ?? dock.draft.minWidth,
+			minHeight: patch.minHeight ?? dock.draft.minHeight,
+		});
+		if (built !== undefined) setDock(built);
+	};
 
 	const bounds3 = regionBounds(region);
 	const axisFlags = flagsOf(spin, [...AXIS_NAMES, ...FACE_NAMES]);
@@ -438,128 +488,27 @@ function Gallery() {
 		"DockWidget",
 		<frame key="dockWidget" Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, theme.padding.calc(1))} SortOrder={Enum.SortOrder.LayoutOrder} />
-			{enumSelect("Dock", 1, "InitialDockState", dock.InitialDockState.Name, theme, fill, (incoming) => {
+			{enumSelect("Dock", 1, "InitialDockState", dock.draft.state.Name, theme, fill, (incoming) => {
 				const state = enumNamed("InitialDockState", incoming) as Enum.InitialDockState;
-				const built = attempt(
-					() =>
-						new DockWidgetPluginGuiInfo(
-							state,
-							dock.InitialEnabled,
-							dock.InitialEnabledShouldOverrideRestore,
-							dock.FloatingXSize,
-							dock.FloatingYSize,
-							dock.MinWidth,
-							dock.MinHeight,
-						),
-				);
-				if (built !== undefined) setDock(built);
+				applyDock({ state });
 			})}
-			<kit.Checkbox
-				key="Enabled"
-				value={dock.InitialEnabled}
-				label="Enabled"
-				onChange={(on) => {
-					const built = attempt(
-						() =>
-							new DockWidgetPluginGuiInfo(
-								dock.InitialDockState,
-								on,
-								dock.InitialEnabledShouldOverrideRestore,
-								dock.FloatingXSize,
-								dock.FloatingYSize,
-								dock.MinWidth,
-								dock.MinHeight,
-							),
-					);
-					if (built !== undefined) setDock(built);
-				}}
-			/>
+			<kit.Checkbox key="Enabled" value={dock.draft.enabled} label="Enabled" onChange={(on) => applyDock({ enabled: on })} />
 			<kit.Checkbox
 				key="Override"
-				value={dock.InitialEnabledShouldOverrideRestore}
+				value={dock.draft.overrideRestore}
 				label="Override restore"
-				onChange={(on) => {
-					const built = attempt(
-						() =>
-							new DockWidgetPluginGuiInfo(
-								dock.InitialDockState,
-								dock.InitialEnabled,
-								on,
-								dock.FloatingXSize,
-								dock.FloatingYSize,
-								dock.MinWidth,
-								dock.MinHeight,
-							),
-					);
-					if (built !== undefined) setDock(built);
-				}}
+				onChange={(on) => applyDock({ overrideRestore: on })}
 			/>
 			{pairRow(
 				4,
-				numberBox("Float X", 1, dock.FloatingXSize, theme, (incoming) => {
-					const built = attempt(
-						() =>
-							new DockWidgetPluginGuiInfo(
-								dock.InitialDockState,
-								dock.InitialEnabled,
-								dock.InitialEnabledShouldOverrideRestore,
-								incoming,
-								dock.FloatingYSize,
-								dock.MinWidth,
-								dock.MinHeight,
-							),
-					);
-					if (built !== undefined) setDock(built);
-				}),
-				numberBox("Float Y", 1, dock.FloatingYSize, theme, (incoming) => {
-					const built = attempt(
-						() =>
-							new DockWidgetPluginGuiInfo(
-								dock.InitialDockState,
-								dock.InitialEnabled,
-								dock.InitialEnabledShouldOverrideRestore,
-								dock.FloatingXSize,
-								incoming,
-								dock.MinWidth,
-								dock.MinHeight,
-							),
-					);
-					if (built !== undefined) setDock(built);
-				}),
+				numberBox("Float X", 1, dock.draft.floatX, theme, (incoming) => applyDock({ floatX: incoming })),
+				numberBox("Float Y", 1, dock.draft.floatY, theme, (incoming) => applyDock({ floatY: incoming })),
 				theme,
 			)}
 			{pairRow(
 				5,
-				numberBox("Min width", 1, dock.MinWidth, theme, (incoming) => {
-					const built = attempt(
-						() =>
-							new DockWidgetPluginGuiInfo(
-								dock.InitialDockState,
-								dock.InitialEnabled,
-								dock.InitialEnabledShouldOverrideRestore,
-								dock.FloatingXSize,
-								dock.FloatingYSize,
-								incoming,
-								dock.MinHeight,
-							),
-					);
-					if (built !== undefined) setDock(built);
-				}),
-				numberBox("Min height", 1, dock.MinHeight, theme, (incoming) => {
-					const built = attempt(
-						() =>
-							new DockWidgetPluginGuiInfo(
-								dock.InitialDockState,
-								dock.InitialEnabled,
-								dock.InitialEnabledShouldOverrideRestore,
-								dock.FloatingXSize,
-								dock.FloatingYSize,
-								dock.MinWidth,
-								incoming,
-							),
-					);
-					if (built !== undefined) setDock(built);
-				}),
+				numberBox("Min width", 1, dock.draft.minWidth, theme, (incoming) => applyDock({ minWidth: incoming })),
+				numberBox("Min height", 1, dock.draft.minHeight, theme, (incoming) => applyDock({ minHeight: incoming })),
 				theme,
 			)}
 		</frame>,

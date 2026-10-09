@@ -31,6 +31,36 @@ function unit(value: unknown) {
 	return finite(value) && (value as number) >= 0 && (value as number) <= 1;
 }
 
+interface DockPlain {
+	dock: string;
+	enabled: boolean;
+	override: boolean;
+	floatX: number;
+	floatY: number;
+	minWidth: number;
+	minHeight: number;
+}
+
+const dockMemory = new Array<{ info: DockWidgetPluginGuiInfo; plain: DockPlain }>();
+
+export function dockPlain(value: unknown): DockPlain | undefined {
+	if (typeOf(value) !== "DockWidgetPluginGuiInfo") return undefined;
+	for (const row of dockMemory) {
+		if (row.info === (value as DockWidgetPluginGuiInfo)) return row.plain;
+	}
+	return undefined;
+}
+
+function rememberDock(info: DockWidgetPluginGuiInfo, plain: DockPlain) {
+	for (const row of dockMemory) {
+		if (row.info === info) {
+			row.plain = plain;
+			return;
+		}
+	}
+	dockMemory.push({ info, plain });
+}
+
 function vector(value: Vector, path: string, axes: "xy" | "xyz"): { ok: true; value: Tagged } | { ok: false; error: CodecError } {
 	if (!finite(value.X) || !finite(value.Y)) return fail(path, "vector");
 	if (axes === "xy") return { ok: true, value: { kind: "vector2", x: value.X, y: value.Y } };
@@ -341,22 +371,19 @@ export function encodeValue(
 		};
 	}
 	if (kind === "DockWidgetPluginGuiInfo") {
-		const info = value as DockWidgetPluginGuiInfo;
-		if (typeOf(info.InitialDockState) !== "EnumItem" || typeOf(info.InitialEnabled) !== "boolean") return fail(path, "dockWidget");
-		if (!finite(info.FloatingXSize) || !finite(info.FloatingYSize) || !finite(info.MinWidth) || !finite(info.MinHeight)) {
-			return fail(path, "dockWidget");
-		}
+		const plain = dockPlain(value);
+		if (plain === undefined) return fail(path, "dockWidget");
 		return {
 			ok: true,
 			value: {
 				kind: "dockWidget",
-				dock: info.InitialDockState.Name,
-				enabled: info.InitialEnabled,
-				override: info.InitialEnabledShouldOverrideRestore === true,
-				floatX: info.FloatingXSize,
-				floatY: info.FloatingYSize,
-				minWidth: info.MinWidth,
-				minHeight: info.MinHeight,
+				dock: plain.dock,
+				enabled: plain.enabled,
+				override: plain.override,
+				floatX: plain.floatX,
+				floatY: plain.floatY,
+				minWidth: plain.minWidth,
+				minHeight: plain.minHeight,
 			},
 		};
 	}
@@ -878,12 +905,7 @@ export function dockWidgetValue(
 		() => new DockWidgetPluginGuiInfo(state as Enum.InitialDockState, enabled, overrideRestore, floatX, floatY, minWidth, minHeight),
 	);
 	if (info === undefined || typeOf(info) !== "DockWidgetPluginGuiInfo") return undefined;
-	if (info.InitialDockState.Name !== dock || info.InitialEnabled !== enabled || info.InitialEnabledShouldOverrideRestore !== overrideRestore) {
-		return undefined;
-	}
-	if (info.FloatingXSize !== floatX || info.FloatingYSize !== floatY || info.MinWidth !== minWidth || info.MinHeight !== minHeight) {
-		return undefined;
-	}
+	rememberDock(info, { dock, enabled, override: overrideRestore, floatX, floatY, minWidth, minHeight });
 	return info;
 }
 

@@ -42,7 +42,7 @@ export default {
 		point: PathWaypoint;
 	}) => (
 		<textlabel
-			Text={`region=${typeOf(args.region)} cells=${args.cells.Min.X} nudge=${args.nudge.X} step=${args.step.Z} spin=${args.spin.X} sides=${args.sides.Front} when=${args.when.UnixTimestamp} ease=${args.ease.Time} dock=${args.dock.InitialDockState.Name} point=${args.point.Label}`}
+			Text={`region=${typeOf(args.region)} cells=${args.cells.Min.X} nudge=${args.nudge.X} step=${args.step.Z} spin=${args.spin.X} sides=${args.sides.Front} when=${args.when.UnixTimestamp} ease=${args.ease.Time} dock=${typeOf(args.dock)} point=${args.point.Label}`}
 			Size={new UDim2(1, 0, 0, 48)}
 			BackgroundTransparency={1}
 			TextWrapped={true}

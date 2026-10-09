@@ -165,7 +165,7 @@ Array.prototype.size = function size() {
 	return this.length;
 };
 
-const { encodeValue, encodeArgs, decodeValue, formatDatatype, parseDatatype } = await import("../src/packages/argCodec.ts");
+const { encodeValue, encodeArgs, decodeValue, formatDatatype, parseDatatype, dockWidgetValue } = await import("../src/packages/argCodec.ts");
 
 function roundTrip(value, spec) {
 	const encoded = encodeValue(value, "field", spec);
@@ -451,7 +451,8 @@ if (decodedSides.Front !== true || decodedSides.Back !== false) throw new Error(
 const ease = new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 1, false, 0);
 const decodedEase = roundTrip(ease);
 if (decodedEase.Time !== 0.3 || decodedEase.EasingStyle.Name !== "Quad" || decodedEase.RepeatCount !== 1) throw new Error("tweenInfo");
-const dock = new DockWidgetPluginGuiInfo(Enum.InitialDockState.Right, true, false, 200, 200, 100, 80);
+const dock = dockWidgetValue("Right", true, false, 200, 200, 100, 80);
+if (dock === undefined) throw new Error("dockWidget");
 const decodedDock = roundTrip(dock);
 if (decodedDock.InitialDockState.Name !== "Right" || decodedDock.MinHeight !== 80) throw new Error("dockWidget");
 const point = new PathWaypoint(new Vector3(1, 2, 3), Enum.PathWaypointAction.Walk, "lane");

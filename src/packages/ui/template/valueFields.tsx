@@ -5,6 +5,7 @@ import { commitNumberText, enumItems } from "./storyArgs";
 import {
 	axesValue,
 	dateTimeValue,
+	dockPlain,
 	dockWidgetValue,
 	facesValue,
 	pathWaypointValue,
@@ -358,14 +359,22 @@ export function valueFields(props: {
 		]);
 	}
 	if (kind === "dockWidget") {
-		const info = typeOf(value) === "DockWidgetPluginGuiInfo" ? (value as DockWidgetPluginGuiInfo) : undefined;
-		const dock = info?.InitialDockState.Name ?? "Right";
-		const enabled = info?.InitialEnabled === true;
-		const overrideRestore = info?.InitialEnabledShouldOverrideRestore === true;
-		const floatX = info?.FloatingXSize ?? 200;
-		const floatY = info?.FloatingYSize ?? 200;
-		const minWidth = info?.MinWidth ?? 100;
-		const minHeight = info?.MinHeight ?? 80;
+		const plain = dockPlain(value) ?? {
+			dock: "Right",
+			enabled: true,
+			override: false,
+			floatX: 200,
+			floatY: 200,
+			minWidth: 100,
+			minHeight: 80,
+		};
+		const dock = plain.dock;
+		const enabled = plain.enabled;
+		const overrideRestore = plain.override;
+		const floatX = plain.floatX;
+		const floatY = plain.floatY;
+		const minWidth = plain.minWidth;
+		const minHeight = plain.minHeight;
 		const commit = (patch: {
 			dock?: string;
 			enabled?: boolean;
