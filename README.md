@@ -11,9 +11,7 @@ UI component explorer for roblox-ts developers
 
 ## Overview
 
-Storyblox is a [Storybook](https://storybook.js.org)-like plugin that developers
-can use to preview their UI. It works similaer to
-[hoarcekat](https://github.com/Kampfkarren/hoarcekat) by Kampfkarren.
+Storyblox is a plugin for previewing UI while you build it.
 
 # How to use
 

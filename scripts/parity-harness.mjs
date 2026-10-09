@@ -39,5 +39,5 @@ for (const title of titles) {
 }
 console.log("Wait for storyblox-viewport-ready starting with the title, or stop on storyblox-viewport-error.");
 console.log("Read storyblox-viewport-stats from StarterGui.StorybloxViewport.");
-console.log("Save under STORYBLOX_CAPTURES or ./captures/storybook-parity/.");
+console.log("Save under STORYBLOX_CAPTURES or ./captures/parity/.");
 console.log("Then: node --experimental-strip-types scripts/capture-baseline.mjs --update <report.json>");
