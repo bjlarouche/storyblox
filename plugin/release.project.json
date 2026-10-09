@@ -3,6 +3,9 @@
   "globIgnorePaths": ["**/fixtures/**"],
   "tree": {
     "$path": "shell-release",
+    "remember": {
+      "$path": "remember.luau"
+    },
     "StorybloxInclude": {
       "$path": "../node_modules/roblox-ts/include"
     },

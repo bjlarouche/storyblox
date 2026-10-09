@@ -61,14 +61,31 @@ export function adoptTree<T extends { title: string; branches: unknown[] }>(curr
 	return current;
 }
 
-export function favoriteBranch(stories: StoryNode[], titles: string[], icons: StoryIcons): StoryBranch | undefined {
+const RECENT_CAP = 8;
+
+export function rememberRecent(current: string[], title: string) {
+	if (title.size() === 0) return current;
+	const picked = new Array<string>();
+	picked.push(title);
+	for (const item of current) {
+		if (item !== title && picked.size() < RECENT_CAP) picked.push(item);
+	}
+	return picked;
+}
+
+export function favoriteBranch(
+	stories: StoryNode[],
+	titles: string[],
+	icons: StoryIcons,
+	label = "Starred",
+): StoryBranch | undefined {
 	const leaves: StoryLeaf[] = [];
 	for (const title of titles) {
 		const story = stories.find((item) => item.title === title);
 		if (story !== undefined) leaves.push({ title, onClick: story.onClick, icon: icons.story });
 	}
 	if (leaves.size() === 0) return undefined;
-	return { title: "Starred", leaves, icon: icons.starred };
+	return { title: label, leaves, icon: label === "Starred" ? icons.starred : icons.folder };
 }
 
 export function orderedStoryTitles(branches: StoryBranch[]): string[] {
