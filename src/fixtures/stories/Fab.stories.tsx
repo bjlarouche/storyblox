@@ -22,15 +22,30 @@ export default {
 		disabled: { type: "boolean" },
 		reducedMotion: { type: "boolean" },
 	},
+	preview: { kind: "gui", width: 280, height: 160 },
 	render: (args: Args) => (
-		<Fab
-			icon={Icons.Save}
-			label={args.label === "" ? undefined : args.label}
-			size={args.size}
-			color={args.color}
-			loading={args.loading}
-			disabled={args.disabled}
-			reducedMotion={args.reducedMotion}
-		/>
+		<frame AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, 12)} VerticalAlignment={Enum.VerticalAlignment.Center} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<frame LayoutOrder={1} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<Fab
+					icon={Icons.Save}
+					label={args.label === "" ? undefined : args.label}
+					size={args.size}
+					color={args.color}
+					loading={args.loading}
+					disabled={args.disabled}
+					reducedMotion={args.reducedMotion}
+				/>
+			</frame>
+			<frame LayoutOrder={2} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<Fab icon={Icons.Save} color="primary" />
+			</frame>
+			<frame LayoutOrder={3} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<Fab icon={Icons.Save} color="accent" label="Accent" />
+			</frame>
+			<frame LayoutOrder={4} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<Fab icon={Icons.Save} disabled={true} />
+			</frame>
+		</frame>
 	),
 };
