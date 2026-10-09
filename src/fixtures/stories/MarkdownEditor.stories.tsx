@@ -19,6 +19,13 @@ Write on the left, preview on the right.
 
 > A short quote
 
+## Table
+
+| Crew | Role | Watch |
+| :--- | :---: | ---: |
+| Ada | **Pilot** | 04:00 |
+| Grace \\| Lin | Navigator | A longer watch note that wraps in the cell |
+
 \`\`\`
 const ok = true;
 \`\`\`

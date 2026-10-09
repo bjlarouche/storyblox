@@ -1,4 +1,21 @@
 import React from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
+
+function ControlsLabel(props: { text: string }) {
+	const { theme } = useTheme();
+	return (
+		<textlabel
+			key="ControlsLabel"
+			Text={props.text}
+			Size={new UDim2(1, 0, 0, 24)}
+			BackgroundTransparency={1}
+			TextSize={16}
+			Font={Enum.Font.SourceSans}
+			TextColor3={theme.palette.text.primary}
+			TextXAlignment={Enum.TextXAlignment.Left}
+		/>
+	);
+}
 
 export default {
 	title: "Layout/Controls",
@@ -25,14 +42,8 @@ export default {
 		},
 	},
 	render: (args: { tone?: string; amount?: number; count?: number; disabled?: boolean }) => (
-		<textlabel
-			key="ControlsLabel"
-			Text={`tone=${args.tone ?? ""} amount=${args.amount ?? ""} count=${args.count === undefined ? "absent" : tostring(args.count)} disabled=${args.disabled === undefined ? "absent" : tostring(args.disabled)}`}
-			Size={new UDim2(1, 0, 0, 24)}
-			BackgroundTransparency={1}
-			TextSize={16}
-			Font={Enum.Font.SourceSans}
-			TextXAlignment={Enum.TextXAlignment.Left}
+		<ControlsLabel
+			text={`tone=${args.tone ?? ""} amount=${args.amount ?? ""} count=${args.count === undefined ? "absent" : tostring(args.count)} disabled=${args.disabled === undefined ? "absent" : tostring(args.disabled)}`}
 		/>
 	),
 };
