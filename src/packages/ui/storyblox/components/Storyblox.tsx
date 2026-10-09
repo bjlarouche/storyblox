@@ -675,7 +675,8 @@ function Storyblox(props: StorybloxProps) {
 			}
 		});
 		onSelect();
-		return () => {
+		const disconnect = () => {
+			goneConn?.Disconnect();
 			requestConn.Disconnect();
 			selectConn.Disconnect();
 			themeConn.Disconnect();
@@ -690,6 +691,9 @@ function Storyblox(props: StorybloxProps) {
 			chromeConn.Disconnect();
 			caseConn.Disconnect();
 		};
+		// The marker outlives reloads; a tree whose unmount never finished must stop hearing it once its clone is gone.
+		const goneConn = hostPlugin?.Destroying.Connect(disconnect);
+		return disconnect;
 	}, [root, primaryTheme, secondaryTheme, onThemeChange]);
 
 	useEffect(() => {
