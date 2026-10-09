@@ -21,18 +21,24 @@ function TooltipStory(args: Args) {
 					TextColor3={theme.palette.text.primary}
 				/>
 			</Tooltip>
-			<Tooltip text={args.text} delay={args.delay}>
-				<textlabel
-					AnchorPoint={new Vector2(1, 1)}
-					Position={new UDim2(1, -8, 1, -8)}
-					Size={new UDim2(0, 80, 0, 24)}
-					BackgroundTransparency={1}
-					Text="Corner"
-					TextSize={18}
-					Font={Enum.Font.SourceSans}
-					TextColor3={theme.palette.text.primary}
-				/>
-			</Tooltip>
+			<frame
+				AnchorPoint={new Vector2(1, 1)}
+				Position={new UDim2(1, -8, 1, -8)}
+				AutomaticSize={Enum.AutomaticSize.XY}
+				Size={new UDim2(0, 0, 0, 0)}
+				BackgroundTransparency={1}
+			>
+				<Tooltip text={args.text} delay={args.delay}>
+					<textlabel
+						Size={new UDim2(0, 80, 0, 24)}
+						BackgroundTransparency={1}
+						Text="Corner"
+						TextSize={18}
+						Font={Enum.Font.SourceSans}
+						TextColor3={theme.palette.text.primary}
+					/>
+				</Tooltip>
+			</frame>
 		</frame>
 	);
 }
