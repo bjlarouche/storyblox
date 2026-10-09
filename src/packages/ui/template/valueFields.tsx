@@ -54,7 +54,9 @@ function column(key: string, gap: UDim, children: Array<React.Element>) {
 	return (
 		<frame key={key} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={gap} SortOrder={Enum.SortOrder.LayoutOrder} />
-			{children}
+			<>
+				{children}
+			</>
 		</frame>
 	);
 }
@@ -180,7 +182,9 @@ function flagGroup(
 			{caption(title, 1, theme)}
 			<frame key="Flags" LayoutOrder={2} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 				<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={gap} SortOrder={Enum.SortOrder.LayoutOrder} />
-				{flagBoxes(names, flags, disabled, onToggle)}
+				<>
+					{flagBoxes(names, flags, disabled, onToggle)}
+				</>
 			</frame>
 		</frame>
 	);

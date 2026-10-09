@@ -118,7 +118,9 @@ function A11yPanel({ theme, findings, onRescan }: A11yPanelProps) {
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
 			) : (
-				rows
+				<>
+					{rows}
+				</>
 			)}
 		</scrollingframe>
 	);

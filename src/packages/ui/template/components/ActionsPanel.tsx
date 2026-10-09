@@ -114,7 +114,9 @@ function ActionsPanel({ theme, events, disabled, onReset }: ActionsPanelProps) {
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
 			) : (
-				rows
+				<>
+					{rows}
+				</>
 			)}
 		</scrollingframe>
 	);

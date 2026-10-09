@@ -198,7 +198,9 @@ function InteractionsPanel({ theme, cases, results, running, onRun, onRerun }: I
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
 			) : (
-				rows
+				<>
+					{rows}
+				</>
 			)}
 		</scrollingframe>
 	);
