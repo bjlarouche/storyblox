@@ -14,7 +14,7 @@ import { ErrorPanel, SafeBoundary, SplitPane, Template, copyText, selectText } f
 import { withStoryControls } from "../../template/storyControls";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
-import { parseFavorites, toggleFavorite } from "../../storiesSidebar/storyTree";
+import { parseFavorites, storyById, toggleFavorite } from "../../storiesSidebar/storyTree";
 import { useDragScroll } from "../../scroll";
 import { normalizeExport, storyModuleSuffix } from "../normalizeStory";
 import { storyFromExport } from "../storyAdapter";
@@ -235,6 +235,7 @@ function Storyblox(props: StorybloxProps) {
 	const [excludeTags, setExcludeTags] = useState<string[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
 	const [copyFailed, setCopyFailed] = useState(false);
+	const [openMiss, setOpenMiss] = useState(false);
 	const copyBox = useRef<TextBox>();
 	const [previewKey, setPreviewKey] = useState(0);
 	const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_WIDTH);
@@ -881,12 +882,55 @@ function Storyblox(props: StorybloxProps) {
 						/>
 					)}
 				</frame>
+				<textbox
+					key="OpenId"
+					PlaceholderText="Paste story id"
+					Text=""
+					LayoutOrder={2}
+					Size={new UDim2(1, 0, 0, theme.spacing.calc(2))}
+					ClearTextOnFocus={false}
+					TextEditable={true}
+					Font={theme.typography.fontFamilies.default}
+					TextSize={theme.typography.fontSizes.caption}
+					TextColor3={theme.palette.text.primary}
+					BackgroundColor3={theme.palette.surface.paper}
+					BorderSizePixel={0}
+					Event={{
+						FocusLost: (rbx, enterPressed) => {
+							if (enterPressed !== true) return;
+							const match = storyById(storiesRef.current, rbx.Text);
+							if (match === undefined) {
+								setOpenMiss(rbx.Text.size() > 0);
+								return;
+							}
+							setOpenMiss(false);
+							rbx.Text = "";
+							controlRoot(root)?.SetAttribute("storyblox-select", match.title);
+							setSelectedStory(match);
+							setPane("canvas");
+						},
+					}}
+				/>
+				{openMiss && (
+					<textlabel
+						key="OpenMiss"
+						Text="No story with that id"
+						LayoutOrder={3}
+						Size={new UDim2(1, 0, 0, 0)}
+						AutomaticSize={Enum.AutomaticSize.Y}
+						BackgroundTransparency={1}
+						Font={theme.typography.fontFamilies.default}
+						TextSize={theme.typography.fontSizes.caption}
+						TextColor3={theme.palette.status.error.main}
+						TextXAlignment={Enum.TextXAlignment.Left}
+					/>
+				)}
 				{copyFailed && selectedStory !== undefined && (
 					<textbox
 						key="CopyIdBox"
 						ref={copyBox}
 						Text={selectedStory.title}
-						LayoutOrder={2}
+						LayoutOrder={4}
 						Size={new UDim2(1, 0, 0, theme.spacing.calc(2))}
 						ClearTextOnFocus={false}
 						TextEditable={true}
@@ -900,7 +944,7 @@ function Storyblox(props: StorybloxProps) {
 				<textlabel
 					key="InspectorBody"
 					Text={storyInspector(selectedStory as never)}
-					LayoutOrder={3}
+					LayoutOrder={5}
 					Size={new UDim2(1, 0, 0, 0)}
 					AutomaticSize={Enum.AutomaticSize.Y}
 					TextWrapped={true}
