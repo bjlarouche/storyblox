@@ -37,6 +37,7 @@ export interface InspectorPaneProps {
 	docs?: {
 		title?: string;
 		description?: unknown;
+		page?: string;
 		argTypes?: unknown;
 		source?: string;
 	};
@@ -156,6 +157,7 @@ function InspectorPane(props: InspectorPaneProps) {
 							theme={theme}
 							title={props.docs.title}
 							description={props.docs.description}
+							page={props.docs.page}
 							argTypes={props.docs.argTypes}
 							source={props.docs.source}
 						/>

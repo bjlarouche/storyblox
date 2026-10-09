@@ -71,6 +71,9 @@ cyclic.self = cyclic;
 const wrappedCycle = bindActionArgs(cyclic, () => {});
 if (wrappedCycle.onClick === original || wrappedCycle.self !== cyclic) throw new Error("cycle");
 if (bindActionArgs("nope", () => {}) !== "nope") throw new Error("non-table args");
+const filtered = [];
+const picked = bindActionArgs({ onPress: original, onIgnore: original }, (name) => filtered.push(name), (path) => path === "onPress");
+if (picked.onPress() !== "ok" || picked.onIgnore() !== "ok" || filtered.join(",") !== "onPress") throw new Error("action filter");
 
 const render = wrapStory(
 	(args) => `story:${args.label}`,
@@ -79,7 +82,9 @@ const render = wrapStory(
 if (render({ label: "Hi" }) !== "A(B(story:Hi))") throw new Error("decorators");
 
 const template = readFileSync(join(process.cwd(), "src/packages/ui/template/components/Template.tsx"), "utf8");
-if (!template.includes("bindActionArgs(args, actionApi.record)")) throw new Error("template wiring");
+if (!template.includes("bindActionArgs(args, actionApi.record, (path) => allowAction(filter, path))")) {
+	throw new Error("template wiring");
+}
 const fixture = readFileSync(join(process.cwd(), "src/fixtures/stories/Actions.stories.tsx"), "utf8");
 if (!fixture.includes("args.onClick?.()") || !fixture.includes("features: { actions: true }")) throw new Error("callback fixture");
 

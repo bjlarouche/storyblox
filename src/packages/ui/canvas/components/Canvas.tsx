@@ -4,17 +4,29 @@ import useCanvasStyles from "./Canvas.styles";
 
 type DefaultCanvasComponent = Frame;
 
-export interface CanvasProps {}
+export interface CanvasProps {
+	flush?: boolean;
+}
 
 function Canvas(props: CustomizedProps<DefaultCanvasComponent, CanvasProps>) {
-	const { className, children } = props;
+	const { className, children, flush } = props;
 	const { root, scrollable, pageLayout, padding } = useCanvasStyles();
 
 	const [canvasSize, setCanvasSize] = useState<UDim2>(new UDim2(0, 0, 0, 0));
 
 	return (
 		<frame key="Canvas" {...root} {...className}>
-			<uipadding key="Padding" {...padding} />
+			{flush ? (
+				<uipadding
+					key="Padding"
+					PaddingTop={new UDim(0, 0)}
+					PaddingBottom={new UDim(0, 0)}
+					PaddingLeft={new UDim(0, 0)}
+					PaddingRight={new UDim(0, 0)}
+				/>
+			) : (
+				<uipadding key="Padding" {...padding} />
+			)}
 			<scrollingframe
 				key="Scrollable"
 				{...scrollable}
