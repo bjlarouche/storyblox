@@ -1,7 +1,15 @@
 import React from "@rbxts/react";
+import { dockPlain, dockWidgetValue } from "../../packages/argCodec";
 
 const region = new Region3(new Vector3(0, 0, 0), new Vector3(4, 2, 4));
 const cells = new Region3int16(new Vector3int16(0, 0, 0), new Vector3int16(4, 2, 4));
+const num = (value: number) => string.format("%g", math.round(value * 1000) / 1000);
+
+function dockText(info: DockWidgetPluginGuiInfo) {
+	const dock = dockPlain(info);
+	if (dock === undefined) return typeOf(info);
+	return `${dock.dock} enabled=${dock.enabled} override=${dock.override} float=${num(dock.floatX)}x${num(dock.floatY)} min=${num(dock.minWidth)}x${num(dock.minHeight)}`;
+}
 
 export default {
 	title: "Layout/Value Types",
@@ -14,7 +22,7 @@ export default {
 		sides: new Faces(Enum.NormalId.Front, Enum.NormalId.Back),
 		when: DateTime.fromUnixTimestamp(0),
 		ease: new TweenInfo(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 1, false, 0),
-		dock: new DockWidgetPluginGuiInfo(Enum.InitialDockState.Right, true, false, 200, 200, 100, 80),
+		dock: dockWidgetValue("Right", true, false, 200, 200, 100, 80)!,
 		point: new PathWaypoint(new Vector3(1, 2, 3), Enum.PathWaypointAction.Walk, "lane"),
 	},
 	argTypes: {
@@ -42,8 +50,14 @@ export default {
 		point: PathWaypoint;
 	}) => (
 		<textlabel
-			Text={`region=${typeOf(args.region)} cells=${args.cells.Min.X} nudge=${args.nudge.X} step=${args.step.Z} spin=${args.spin.X} sides=${args.sides.Front} when=${args.when.UnixTimestamp} ease=${args.ease.Time} dock=${typeOf(args.dock)} point=${args.point.Label}`}
-			Size={new UDim2(1, 0, 0, 48)}
+			Text={[
+				`region=${typeOf(args.region)} cells=${args.cells.Min.X} nudge=${args.nudge.X} step=${args.step.Z}`,
+				`spin=${args.spin.X} sides=${args.sides.Front} when=${args.when.UnixTimestamp} ease=${num(args.ease.Time)}`,
+				`dock=${dockText(args.dock)}`,
+				`point=${args.point.Label}`,
+			].join("\n")}
+			Size={new UDim2(1, 0, 0, 0)}
+			AutomaticSize={Enum.AutomaticSize.Y}
 			BackgroundTransparency={1}
 			TextWrapped={true}
 			TextSize={16}
