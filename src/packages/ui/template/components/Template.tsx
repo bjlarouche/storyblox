@@ -12,7 +12,6 @@ import {
 	flipOrientation,
 	GRID_CELL,
 	gridLineCount,
-	previewPresetLabel,
 	previewScale,
 	previewSize,
 	stepPreviewPreset,
@@ -30,13 +29,12 @@ import { storyLabel } from "../storyLabel";
 import { CaseResult, createCaseClock, createSeed, runCase } from "packages/storyCases";
 import { ActionLogContext } from "../actionLogContext";
 import InspectorPane from "./InspectorPane";
+import CanvasToolbar from "./CanvasToolbar";
 import OutlineOverlay from "./OutlineOverlay";
 import ErrorPanel from "./ErrorPanel";
 import SafeBoundary from "./SafeBoundary";
 import useTemplateStyles from "./Template.styles";
 
-const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
-const INSPECTOR_ICON = "rbxassetid://94615499225611" as Icons;
 const CONTROLS_MIN = 120;
 
 function caseNames(story: Story | undefined): string[] {
@@ -243,6 +241,7 @@ function Template({
 		epoch: 0,
 	});
 	const [dock, setDock] = useState({ x: 0, y: 0 });
+	const [toolsWidth, setToolsWidth] = useState(0);
 	const storyKey = story?.title ?? "";
 	const [argsStory, setArgsStory] = useState("");
 	const [args, setArgs] = useState<ArgValues>({});
@@ -707,7 +706,7 @@ function Template({
 						}
 						{...title}
 						Position={new UDim2(0, theme.spacing.calc(0.75) + favoriteSlot, 0, 0)}
-						Size={new UDim2(1, -(theme.spacing.calc(7.5) + favoriteSlot), 1, 0)}
+						Size={new UDim2(1, -(toolsWidth + theme.spacing.calc(1.5) + favoriteSlot), 1, 0)}
 					/>
 					{onToggleTheme && (
 						<frame
@@ -717,236 +716,63 @@ function Template({
 							AnchorPoint={new Vector2(1, 0.5)}
 							Position={new UDim2(1, -theme.spacing.calc(0.75), 0.5, 0)}
 							BackgroundTransparency={1}
+							Change={{
+								AbsoluteSize: (rbx) => {
+									const width = math.floor(rbx.AbsoluteSize.X);
+									setToolsWidth((current) => (current === width ? current : width));
+								},
+							}}
 						>
 							<uilistlayout
 								key="ToolsLayout"
 								FillDirection={Enum.FillDirection.Horizontal}
 								VerticalAlignment={Enum.VerticalAlignment.Center}
 								HorizontalAlignment={Enum.HorizontalAlignment.Right}
-								Padding={new UDim(0, theme.spacing.calc(1))}
+								Padding={new UDim(0, theme.spacing.calc(0.5))}
 								SortOrder={Enum.SortOrder.LayoutOrder}
 							/>
-							<textbutton
-								key="ZoomOut"
-								Text="-"
-								LayoutOrder={1}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								Event={{ MouseButton1Click: () => setZoom((current) => stepZoom(current, -1)) }}
-							/>
-							<textlabel
-								key="Zoom"
-								Text={`${math.floor(zoom * 100)}%`}
-								LayoutOrder={2}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-							/>
-							<textbutton
-								key="ZoomIn"
-								Text="+"
-								LayoutOrder={3}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								Event={{ MouseButton1Click: () => setZoom((current) => stepZoom(current, 1)) }}
-							/>
-							<textbutton
-								key="Grid"
-								Text={grid ? "Grid on" : "Grid"}
-								LayoutOrder={4}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								TextTransparency={grid ? 0 : 0.45}
-								Event={{ MouseButton1Click: () => setGrid((current) => !current) }}
-							/>
-							<textbutton
-								key="Fit"
-								Text={fit ? "Fit" : "100%"}
-								LayoutOrder={5}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								Event={{ MouseButton1Click: () => setFit((current) => !current) }}
-							/>
-							<textbutton
-								key="Size"
-								Text={previewPresetLabel(sizePick)}
-								LayoutOrder={10}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								TextTransparency={sizePick === undefined ? 0.45 : 0}
-								Event={{ MouseButton1Click: () => setSizePick((current) => stepPreviewPreset(current)) }}
-							/>
-							{previewSize(activePreview((story as { preview?: unknown } | undefined)?.preview, sizePick)) !== undefined && (
-								<textbutton
-									key="Orientation"
-									Text={orientation === "portrait" ? "Portrait" : "Landscape"}
-									LayoutOrder={11}
-									AutomaticSize={Enum.AutomaticSize.X}
-									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-									BackgroundTransparency={1}
-									Font={theme.typography.fontFamilies.semibold}
-									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.palette.primary.main}
-									Event={{ MouseButton1Click: () => setOrientation((current) => flipOrientation(current)) }}
-								/>
-							)}
-							<textbutton
-								key="Background"
-								Text={bgStep === 0 ? "Bg" : bgStep === 1 ? "Bg paper" : "Bg canvas"}
-								LayoutOrder={12}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								TextTransparency={bgStep === 0 ? 0.45 : 0}
-								Event={{ MouseButton1Click: () => setBgStep((current) => (current + 1) % 3) }}
-							/>
-							<textbutton
-								key="Outline"
-								Text={outline ? "Outline on" : "Outline"}
-								LayoutOrder={6}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								TextTransparency={outline ? 0 : 0.45}
-								Event={{
-									MouseButton1Click: () =>
-										setOutline((current) => {
-											if (current) setMeasure(false);
-											return !current;
-										}),
-								}}
-							/>
-							<textbutton
-								key="Measure"
-								Text={measure ? "Measure on" : "Measure"}
-								LayoutOrder={7}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								TextTransparency={measure ? 0 : 0.45}
-								Event={{
-									MouseButton1Click: () =>
-										setMeasure((current) => {
-											if (!current) setOutline(true);
-											return !current;
-										}),
-								}}
-							/>
-							<IconButton
-								id="Remount"
-								icon={REMOUNT_ICON}
-								tint={theme.palette.text.secondary}
-								onClick={() => setEpoch((current) => current + 1)}
-								className={
-									{
-										Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
-										LayoutOrder: 8,
-									} as WriteableStyle<ImageButton>
+							<CanvasToolbar
+								zoom={zoom}
+								fit={fit}
+								sizePick={sizePick}
+								orientation={orientation}
+								canOrient={
+									previewSize(activePreview((story as { preview?: unknown } | undefined)?.preview, sizePick)) !==
+									undefined
 								}
-							/>
-							{onToggleInspector !== undefined && (
-								<stars.Tooltip
-									text={inspectorOpen ? "Hide inspector" : "Show inspector"}
-									className={
-										{
-											Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
-											AutomaticSize: Enum.AutomaticSize.None,
-											LayoutOrder: 9,
-										} as WriteableStyle<Frame>
-									}
-								>
-									<IconButton
-										id="Inspector"
-										icon={INSPECTOR_ICON}
-										tint={theme.palette.text.secondary}
-										onClick={onToggleInspector}
-										className={
-											{
-												Size: new UDim2(1, 0, 1, 0),
-											} as WriteableStyle<ImageButton>
-										}
-									/>
-								</stars.Tooltip>
-							)}
-							{onToggleSettings !== undefined && (
-								<stars.Tooltip
-									text={settingsOpen ? "Close settings" : "Settings"}
-									className={
-										{
-											Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
-											AutomaticSize: Enum.AutomaticSize.None,
-											LayoutOrder: 14,
-										} as WriteableStyle<Frame>
-									}
-								>
-									<IconButton
-										id="Settings"
-										icon={Icons.Settings}
-										tint={theme.palette.text.secondary}
-										onClick={onToggleSettings}
-										className={
-											{
-												Size: new UDim2(1, 0, 1, 0),
-											} as WriteableStyle<ImageButton>
-										}
-									/>
-								</stars.Tooltip>
-							)}
-							<IconButton
-								id="Theme"
-								icon={primaryThemeEnabled ? Icons.DarkTheme : Icons.LightTheme}
-								tint={theme.palette.text.secondary}
-								onClick={onToggleTheme}
-								className={
-									{
-										Size: new UDim2(0, theme.spacing.calc(2), 0, theme.spacing.calc(2)),
-										LayoutOrder: 10,
-									} as WriteableStyle<ImageButton>
+								grid={grid}
+								outline={outline}
+								measure={measure}
+								bgStep={bgStep}
+								density={density}
+								dark={primaryThemeEnabled === true}
+								inspectorOpen={inspectorOpen}
+								settingsOpen={settingsOpen}
+								showInspector={onToggleInspector !== undefined}
+								showSettings={onToggleSettings !== undefined}
+								onZoom={(direction) => setZoom((current) => stepZoom(current, direction))}
+								onFit={() => setFit((current) => !current)}
+								onSize={() => setSizePick((current) => stepPreviewPreset(current))}
+								onOrient={() => setOrientation((current) => flipOrientation(current))}
+								onGrid={() => setGrid((current) => !current)}
+								onOutline={() =>
+									setOutline((current) => {
+										if (current) setMeasure(false);
+										return !current;
+									})
 								}
-							/>
-							<textbutton
-								key="Density"
-								Text={density === "compact" ? "Compact" : "Comfort"}
-								LayoutOrder={13}
-								AutomaticSize={Enum.AutomaticSize.X}
-								Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-								BackgroundTransparency={1}
-								Font={theme.typography.fontFamilies.semibold}
-								TextSize={theme.typography.fontSizes.caption}
-								TextColor3={theme.palette.primary.main}
-								Event={{ MouseButton1Click: () => onToggleDensity?.() }}
+								onMeasure={() =>
+									setMeasure((current) => {
+										if (!current) setOutline(true);
+										return !current;
+									})
+								}
+								onBackground={() => setBgStep((current) => (current + 1) % 3)}
+								onDensity={onToggleDensity}
+								onTheme={onToggleTheme}
+								onInspector={onToggleInspector}
+								onSettings={onToggleSettings}
+								onRemount={() => setEpoch((current) => current + 1)}
 							/>
 							<>
 								{extraGlobalEntries(story?.globals).map((entry, index) => {
@@ -960,10 +786,13 @@ function Template({
 												LayoutOrder={20 + index}
 												AutomaticSize={Enum.AutomaticSize.X}
 												Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-												BackgroundTransparency={1}
+												BackgroundColor3={theme.palette.action.selected}
+												BackgroundTransparency={on ? 0 : 1}
+												BorderSizePixel={0}
+												AutoButtonColor={false}
 												Font={theme.typography.fontFamilies.semibold}
 												TextSize={theme.typography.fontSizes.caption}
-												TextColor3={theme.palette.primary.main}
+												TextColor3={on ? theme.palette.text.primary : theme.palette.text.secondary}
 												Event={{
 													MouseButton1Click: () =>
 														setGlobalPatch((current) => {
@@ -973,7 +802,14 @@ function Template({
 															return patched;
 														}),
 												}}
-											/>
+											>
+												<uicorner key="Round" CornerRadius={new UDim(0, theme.shape.borderRadius)} />
+												<uipadding
+													key="Pad"
+													PaddingLeft={new UDim(0, theme.spacing.calc(0.75))}
+													PaddingRight={new UDim(0, theme.spacing.calc(0.75))}
+												/>
+											</textbutton>
 										);
 									}
 									return (
@@ -1006,13 +842,13 @@ function Template({
 								<textbutton
 									key="ResetGlobals"
 									Text="Reset"
-									LayoutOrder={40}
+									LayoutOrder={36}
 									AutomaticSize={Enum.AutomaticSize.X}
 									Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
 									BackgroundTransparency={1}
 									Font={theme.typography.fontFamilies.semibold}
 									TextSize={theme.typography.fontSizes.caption}
-									TextColor3={theme.palette.primary.main}
+									TextColor3={theme.palette.text.secondary}
 									Event={{ MouseButton1Click: () => setGlobalPatch({}) }}
 								/>
 							)}
