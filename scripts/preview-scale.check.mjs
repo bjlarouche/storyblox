@@ -35,11 +35,9 @@ if (stepZoom(1, -1) !== 0.5) throw new Error("zoom out");
 if (stepZoom(2, 1) !== 2) throw new Error("zoom stays at 200");
 if (stepZoom(0.5, -1) !== 0.5) throw new Error("zoom stays at 50");
 if (stepPreviewPreset(undefined) !== "phone") throw new Error("size starts at phone");
-if (stepPreviewPreset("phone") !== "tablet" || stepPreviewPreset("tablet") !== "desktop" || stepPreviewPreset("desktop") !== "console") {
-	throw new Error("size cycle");
-}
-if (stepPreviewPreset("console") !== undefined || stepPreviewPreset("watch") !== undefined) throw new Error("size returns to story");
-if (previewPresetLabel(undefined) !== "Size" || previewPresetLabel("phone") !== "Phone" || previewPresetLabel("console") !== "Console") {
+if (stepPreviewPreset("phone") !== "tablet" || stepPreviewPreset("tablet") !== "desktop") throw new Error("size cycle");
+if (stepPreviewPreset("desktop") !== undefined || stepPreviewPreset("watch") !== undefined) throw new Error("size returns to story");
+if (previewPresetLabel(undefined) !== "Size" || previewPresetLabel("phone") !== "Phone" || previewPresetLabel("desktop") !== "Desktop") {
 	throw new Error("size label");
 }
 const storySize = { width: 320, height: 48, preset: "phone" };

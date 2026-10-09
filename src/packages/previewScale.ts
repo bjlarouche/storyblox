@@ -16,16 +16,14 @@ const PRESETS: { [name: string]: { width: number; height: number } } = {
 	phone: { width: 390, height: 844 },
 	tablet: { width: 1024, height: 768 },
 	desktop: { width: 1920, height: 1080 },
-	console: { width: 1920, height: 1080 },
 };
 
-export const PREVIEW_PRESETS = ["phone", "tablet", "desktop", "console"];
+export const PREVIEW_PRESETS = ["phone", "tablet", "desktop"];
 
 const PRESET_LABELS: { [name: string]: string } = {
 	phone: "Phone",
 	tablet: "Tablet",
 	desktop: "Desktop",
-	console: "Console",
 };
 
 export function stepPreviewPreset(current: string | undefined) {

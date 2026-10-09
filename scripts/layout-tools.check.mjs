@@ -25,8 +25,35 @@ const rel = relativeBox(box, { x: 5, y: 5, width: 100, height: 100, name: "Root"
 if (rel.x !== 5 || rel.y !== 15 || rel.width !== 40.6) throw new Error("relative");
 
 const template = readFileSync("src/packages/ui/template/components/Template.tsx", "utf8");
+const toolbar = readFileSync("src/packages/ui/template/components/CanvasToolbar.tsx", "utf8");
 if (template.includes("outlineEnabled") || template.includes("measureEnabled")) throw new Error("outline gate");
-if (!template.includes('key="Outline"') || !template.includes('key="Measure"')) throw new Error("toolbar");
+const toolbarOrder = [
+	"ZoomOut",
+	"Zoom",
+	"ZoomIn",
+	"Fit",
+	"RuleZoom",
+	"Size",
+	"Orientation",
+	"RuleViewport",
+	"Grid",
+	"Outline",
+	"Measure",
+	"RuleOverlay",
+	"Theme",
+	"Background",
+	"Density",
+	"RuleTools",
+	"Remount",
+	"Inspector",
+	"Settings",
+];
+let toolbarAt = -1;
+for (const key of toolbarOrder) {
+	const found = toolbar.indexOf(`key="${key}"`);
+	if (found <= toolbarAt) throw new Error(`toolbar order ${key}`);
+	toolbarAt = found;
+}
 if (template.includes("declared ? <uistroke")) throw new Error("bounds stroke is always on");
 if (!template.includes("declared && grid ? <uistroke")) throw new Error("bounds stroke follows grid");
 if (!template.includes("ClipsDescendants={declared}")) throw new Error("preview frame does not clip");
@@ -57,6 +84,10 @@ const first = collectGuiBoxes(root);
 const second = collectGuiBoxes(root);
 const names = first.map((box) => box.name).join(",");
 if (names !== "mount,One" || second.length !== first.length) throw new Error(`overlay leaked into measure: ${names}`);
+const inset = gui("Inset", 0, 0, 240, 120, [button]);
+const insetRoot = gui("mount", 0, 0, 240, 120, [inset]);
+const insetNames = collectGuiBoxes(insetRoot).map((box) => box.name).join(",");
+if (insetNames !== "mount,One") throw new Error(`inset was outlined: ${insetNames}`);
 for (let i = 0; i < first.length; i++) {
 	if (first[i].x !== second[i].x || first[i].y !== second[i].y) throw new Error("second toggle moved");
 }

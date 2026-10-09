@@ -28,13 +28,14 @@ if (flipDensity("compact") !== "comfortable" || flipDensity("comfortable") !== "
 
 const root = process.cwd();
 const template = readFileSync(join(root, "src/packages/ui/template/components/Template.tsx"), "utf8");
+const chrome = template + readFileSync(join(root, "src/packages/ui/template/components/CanvasToolbar.tsx"), "utf8");
 const shell = readFileSync(join(root, "src/packages/ui/storyblox/components/Storyblox.tsx"), "utf8");
 const storyChange = template.slice(template.indexOf("if (storyKey !== argsStory)"), template.indexOf("const loaderFns"));
 if (!storyChange.includes("setGlobalPatch({})") || storyChange.includes("setDensity")) {
 	throw new Error("story change must clear the global patch and keep density");
 }
 for (const needle of ['resetKey={`toolbar:', 'key="Density"', 'key="ResetGlobals"', "setGlobalPatch({})"]) {
-	if (!template.includes(needle)) throw new Error(`toolbar missing ${needle}`);
+	if (!chrome.includes(needle)) throw new Error(`toolbar missing ${needle}`);
 }
 for (const needle of ['SetAttribute("storyblox-theme"', 'SetAttribute("storyblox-density"', "storyblox-theme", "storyblox-density"]) {
 	if (!shell.includes(needle)) throw new Error(`shell missing ${needle}`);

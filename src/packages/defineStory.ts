@@ -168,7 +168,7 @@ export interface ModernStory<T> {
 	) => unknown;
 	preview?: {
 		kind: string;
-		preset?: "phone" | "tablet" | "desktop" | "console";
+		preset?: "phone" | "tablet" | "desktop";
 		width?: number;
 		height?: number;
 		orientation?: "portrait" | "landscape";

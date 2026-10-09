@@ -7,7 +7,9 @@ const fixturesDir = join(root, "src/fixtures/stories");
 const fixtureFiles = readdirSync(fixturesDir).filter((name) => name.endsWith(".stories.tsx"));
 const fixtureBlob = fixtureFiles.map((name) => read(join("src/fixtures/stories", name))).join("\n");
 
-const template = read("src/packages/ui/template/components/Template.tsx");
+const template =
+	read("src/packages/ui/template/components/Template.tsx") +
+	read("src/packages/ui/template/components/CanvasToolbar.tsx");
 const inspector = read("src/packages/ui/template/components/InspectorPane.tsx");
 const pack = read("package.json");
 
