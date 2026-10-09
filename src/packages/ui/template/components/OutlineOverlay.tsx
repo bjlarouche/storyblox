@@ -1,6 +1,6 @@
 import React from "@rbxts/react";
 import { Theme } from "@rbxts/uiblox";
-import { BoxRect } from "packages/layoutTools";
+import { BoxRect, overlayLocal } from "packages/layoutTools";
 
 export interface OutlineOverlayProps {
 	theme: Theme;
@@ -16,17 +16,7 @@ function OutlineOverlay({ theme, boxes, measure, origin, scale = 1 }: OutlineOve
 	const rows = new Array<React.Element>();
 	for (let index = 0; index < boxes.size(); index++) {
 		const raw = boxes[index];
-		const box =
-			origin !== undefined
-				? {
-						x: (raw.x - origin.x) / scale,
-						y: (raw.y - origin.y) / scale,
-						width: raw.width / scale,
-						height: raw.height / scale,
-						name: raw.name,
-						className: raw.className,
-					}
-				: raw;
+		const box = origin !== undefined ? overlayLocal(raw, origin, scale) : raw;
 		rows.push(
 			<frame
 				key={`outline-${index}`}

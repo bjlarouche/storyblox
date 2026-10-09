@@ -366,14 +366,20 @@ function Template({
 			setOutlineOrigin(undefined);
 			return;
 		}
+		let alive = true;
 		task.defer(() => {
+			if (!alive) return;
 			const root = mountFrame.current;
 			if (root === undefined) return;
 			const boxes = collectGuiBoxes(root);
 			if (boxes.size() > 0) boxes.shift();
+			if (!alive) return;
 			setOutlineOrigin(guiBox(root));
-			setOutlineBoxes(boxes.filter((box) => box.name !== "OutlineOverlay"));
+			setOutlineBoxes(boxes);
 		});
+		return () => {
+			alive = false;
+		};
 	}, [outline, measure, storyKey, epoch, args]);
 
 	useEffect(() => {
@@ -568,30 +574,33 @@ function Template({
 					BackgroundColor3={background ?? theme.palette.surface.canvas}
 					BackgroundTransparency={background !== undefined ? 0 : 1}
 					BorderSizePixel={0}
+					ClipsDescendants={declared}
 				>
 					<uiscale key="Scale" Scale={scale} />
 					{declared && grid ? <uistroke key="Bounds" Thickness={1} Color={gridColor} Transparency={0.45} /> : undefined}
 					{grid ? gridLines(logicalWidth, logicalHeight, gridColor) : undefined}
-					<uipadding
-						key="Inset"
-						PaddingTop={new UDim(0, inset)}
-						PaddingBottom={new UDim(0, inset)}
-						PaddingLeft={new UDim(0, inset)}
-						PaddingRight={new UDim(0, inset)}
-					/>
-					{layout === "centered" ? (
-						<frame key="Story" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
-							<uilistlayout
-								key="Center"
-								FillDirection={Enum.FillDirection.Vertical}
-								HorizontalAlignment={Enum.HorizontalAlignment.Center}
-								VerticalAlignment={Enum.VerticalAlignment.Center}
-							/>
-							{storyElement}
-						</frame>
-					) : (
-						storyElement
-					)}
+					<frame key="Inset" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
+						<uipadding
+							key="Pad"
+							PaddingTop={new UDim(0, inset)}
+							PaddingBottom={new UDim(0, inset)}
+							PaddingLeft={new UDim(0, inset)}
+							PaddingRight={new UDim(0, inset)}
+						/>
+						{layout === "centered" ? (
+							<frame key="Story" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
+								<uilistlayout
+									key="Center"
+									FillDirection={Enum.FillDirection.Vertical}
+									HorizontalAlignment={Enum.HorizontalAlignment.Center}
+									VerticalAlignment={Enum.VerticalAlignment.Center}
+								/>
+								{storyElement}
+							</frame>
+						) : (
+							storyElement
+						)}
+					</frame>
 					{(outline || measure) && outlineOrigin !== undefined ? (
 						<OutlineOverlay theme={theme} boxes={outlineBoxes} measure={measure} origin={outlineOrigin} scale={scale} />
 					) : undefined}
