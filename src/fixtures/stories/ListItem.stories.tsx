@@ -1,4 +1,5 @@
 import React from "@rbxts/react";
+import { Switch } from "@rbxts/uiblox";
 import { List, ListItem } from "./kitBreadth";
 
 interface Args {
@@ -45,6 +46,14 @@ function ListItemStory(args: Args) {
 						divider={args.divider}
 					/>
 				</Row>
+				<Row order={4}>
+					<ListItem
+						text="A longer primary line that stays inside the row"
+						secondary="A longer secondary line that wraps inside the padding instead of spilling past the switch"
+						trailing={<Switch value={false} onChange={() => {}} />}
+						divider
+					/>
+				</Row>
 			</List>
 		</frame>
 	);
@@ -52,7 +61,7 @@ function ListItemStory(args: Args) {
 
 export default {
 	title: "Components/List Item",
-	preview: { kind: "gui", width: 280, height: 220 },
+	preview: { kind: "gui", width: 280, height: 320 },
 	args: { text: "Primary", secondary: "Secondary", selected: false, disabled: false, dense: false, divider: true },
 	argTypes: {
 		text: { type: "string" },
