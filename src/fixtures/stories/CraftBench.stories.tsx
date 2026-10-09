@@ -237,6 +237,8 @@ function CraftBench(args: Args) {
 						sx={{
 							Size: new UDim2(1, 0, 0, 96),
 							AutomaticSize: Enum.AutomaticSize.None,
+							BackgroundColor3: Color3.fromRGB(255, 255, 255),
+							BackgroundTransparency: 0,
 							radius: 8,
 							gradient: { colors: [recipe.from, recipe.to], rotation: 18 },
 						}}
