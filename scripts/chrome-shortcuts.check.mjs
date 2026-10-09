@@ -32,4 +32,11 @@ for (const kind of ["zoomIn", "zoomOut", "grid", "fit", "orientation", "backgrou
 	if (!template.includes(`"${kind}"`)) throw new Error(`Template missing chrome kind ${kind}`);
 }
 
+const settings = read("src/packages/ui/storyblox/components/SettingsPanel.tsx");
+const labels = [...shell.matchAll(/CreatePluginAction\(\s*"[^"]+"\s*,\s*"([^"]+)"/g)].map((match) => match[1]);
+if (labels.length < 10) throw new Error(`expected plugin actions, got ${labels.length}`);
+for (const label of labels) {
+	if (!settings.includes(`"${label}"`)) throw new Error(`settings missing shortcut ${label}`);
+}
+
 console.log("chrome shortcuts ok");
