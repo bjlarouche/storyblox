@@ -20,16 +20,31 @@ interface CatalogEntry {
 	suffix: string;
 }
 
-function storyModuleForRequire(moduleScript: ModuleScript): ModuleScript {
-	const nested = script.Parent?.FindFirstChild("stories")?.FindFirstChild(moduleScript.Name);
-	return nested !== undefined && nested.IsA("ModuleScript") ? nested : moduleScript;
+function loadedHost(): Instance | undefined {
+	let current: Instance | undefined = script;
+	while (current !== undefined) {
+		if (current.Name === "StorybloxPlugin_loaded") return current;
+		current = current.Parent;
+	}
+	return undefined;
+}
+
+function catalogRoots(marker: Instance): Instance[] {
+	const host = loadedHost();
+	if (host === undefined) return [marker];
+	const roots = new Array<Instance>();
+	const compiled = script.Parent?.FindFirstChild("stories");
+	if (compiled !== undefined) roots.push(compiled);
+	const native = host.FindFirstChild("stories");
+	if (native !== undefined && !roots.includes(native)) roots.push(native);
+	return roots.size() > 0 ? roots : [marker];
 }
 
 function loadStoryModule(moduleScript: ModuleScript): unknown {
 	const runtime = (_G as never as Record<string, { import: (context: Instance, module: ModuleScript) => unknown }>)[
 		script as never as string
 	];
-	return runtime.import(script, storyModuleForRequire(moduleScript));
+	return runtime.import(script, moduleScript);
 }
 
 function parseSize(raw: unknown): Vector2 | undefined {
@@ -60,20 +75,22 @@ function parseArgs(raw: unknown): { [key: string]: unknown } | undefined {
 	return decoded as { [key: string]: unknown };
 }
 
-function buildCatalog(root: Instance): CatalogEntry[] {
+function buildCatalog(roots: Instance[]): CatalogEntry[] {
 	const entries = new Array<CatalogEntry>();
 	const seen: { [title: string]: boolean } = {};
-	for (const descendant of root.GetDescendants()) {
-		if (!descendant.IsA("ModuleScript")) continue;
-		const suffix = storyModuleSuffix(descendant.Name, SUFFIX);
-		if (suffix === undefined) continue;
-		const [ok, mod] = pcall(() => loadStoryModule(descendant));
-		if (!ok) continue;
-		const story = storyFromExport(normalizeExport(mod, descendant.Name, suffix));
-		if (story === undefined) continue;
-		if (seen[story.title]) continue;
-		seen[story.title] = true;
-		entries.push({ title: story.title, module: descendant, suffix });
+	for (const root of roots) {
+		for (const descendant of root.GetDescendants()) {
+			if (!descendant.IsA("ModuleScript")) continue;
+			const suffix = storyModuleSuffix(descendant.Name, SUFFIX);
+			if (suffix === undefined) continue;
+			const [ok, mod] = pcall(() => loadStoryModule(descendant));
+			if (!ok) continue;
+			const story = storyFromExport(normalizeExport(mod, descendant.Name, suffix));
+			if (story === undefined) continue;
+			if (seen[story.title]) continue;
+			seen[story.title] = true;
+			entries.push({ title: story.title, module: descendant, suffix });
+		}
 	}
 	entries.sort((a, b) => a.title < b.title);
 	return entries;
@@ -110,7 +127,8 @@ export = function (storiesRoot: Instance) {
 	let generation = 0;
 	let reactRoot: ReactRoblox.Root | undefined;
 	let templateCleanup: (() => void) | undefined;
-	let catalog = buildCatalog(storiesRoot);
+	const roots = catalogRoots(storiesRoot);
+	let catalog = buildCatalog(roots);
 	storiesRoot.SetAttribute(
 		"storyblox-viewport-stories",
 		HttpService.JSONEncode(catalog.map((entry) => entry.title)),
@@ -236,7 +254,7 @@ export = function (storiesRoot: Instance) {
 	const runScan = () => {
 		const scan = storiesRoot.GetAttribute("storyblox-viewport-scan");
 		if (scan === undefined || scan === "" || scan === 0 || scan === false) return;
-		catalog = buildCatalog(storiesRoot);
+		catalog = buildCatalog(roots);
 		storiesRoot.SetAttribute(
 			"storyblox-viewport-stories",
 			HttpService.JSONEncode(catalog.map((entry) => entry.title)),
@@ -293,14 +311,16 @@ export = function (storiesRoot: Instance) {
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-size").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-bg").Connect(remount),
 		storiesRoot.GetAttributeChangedSignal("storyblox-viewport-scan").Connect(runScan),
-		storiesRoot.DescendantAdded.Connect((inst) => {
-			if (!inst.IsA("ModuleScript")) return;
-			catalog = buildCatalog(storiesRoot);
-			storiesRoot.SetAttribute(
-				"storyblox-viewport-stories",
-				HttpService.JSONEncode(catalog.map((entry) => entry.title)),
-			);
-		}),
+		...roots.map((root) =>
+			root.DescendantAdded.Connect((inst) => {
+				if (!inst.IsA("ModuleScript")) return;
+				catalog = buildCatalog(roots);
+				storiesRoot.SetAttribute(
+					"storyblox-viewport-stories",
+					HttpService.JSONEncode(catalog.map((entry) => entry.title)),
+				);
+			}),
+		),
 	];
 
 	remount();

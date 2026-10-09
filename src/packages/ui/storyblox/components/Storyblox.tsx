@@ -40,16 +40,10 @@ function moduleSource(root: ModuleScript) {
 	return root.GetFullName();
 }
 
-function pluginStories(): Instance | undefined {
-	return ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
-}
-
 function findHostPlugin() {
 	let current: Instance | undefined = script;
 	while (current !== undefined) {
-		if (current.FindFirstChild("node_modules") !== undefined && current.FindFirstChild("stories") !== undefined) {
-			return current;
-		}
+		if (current.Name === "StorybloxPlugin_loaded") return current;
 		current = current.Parent;
 	}
 	return undefined;
@@ -57,37 +51,32 @@ function findHostPlugin() {
 
 const hostPlugin = findHostPlugin();
 
-// The dev shell clones StorybloxPlugin, then scans the original. Those modules import the other react, so useState's dispatcher is nil.
-function runningModule(moduleScript: ModuleScript): ModuleScript {
-	const original = ServerStorage.FindFirstChild("StorybloxPlugin");
-	if (hostPlugin === undefined || original === undefined || hostPlugin === original) return storyModuleForRequire(moduleScript);
-	if (!moduleScript.IsDescendantOf(original)) return storyModuleForRequire(moduleScript);
-	const names = new Array<string>();
-	let current: Instance | undefined = moduleScript;
-	while (current !== undefined && current !== original) {
-		names.push(current.Name);
-		current = current.Parent;
-	}
-	let found: Instance = hostPlugin;
-	for (let index = names.size() - 1; index >= 0; index--) {
-		const child = found.FindFirstChild(names[index]);
-		if (child === undefined) return storyModuleForRequire(moduleScript);
-		found = child;
-	}
-	const resolved = found.IsA("ModuleScript") ? found : moduleScript;
-	return storyModuleForRequire(resolved);
+function pluginStories(): Instance | undefined {
+	const place = ServerStorage.FindFirstChild("StorybloxPlugin")?.FindFirstChild("stories");
+	if (place !== undefined) return place;
+	return hostPlugin?.FindFirstChild("stories");
 }
 
-function storyModuleForRequire(moduleScript: ModuleScript): ModuleScript {
-	const storiesFolder = moduleScript.Parent;
-	if (storiesFolder === undefined || storiesFolder.Name !== "stories") return moduleScript;
-	const nested = storiesFolder.Parent?.FindFirstChild("node_modules")
+function originalPlugin(): Instance | undefined {
+	if (hostPlugin === undefined) return undefined;
+	const original = ServerStorage.FindFirstChild("StorybloxPlugin");
+	if (original === undefined || original === hostPlugin) return undefined;
+	return original;
+}
+
+function underOriginal(inst: Instance): boolean {
+	const original = originalPlugin();
+	if (original === undefined) return false;
+	return inst === original || inst.IsDescendantOf(original);
+}
+
+function packageFixtureStories(): Instance | undefined {
+	return hostPlugin
+		?.FindFirstChild("node_modules")
 		?.FindFirstChild("@rbxts")
 		?.FindFirstChild("storyblox")
 		?.FindFirstChild("fixtures")
-		?.FindFirstChild("stories")
-		?.FindFirstChild(moduleScript.Name);
-	return nested !== undefined && nested.IsA("ModuleScript") ? nested : moduleScript;
+		?.FindFirstChild("stories");
 }
 
 function controlRoot(root?: Instance) {
@@ -141,7 +130,7 @@ function loadStoryModule(moduleScript: ModuleScript): unknown {
 	const runtime = (_G as never as Record<string, { import: (context: Instance, module: ModuleScript) => unknown }>)[
 		script as never as string
 	];
-	return runtime.import(script, runningModule(moduleScript));
+	return runtime.import(script, moduleScript);
 }
 
 function adaptStory(normalized: ReturnType<typeof normalizeExport>) {
@@ -186,7 +175,17 @@ function storyScanRoots(explicit: Instance | undefined, extraRoots: string): Ins
 		const inst = lookupRootPath(path);
 		if (inst !== undefined) resolved.push(inst);
 	}
-	const collapsed = collapseScanRoots(resolved);
+	if (hostPlugin !== undefined) {
+		const native = hostPlugin.FindFirstChild("stories");
+		if (native !== undefined) resolved.push(native);
+		const compiled = packageFixtureStories();
+		if (compiled !== undefined) resolved.push(compiled);
+	}
+	const live = new Array<Instance>();
+	for (const root of resolved) {
+		if (!underOriginal(root)) live.push(root);
+	}
+	const collapsed = collapseScanRoots(live);
 	return collapsed.size() > 0 ? collapsed : [ReplicatedStorage];
 }
 
@@ -394,6 +393,7 @@ function Storyblox(props: StorybloxProps) {
 					}
 				} else if (STORY_ROOT_CLASSES.includes(root.ClassName)) {
 					for (const child of root.GetDescendants()) {
+						if (underOriginal(child)) continue;
 						if (child.IsA("ModuleScript") && storyModuleSuffix(child.Name, extension) !== undefined) {
 							findStories(child);
 						}
@@ -429,6 +429,7 @@ function Storyblox(props: StorybloxProps) {
 		for (const storiesRoot of scanRoots) {
 			added.push(
 				storiesRoot.DescendantAdded.Connect((descendant) => {
+					if (underOriginal(descendant)) return;
 					findStories(descendant);
 					logDebug(`Descendant added: ${descendant.GetFullName()} checking for stories`);
 				}),
