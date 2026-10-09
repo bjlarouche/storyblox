@@ -7,7 +7,6 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 	const storiesOffset = tagOffset + filterHeight + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(5) + theme.padding.calc(2);
 	const light = theme.type === "Light";
-	const rowHeight = theme.spacing.calc(3);
 
 	return createStyles({
 		logo: {
@@ -53,9 +52,9 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ZIndex: 5100,
 		} as WriteableStyle<ScrollingFrame>,
 		resultRow: {
-			Size: new UDim2(1, -theme.padding.calc(2), 0, rowHeight),
-			Position: UDim2.fromScale(0.5, 0),
-			AnchorPoint: new Vector2(0.5, 0),
+			Size: new UDim2(1, -theme.padding.calc(2), 1, -theme.padding.calc(1)),
+			Position: UDim2.fromScale(0.5, 0.5),
+			AnchorPoint: new Vector2(0.5, 0.5),
 			BackgroundColor3: theme.palette.primary.main,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
@@ -72,7 +71,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ZIndex: 5210,
 		} as WriteableStyle<ImageLabel>,
 		resultLeaf: {
-			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(1)),
+			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(2) + theme.padding.calc(1)),
 			Position: new UDim2(0, theme.spacing.calc(1.5) + theme.padding.calc(3), 0, theme.padding.calc(1)),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
@@ -81,13 +80,8 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ZIndex: 5210,
 		} as WriteableStyle<TextLabel>,
 		resultPath: {
-			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(1)),
-			Position: new UDim2(
-				0,
-				theme.spacing.calc(1.5) + theme.padding.calc(3),
-				0,
-				theme.padding.calc(1) + theme.spacing.calc(1),
-			),
+			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(2)),
+			Position: new UDim2(0, theme.spacing.calc(1.5) + theme.padding.calc(3), 0, theme.spacing.calc(3)),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 			TextXAlignment: Enum.TextXAlignment.Left,
@@ -108,19 +102,18 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ZIndex: 5001,
 		} as WriteableStyle<Frame>,
 		versionLabel: {
-			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(1)),
+			Size: new UDim2(1, -theme.padding.calc(4), 0, theme.spacing.calc(2)),
 			Position: new UDim2(0, theme.padding.calc(2), 1, -theme.padding.calc(2)),
 			AnchorPoint: new Vector2(0, 1),
-			FontSize: theme.typography.fontSizes.caption,
-			Font: theme.typography.fontFamilies.light,
+			TextSize: theme.typography.fontSizes.caption,
+			Font: theme.typography.fontFamilies.default,
 			TextColor3: theme.palette.text.secondary,
-			TextScaled: true,
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 			ZIndex: 5100,
 		} as WriteableStyle<TextLabel>,
 		statusLabel: {
-			Position: new UDim2(0, theme.padding.calc(2), 1, -(theme.padding.calc(3) + theme.spacing.calc(1))),
+			Position: new UDim2(0, theme.padding.calc(2), 1, -(theme.padding.calc(3) + theme.spacing.calc(2))),
 		} as WriteableStyle<TextLabel>,
 	});
 });

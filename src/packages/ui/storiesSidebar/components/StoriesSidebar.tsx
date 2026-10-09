@@ -324,7 +324,7 @@ function StoriesSidebar({
 						className={resultsList}
 						items={hits}
 						getKey={(hit) => hit.title}
-						itemHeight={theme.spacing.calc(2) + theme.padding.calc(2)}
+						itemHeight={theme.spacing.calc(6)}
 						listRef={resultsRef}
 						renderItem={(hit, index) => {
 							const emphasized = index === active || index === hover || hit.title === selected;
