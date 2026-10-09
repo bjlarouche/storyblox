@@ -18,6 +18,11 @@ export default {
 		disabled: { type: "boolean" },
 	},
 	render: (args: Args) => (
-		<Link text={args.text} color={args.color} underline={args.underline} disabled={args.disabled} />
+		<frame Size={new UDim2(0, 220, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 8)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<Link text={args.text} color={args.color} underline={args.underline} disabled={args.disabled} />
+			<Link text="Open docs" color="primary" underline="always" />
+			<Link text="Open docs" color="primary" underline="hover" />
+		</frame>
 	),
 };
