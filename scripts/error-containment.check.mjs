@@ -53,6 +53,19 @@ if (!host.includes("ErrorBoundary") || !host.includes("Storyblox crashed")) {
 if (host.includes("press Reload")) {
 	throw new Error("host crash copy must not assume a Reload toolbar button");
 }
+if (host.includes("ReactRoblox.act")) throw new Error("host must not use act; it throws outside test mode");
+const unmountAt = host.indexOf("handle:unmount()");
+const drainAt = host.indexOf("while not drained");
+if (unmountAt < 0 || drainAt < unmountAt || !host.includes("React.createElement(Drained)")) {
+	throw new Error("host cleanup must yield until the unmount effects ran");
+}
+for (const rel of ["plugin/shell/init.server.luau", "plugin/shell-release/init.server.luau"]) {
+	const shell = read(rel);
+	const body = shell.slice(shell.indexOf("local function mount()"));
+	if (!shell.includes("if loading then") || body.indexOf("runCleanup()") > body.indexOf("root:ClearAllChildren()")) {
+		throw new Error(`${rel} must finish cleanup before the next load renders`);
+	}
+}
 
 const controlFixture = read("src/fixtures/stories/CrashControl.stories.tsx");
 const storyFixture = read("src/fixtures/stories/CrashStory.stories.tsx");
