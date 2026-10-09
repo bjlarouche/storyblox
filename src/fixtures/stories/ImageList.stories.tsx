@@ -32,11 +32,17 @@ export default {
 		<ImageList
 			items={sources.map((src, index) => ({
 				src,
-				title: args.titles ? labels[index] : undefined,
+				title: args.titles
+					? index === 1
+						? "A longer caption that stays on one line"
+						: labels[index]
+					: undefined,
+				aspect: index === 0 ? 1 : undefined,
 			}))}
 			cols={args.cols}
 			gap={args.gap}
 			itemSize={args.itemSize}
+			aspect={4 / 3}
 		/>
 	),
 };
