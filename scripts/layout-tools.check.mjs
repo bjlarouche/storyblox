@@ -84,6 +84,10 @@ const first = collectGuiBoxes(root);
 const second = collectGuiBoxes(root);
 const names = first.map((box) => box.name).join(",");
 if (names !== "mount,One" || second.length !== first.length) throw new Error(`overlay leaked into measure: ${names}`);
+const inset = gui("Inset", 0, 0, 240, 120, [button]);
+const insetRoot = gui("mount", 0, 0, 240, 120, [inset]);
+const insetNames = collectGuiBoxes(insetRoot).map((box) => box.name).join(",");
+if (insetNames !== "mount,One") throw new Error(`inset was outlined: ${insetNames}`);
 for (let i = 0; i < first.length; i++) {
 	if (first[i].x !== second[i].x || first[i].y !== second[i].y) throw new Error("second toggle moved");
 }

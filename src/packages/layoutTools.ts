@@ -28,7 +28,8 @@ export function collectGuiBoxes(root: Instance, max = 64): BoxRect[] {
 	while (stack.size() > 0 && boxes.size() < max) {
 		const node = stack.pop()!;
 		if (node !== root && node.Name === OVERLAY_NAME) continue;
-		if (node.IsA("GuiObject")) {
+		const inset = node !== root && node.Name === "Inset";
+		if (!inset && node.IsA("GuiObject")) {
 			const gui = node as GuiObject;
 			if (gui.AbsoluteSize.X > 0 && gui.AbsoluteSize.Y > 0) boxes.push(guiBox(gui));
 		}
