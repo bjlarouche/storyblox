@@ -11,7 +11,9 @@ String.prototype.size = function size() {
 	return this.length;
 };
 
-const { bindActionArgs, createActionLog, runSetup, wrapStory } = await import("../src/packages/storyActions.ts");
+const { bindActionArgs, createActionLog, decoratorsFrom, runSetup, stackDecorators, wrapStory } = await import(
+	"../src/packages/storyActions.ts"
+);
 
 const log = createActionLog(2);
 log.record("click", "a");
@@ -80,6 +82,18 @@ const render = wrapStory(
 	[(inner) => (args) => `A(${inner(args)})`, (inner) => (args) => `B(${inner(args)})`],
 );
 if (render({ label: "Hi" }) !== "A(B(story:Hi))") throw new Error("decorators");
+const outer = () => {};
+const inner = () => {};
+const nearest = () => {};
+if (decoratorsFrom({ decorators: [outer, "nope", inner] }).join() !== [outer, inner].join()) throw new Error("decorators from");
+if (decoratorsFrom({ default: { decorators: [outer] } })[0] !== outer) throw new Error("default decorators");
+if (decoratorsFrom({ title: "Shell/Nope" }).length !== 0) throw new Error("story is not a wrap");
+const stacked = stackDecorators([[nearest], [outer, inner]]);
+if (stacked[0] !== outer || stacked[1] !== inner || stacked[2] !== nearest) throw new Error("folder order");
+const storyblox = readFileSync(join(process.cwd(), "src/packages/ui/storyblox/components/Storyblox.tsx"), "utf8");
+if (!storyblox.includes('root.Name === "wrap.stories"') || !storyblox.includes("wrapStory(")) {
+	throw new Error("folder wrap wiring");
+}
 
 const template = readFileSync(join(process.cwd(), "src/packages/ui/template/components/Template.tsx"), "utf8");
 if (!template.includes("bindActionArgs(args, actionApi.record, (path) => allowAction(filter, path))")) {

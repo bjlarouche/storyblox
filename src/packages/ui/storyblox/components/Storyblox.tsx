@@ -23,6 +23,7 @@ import { insideCanvas } from "../canvasReady";
 import { createStorySession, keepSelection } from "../storyRegistry";
 import { ClaimedId, claimStoryId, releaseStoryId } from "packages/defineStory";
 import { checkRequest, PROTOCOL_VERSION } from "packages/bridgeProtocol";
+import { decoratorsFrom, stackDecorators, wrapStory } from "packages/storyActions";
 import { filterStoriesByTags, parseTagList } from "packages/storyTags";
 import { STORY_ROOT_CLASSES, mergeStoryRootPaths, parseRootList, splitRootPath } from "packages/storyRoots";
 import { narrowShell } from "../shellLayout";
@@ -137,6 +138,36 @@ function adaptStory(normalized: ReturnType<typeof normalizeExport>) {
 	return storyFromExport(normalized, {
 		workspaceAllowed: () => ((pluginStories()?.GetAttribute("storyblox-workspace") as number | undefined) ?? 0) > 0,
 	});
+}
+
+function folderDecorators(module: ModuleScript) {
+	const levels = new Array<ReturnType<typeof decoratorsFrom>>();
+	let folder: Instance | undefined = module.Parent;
+	while (folder !== undefined) {
+		const wrap = folder.FindFirstChild("wrap.stories");
+		if (wrap !== undefined && wrap.IsA("ModuleScript") && wrap !== module) {
+			try {
+				levels.push(decoratorsFrom(loadStoryModule(wrap)));
+			} catch {
+				/* skip a folder wrap that fails to load */
+			}
+		}
+		folder = folder.Parent;
+	}
+	return stackDecorators(levels);
+}
+
+function loadedStory(root: ModuleScript, suffix: string) {
+	const story = adaptStory(normalizeExport(loadStoryModule(root), root.Name, suffix));
+	if (story === undefined) return undefined;
+	const decorators = folderDecorators(root);
+	if (decorators.size() === 0) return story;
+	const inner = story.template as (props: unknown, context: unknown) => unknown;
+	return {
+		...story,
+		template: (props: unknown, context: unknown) =>
+			wrapStory((args: unknown) => inner(args, context), decorators)(props),
+	} as unknown as Story;
 }
 function lookupRootPath(path: string): Instance | undefined {
 	const parts = splitRootPath(path);
@@ -334,12 +365,13 @@ function Storyblox(props: StorybloxProps) {
 			const token = generation.current;
 			task.spawn(() => {
 				if (generation.current !== token) return;
+				if (root.IsA("ModuleScript") && root.Name === "wrap.stories") return;
 				const suffix = root.IsA("ModuleScript") ? storyModuleSuffix(root.Name, extension) : undefined;
 				if (root.IsA("ModuleScript") && suffix !== undefined) {
 					if (seenModules.current.includes(root)) return;
 					seenModules.current.push(root);
 					try {
-						const story = adaptStory(normalizeExport(loadStoryModule(root), root.Name, suffix));
+						const story = loadedStory(root, suffix);
 						if (story === undefined) {
 							logDebug(`Rejected story export ${root.GetFullName()}`);
 							return;
@@ -349,7 +381,7 @@ function Storyblox(props: StorybloxProps) {
 						const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
 							logDebug(`Story source updated: ${root.GetFullName()}`);
 
-							const updatedStory = adaptStory(normalizeExport(loadStoryModule(root), root.Name, suffix));
+							const updatedStory = loadedStory(root, suffix);
 							if (updatedStory === undefined) {
 								session.remove(story.title);
 								return;
