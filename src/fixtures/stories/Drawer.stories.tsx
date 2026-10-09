@@ -4,9 +4,22 @@ import { Drawer, useArg } from "./kitBreadth";
 
 interface Args {
 	open: boolean;
-	edge: "left" | "right";
+	edge: "left" | "right" | "bottom";
 	width: number;
+	height: number;
 }
+
+interface TitledProps {
+	open: boolean;
+	edge?: "left" | "right" | "bottom";
+	width?: number;
+	height?: number;
+	title?: string;
+	onClose: () => void;
+	children?: React.ReactNode;
+}
+
+const Titled = Drawer as unknown as (props: TitledProps) => React.Element;
 
 function DrawerStory(args: Args) {
 	const { theme } = useTheme();
@@ -22,32 +35,37 @@ function DrawerStory(args: Args) {
 					Event={{ Activated: () => setOpen(true) }}
 				/>
 			)}
-			<Drawer
+			<Titled
 				open={open}
 				edge={args.edge}
-				width={args.width < 1 ? undefined : args.width}
+				width={args.edge === "bottom" || args.width < 1 ? undefined : args.width}
+				height={args.edge === "bottom" ? args.height : undefined}
+				title="A long drawer title that wraps inside the padded edge"
 				onClose={() => setOpen(false)}
 			>
 				<textlabel
 					Size={new UDim2(1, 0, 0, 24)}
 					BackgroundTransparency={1}
-					Text="Drawer"
+					Text="Stays inside the padding"
+					TextWrapped={true}
 					TextSize={16}
 					Font={Enum.Font.SourceSans}
 					TextColor3={theme.palette.text.primary}
 				/>
-			</Drawer>
+			</Titled>
 		</>
 	);
 }
 
 export default {
 	title: "Components/Drawer",
-	args: { open: true, edge: "left", width: 240 },
+	preview: { kind: "gui", width: 420, height: 320 },
+	args: { open: true, edge: "left", width: 280, height: 160 },
 	argTypes: {
 		open: { type: "boolean" },
-		edge: { type: "enum", options: ["left", "right"] },
-		width: { type: "number", min: 0, max: 400, step: 20 },
+		edge: { type: "enum", options: ["left", "right", "bottom"] },
+		width: { type: "number", min: 0, max: 640, step: 20 },
+		height: { type: "number", min: 80, max: 320, step: 20 },
 	},
 	render: (args: Args) => <DrawerStory {...args} />,
 };
