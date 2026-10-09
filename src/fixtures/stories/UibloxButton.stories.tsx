@@ -1,36 +1,47 @@
 import React from "@rbxts/react";
 import { Button } from "@rbxts/uiblox";
 
-interface Args {
-	text: string;
-	variant: "contained" | "outlined" | "text";
-	size: "small" | "medium" | "large";
-	color: "primary" | "secondary";
-	disabled: boolean;
-	fullWidth: boolean;
+const VARIANTS = ["contained", "outlined", "text"] as const;
+const SIZES = ["small", "medium", "large"] as const;
+
+function ButtonMatrix() {
+	return (
+		<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 8)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<uipadding
+				PaddingTop={new UDim(0, 8)}
+				PaddingBottom={new UDim(0, 8)}
+				PaddingLeft={new UDim(0, 8)}
+				PaddingRight={new UDim(0, 8)}
+			/>
+			{VARIANTS.map((variant, row) => (
+				<frame
+					key={variant}
+					LayoutOrder={row}
+					Size={new UDim2(1, 0, 0, 52)}
+					BackgroundTransparency={1}
+					BorderSizePixel={0}
+				>
+					<uilistlayout
+						FillDirection={Enum.FillDirection.Horizontal}
+						Padding={new UDim(0, 8)}
+						VerticalAlignment={Enum.VerticalAlignment.Center}
+						SortOrder={Enum.SortOrder.LayoutOrder}
+					/>
+					{SIZES.map((size, index) => (
+						<Button key={size} text={size} variant={variant} size={size} className={{ LayoutOrder: index }} />
+					))}
+					<Button text="Off" variant={variant} disabled className={{ LayoutOrder: 3 }} />
+					<Button text="Busy" variant={variant} loading className={{ LayoutOrder: 4 }} />
+					<Button text="Ink" variant={variant} color="secondary" className={{ LayoutOrder: 5 }} />
+				</frame>
+			))}
+		</frame>
+	);
 }
 
 export default {
 	title: "Components/Button",
-	args: { text: "Button", variant: "contained", size: "medium", color: "secondary", disabled: false, fullWidth: true },
-	argTypes: {
-		text: { type: "string" },
-		variant: { type: "enum", options: ["contained", "outlined", "text"] },
-		size: { type: "enum", options: ["small", "medium", "large"] },
-		color: { type: "enum", options: ["primary", "secondary"] },
-		disabled: { type: "boolean" },
-		fullWidth: { type: "boolean" },
-	},
-	render: (args: Args) => (
-		<frame Size={new UDim2(0, 220, 0, 40)} BackgroundTransparency={1}>
-			<Button
-				text={args.text}
-				variant={args.variant}
-				size={args.size}
-				color={args.color}
-				disabled={args.disabled}
-				fullWidth={args.fullWidth}
-			/>
-		</frame>
-	),
+	preview: { kind: "gui", width: 640, height: 220 },
+	render: () => <ButtonMatrix />,
 };
