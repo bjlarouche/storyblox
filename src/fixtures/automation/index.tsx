@@ -125,10 +125,7 @@ function buildCatalog(roots: Instance[]): CatalogEntry[] {
 
 function ensureGui(): ScreenGui {
 	const existing = StarterGui.FindFirstChild(GUI_NAME);
-	if (existing && existing.IsA("ScreenGui")) {
-		existing.ClearAllChildren();
-		return existing;
-	}
+	if (existing && existing.IsA("ScreenGui")) return existing;
 	existing?.Destroy();
 	const gui = new Instance("ScreenGui");
 	gui.Name = GUI_NAME;
@@ -153,6 +150,7 @@ function resolveStory(entry: CatalogEntry): Story | undefined {
 export = function (storiesRoot: Instance) {
 	let generation = 0;
 	let reactRoot: ReactRoblox.Root | undefined;
+	let host: Frame | undefined;
 	let templateCleanup: (() => void) | undefined;
 	const roots = catalogRoots(storiesRoot);
 	let catalog = buildCatalog(roots);
@@ -168,14 +166,34 @@ export = function (storiesRoot: Instance) {
 		if (!flushed) pcall(() => root.unmount());
 	};
 
-	const teardown = () => {
+	const releaseStory = () => {
 		templateCleanup?.();
 		templateCleanup = undefined;
-		if (reactRoot !== undefined) {
-			unmountRoot(reactRoot);
-			reactRoot = undefined;
+	};
+
+	const ensureHost = (bg: Color3, size: Vector2 | undefined) => {
+		const gui = ensureGui();
+		if (host !== undefined && host.Parent !== gui) {
+			pcall(() => {
+				host!.Parent = gui;
+			});
 		}
-		destroyGui();
+		if (host === undefined || host.Parent !== gui) {
+			const frame = new Instance("Frame");
+			frame.Name = "Host";
+			frame.BorderSizePixel = 0;
+			frame.Parent = gui;
+			host = frame;
+		}
+		host.BackgroundColor3 = bg;
+		if (size !== undefined) {
+			host.Size = new UDim2(0, size.X, 0, size.Y);
+			host.Position = new UDim2(0.5, -size.X / 2, 0.5, -size.Y / 2);
+		} else {
+			host.Size = new UDim2(1, 0, 1, 0);
+			host.Position = new UDim2(0, 0, 0, 0);
+		}
+		return host;
 	};
 
 	const mountTitle = (title: string, themeName: "light" | "dark", argsPatch?: { [key: string]: unknown }) => {
@@ -184,7 +202,7 @@ export = function (storiesRoot: Instance) {
 		storiesRoot.SetAttribute("storyblox-viewport-ready", undefined);
 		storiesRoot.SetAttribute("storyblox-viewport-error", undefined);
 		storiesRoot.SetAttribute("storyblox-viewport-stats", undefined);
-		teardown();
+		releaseStory();
 
 		let entry: CatalogEntry | undefined;
 		for (const item of catalog) {
@@ -232,20 +250,12 @@ export = function (storiesRoot: Instance) {
 		const bg =
 			parseColor(storiesRoot.GetAttribute("storyblox-viewport-bg")) ??
 			(themeName === "light" ? LIGHT_BG : DARK_BG);
-		const gui = ensureGui();
-		const host = new Instance("Frame");
-		host.Name = "Host";
-		host.BorderSizePixel = 0;
-		host.BackgroundColor3 = bg;
-		if (size !== undefined) {
-			host.Size = new UDim2(0, size.X, 0, size.Y);
-			host.Position = new UDim2(0.5, -size.X / 2, 0.5, -size.Y / 2);
-		} else {
-			host.Size = new UDim2(1, 0, 1, 0);
-		}
-		host.Parent = gui;
-
-		reactRoot = ReactRoblox.createRoot(host);
+		const mounted = ensureHost(bg, size);
+		if (reactRoot === undefined) reactRoot = ReactRoblox.createRoot(mounted);
+		let painted = false;
+		const paintConn = mounted.DescendantAdded.Connect(() => {
+			painted = true;
+		});
 		reactRoot.render(
 			<ThemeProvider theme={theme}>
 				<frame key="Story" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
@@ -264,21 +274,25 @@ export = function (storiesRoot: Instance) {
 
 		let settleAttempts = 0;
 		const settle = () => {
-			if (token !== generation) return;
+			if (token !== generation) {
+				paintConn.Disconnect();
+				return;
+			}
 			const camera = Workspace.CurrentCamera;
 			const viewport = camera?.ViewportSize ?? new Vector2(0, 0);
-			if (host.AbsoluteSize.X <= 0 || host.AbsoluteSize.Y <= 0) {
+			if (mounted.AbsoluteSize.X <= 0 || mounted.AbsoluteSize.Y <= 0) {
 				task.delay(0.05, settle);
 				return;
 			}
 			// ReactRoblox render is async; host size is ready before children exist.
 			settleAttempts += 1;
-			if (host.FindFirstChildWhichIsA("GuiObject", true) === undefined && settleAttempts < 40) {
+			if ((!painted || mounted.FindFirstChildWhichIsA("GuiObject", true) === undefined) && settleAttempts < 40) {
 				task.delay(0.05, settle);
 				return;
 			}
-			applyFit(storiesRoot, host);
-			const stats = collectLayoutStats(host, viewport);
+			paintConn.Disconnect();
+			applyFit(storiesRoot, mounted);
+			const stats = collectLayoutStats(mounted, viewport);
 			storiesRoot.SetAttribute("storyblox-viewport-stats", HttpService.JSONEncode(stats));
 			storiesRoot.SetAttribute("storyblox-viewport-ready", `${title}@${token}`);
 		};
@@ -289,7 +303,8 @@ export = function (storiesRoot: Instance) {
 		const title = storiesRoot.GetAttribute("storyblox-viewport");
 		if (title === undefined || title === "") {
 			generation += 1;
-			teardown();
+			releaseStory();
+			if (reactRoot !== undefined) reactRoot.render(undefined as never);
 			storiesRoot.SetAttribute("storyblox-viewport-ready", undefined);
 			storiesRoot.SetAttribute("storyblox-viewport-error", undefined);
 			storiesRoot.SetAttribute("storyblox-viewport-stats", undefined);
@@ -379,7 +394,13 @@ export = function (storiesRoot: Instance) {
 	return () => {
 		generation += 1;
 		for (const conn of conns) conn.Disconnect();
-		teardown();
+		releaseStory();
+		if (reactRoot !== undefined) {
+			unmountRoot(reactRoot);
+			reactRoot = undefined;
+		}
+		host = undefined;
+		destroyGui();
 		storiesRoot.SetAttribute("storyblox-viewport-ready", undefined);
 		storiesRoot.SetAttribute("storyblox-viewport-error", undefined);
 		storiesRoot.SetAttribute("storyblox-viewport-stats", undefined);
