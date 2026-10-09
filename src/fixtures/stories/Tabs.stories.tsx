@@ -48,6 +48,16 @@ function TabsStory(args: Args) {
 			<frame LayoutOrder={1} Size={new UDim2(0, 220, 0, 40)} BackgroundTransparency={1} BorderSizePixel={0}>
 				<Tabs value="overview" options={overflow} onChange={() => {}} />
 			</frame>
+			<frame LayoutOrder={4} Size={new UDim2(0, 220, 0, 40)} BackgroundTransparency={1} BorderSizePixel={0}>
+				<Tabs
+					value="long"
+					options={[
+						{ label: "A longer tab label that stays inside the item", value: "long" },
+						{ label: "Next", value: "next" },
+					]}
+					onChange={() => {}}
+				/>
+			</frame>
 			<frame LayoutOrder={2} Size={new UDim2(0, 148, 0, 168)} BackgroundTransparency={1} BorderSizePixel={0}>
 				<Tabs value="inventory" options={overflow} orientation="vertical" onChange={() => {}} />
 			</frame>

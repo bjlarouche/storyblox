@@ -14,21 +14,26 @@ interface Args {
 function PaginationStory(args: Args) {
 	const [page, setPage] = useArg(args.page);
 	return (
-		<Pagination
-			count={args.count}
-			page={page}
-			disabled={args.disabled}
-			siblingCount={args.siblingCount}
-			boundaryCount={args.boundaryCount}
-			size={args.size}
-			variant={args.variant}
-			onChange={setPage}
-		/>
+		<frame AutomaticSize={Enum.AutomaticSize.Y} Size={new UDim2(0, 280, 0, 0)} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 8)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<Pagination
+				count={args.count}
+				page={page}
+				disabled={args.disabled}
+				siblingCount={args.siblingCount}
+				boundaryCount={args.boundaryCount}
+				size={args.size}
+				variant={args.variant}
+				onChange={setPage}
+			/>
+			<Pagination count={5} page={1} size="small" variant="text" onChange={() => {}} />
+		</frame>
 	);
 }
 
 export default {
 	title: "Components/Pagination",
+	preview: { kind: "gui", width: 320, height: 100 },
 	args: { count: 10, page: 5, disabled: false, siblingCount: 1, boundaryCount: 1, size: "medium", variant: "outlined" },
 	argTypes: {
 		count: { type: "number" },
