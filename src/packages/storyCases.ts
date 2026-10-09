@@ -37,18 +37,6 @@ export function createSeed(seed: number) {
 	};
 }
 
-export function pointerClick(inst: unknown, send: (x: number, y: number, down: boolean) => void) {
-	const gui = inst as
-		| { IsA(className: string): boolean; AbsolutePosition: { X: number; Y: number }; AbsoluteSize: { X: number; Y: number } }
-		| undefined;
-	if (gui === undefined || !gui.IsA("GuiButton")) return false;
-	const position = gui.AbsolutePosition;
-	const size = gui.AbsoluteSize;
-	send(position.X + size.X * 0.5, position.Y + size.Y * 0.5, true);
-	send(position.X + size.X * 0.5, position.Y + size.Y * 0.5, false);
-	return true;
-}
-
 export function runCase<E extends object>(
 	name: string,
 	body: (env: E & { expect: (ok: boolean, message: string) => void }) => void,
