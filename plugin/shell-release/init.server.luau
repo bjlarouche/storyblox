@@ -14,7 +14,8 @@ root.BackgroundTransparency = 1
 root.Size = UDim2.fromScale(1, 1)
 root.Parent = widget
 
-local lifetime, cleanupFn, loaded = {}, nil, nil
+local remember = require(script:WaitForChild("remember"))
+local lifetime, cleanupFn, loaded, forgetRemember = {}, nil, nil, nil
 
 local function show(text)
 	root:ClearAllChildren()
@@ -40,6 +41,10 @@ local function ensureInclude()
 end
 
 local function runCleanup()
+	if forgetRemember then
+		forgetRemember()
+		forgetRemember = nil
+	end
 	if cleanupFn then
 		pcall(cleanupFn)
 	end
@@ -69,6 +74,10 @@ local function load()
 	if not mod then
 		show("StorybloxPlugin needs an init ModuleScript.")
 		return
+	end
+	local stories = loaded:FindFirstChild("stories")
+	if stories then
+		forgetRemember = remember(plugin, stories)
 	end
 	local ok, result = pcall(require, mod)
 	if ok and type(result) == "function" then

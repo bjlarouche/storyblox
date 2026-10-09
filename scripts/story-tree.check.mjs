@@ -14,7 +14,7 @@ Array.prototype.size = function size() {
 	return this.length;
 };
 
-const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch, adoptTree, orderedStoryTitles, stepStoryTitle, navStoryTitles, storyById } = await import(
+const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch, rememberRecent, adoptTree, orderedStoryTitles, stepStoryTitle, navStoryTitles, storyById } = await import(
 	"../src/packages/ui/storiesSidebar/storyTree.ts"
 );
 
@@ -60,6 +60,17 @@ if (fav.leaves[0]?.title !== "Examples/Button/Primary" || fav.leaves[1]?.title !
 if (favoriteBranch([{ title: "Layout/Controls", onClick: click }], ["Missing/Story"], icons) !== undefined) {
 	throw new Error("missing favorite");
 }
+const recent = rememberRecent(rememberRecent(["Layout/Controls"], "Examples/Button/Primary"), "Layout/Controls");
+if (recent.join(",") !== "Layout/Controls,Examples/Button/Primary") throw new Error("recent order");
+const capped = ["a", "b", "c", "d", "e", "f", "g", "h", "i"].reduce((list, title) => rememberRecent(list, title), []);
+if (capped.length !== 8 || capped[0] !== "i" || capped.includes("a")) throw new Error("recent cap");
+const recentBranch = favoriteBranch(
+	[{ title: "Layout/Controls", onClick: click }],
+	["Layout/Controls"],
+	icons,
+	"Recent",
+);
+if (recentBranch?.title !== "Recent" || recentBranch.icon !== "folder") throw new Error("recent branch");
 
 const held = { title: "STORIES", branches: [] };
 const adopted = adoptTree(held, { title: "STORIES", branches: fav ? [fav] : [] });
@@ -99,6 +110,20 @@ if (!storyblox.includes('key="CopyId"') || !storyblox.includes("copyText") || !s
 	throw new Error("copy id");
 }
 if (!storyblox.includes('key="OpenId"') || !storyblox.includes("storyById")) throw new Error("open id");
+if (!storyblox.includes("storyblox-recent") || !storyblox.includes("rememberRecent") || !sidebar.includes('"Recent"')) {
+	throw new Error("recent list");
+}
+const remember = readFileSync(join(root, "plugin/remember.luau"), "utf8");
+const devShell = readFileSync(join(root, "plugin/shell/init.server.luau"), "utf8");
+const releaseShell = readFileSync(join(root, "plugin/shell-release/init.server.luau"), "utf8");
+for (const attr of ["storyblox-recent", "storyblox-include-tags", "storyblox-exclude-tags"]) {
+	if (!remember.includes(attr)) throw new Error(`remember ${attr}`);
+}
+if (!remember.includes("GetSetting") || !remember.includes("SetSetting")) throw new Error("remember settings");
+if (!devShell.includes('WaitForChild("remember")') || !releaseShell.includes('WaitForChild("remember")')) {
+	throw new Error("shell remember");
+}
+if (readFileSync(join(root, "plugin/host/init.luau"), "utf8").includes("storyblox-recent")) throw new Error("host recent");
 const listed = [
 	{ title: "Shell/Actions", id: "shell-actions" },
 	{ title: "Shell/Docs" },

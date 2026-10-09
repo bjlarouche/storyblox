@@ -18,7 +18,22 @@ root.BackgroundTransparency = 1
 root.Size = UDim2.fromScale(1, 1)
 root.Parent = widget
 
+local remember = require(script:WaitForChild("remember"))
 local watchConns, lifetime, pending, cleanupFn, loaded = {}, {}
+local remembered = false
+
+local function bindRemember()
+	if remembered then
+		return
+	end
+	local folder = ss:FindFirstChild("StorybloxPlugin")
+	local stories = folder and folder:FindFirstChild("stories")
+	if not stories then
+		return
+	end
+	remembered = true
+	remember(plugin, stories)
+end
 
 local function show(text)
 	root:ClearAllChildren()
@@ -41,6 +56,7 @@ local function runCleanup()
 end
 
 local function load()
+	bindRemember()
 	runCleanup()
 	root:ClearAllChildren()
 	local folder = ss:FindFirstChild("StorybloxPlugin")

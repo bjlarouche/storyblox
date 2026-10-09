@@ -1,6 +1,9 @@
 {
   "name": "storyblox-plugin",
   "tree": {
-    "$path": "shell"
+    "$path": "shell",
+    "remember": {
+      "$path": "remember.luau"
+    }
   }
 }

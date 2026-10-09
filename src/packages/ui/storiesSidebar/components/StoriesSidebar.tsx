@@ -33,6 +33,7 @@ export interface StoriesSidebarProps {
 	selected?: string;
 	focusSearch?: number;
 	favorites?: string[];
+	recent?: string[];
 	includeTags?: string;
 	excludeTags?: string;
 	onIncludeTagsChange?: (value: string) => void;
@@ -48,6 +49,7 @@ function StoriesSidebar({
 	selected,
 	focusSearch = 0,
 	favorites = [],
+	recent = [],
 	includeTags = "",
 	excludeTags = "",
 	onIncludeTagsChange,
@@ -125,12 +127,14 @@ function StoriesSidebar({
 		const starredIcon = (Icons as unknown as { Star: typeof Icons.OpenBox }).Star;
 		const icons = { folder: Icons.OpenBox, story: Icons.Book, starred: starredIcon };
 		built.branches = storyBranches(nodes, icons) as Branch[];
+		const recentBranch = favoriteBranch(nodes, recent, icons, "Recent");
+		if (recentBranch !== undefined) built.branches.unshift(recentBranch as Branch);
 		const favoritesBranch = favoriteBranch(nodes, favorites, icons);
 		if (favoritesBranch !== undefined) built.branches.unshift(favoritesBranch as Branch);
 
 		treeRef.current = adoptTree(treeRef.current, built);
 		setTreeRev((n) => n + 1);
-	}, [stories, favorites]);
+	}, [stories, favorites, recent]);
 
 	const hits = searchStories(
 		stories.map((story) => story.title),

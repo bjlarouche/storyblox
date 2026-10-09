@@ -14,7 +14,7 @@ import { ErrorPanel, SafeBoundary, SplitPane, Template, copyText, selectText } f
 import { withStoryControls } from "../../template/storyControls";
 import { storyInspector, storyLanguage } from "../../template/storyLabel";
 import { StoriesSidebar } from "../../storiesSidebar";
-import { parseFavorites, storyById, toggleFavorite } from "../../storiesSidebar/storyTree";
+import { parseFavorites, rememberRecent, storyById, toggleFavorite } from "../../storiesSidebar/storyTree";
 import { useDragScroll } from "../../scroll";
 import { normalizeExport, storyModuleSuffix } from "../normalizeStory";
 import { storyFromExport } from "../storyAdapter";
@@ -318,6 +318,12 @@ function Storyblox(props: StorybloxProps) {
 	const [favoriteList, setFavoriteList] = useState(parseFavorites(favorites));
 	const favoritesRef = useRef(favoriteList);
 	favoritesRef.current = favoriteList;
+	const [recentList, setRecentList] = useState(() => {
+		const raw = controlRoot(root)?.GetAttribute("storyblox-recent");
+		return parseFavorites(typeOf(raw) === "string" ? (raw as string) : undefined);
+	});
+	const recentRef = useRef(recentList);
+	recentRef.current = recentList;
 	useDragScroll(inspectorFrame);
 	const toggleFavoriteStory = (title: string) => {
 		const chosen = toggleFavorite(favoritesRef.current, title);
@@ -517,7 +523,11 @@ function Storyblox(props: StorybloxProps) {
 		if (title === undefined || title === lastTitle.current) return;
 		lastTitle.current = title;
 		if (onLastStoryChange) onLastStoryChange(title);
-	}, [selectedStory, onLastStoryChange]);
+		const picked = rememberRecent(recentRef.current, title);
+		recentRef.current = picked;
+		setRecentList(picked);
+		controlRoot(root)?.SetAttribute("storyblox-recent", picked.size() > 0 ? picked.join(",") : undefined);
+	}, [selectedStory, onLastStoryChange, root]);
 
 	useEffect(() => {
 		const marker = controlRoot(root);
@@ -570,8 +580,21 @@ function Storyblox(props: StorybloxProps) {
 			const raw = marker.GetAttribute("storyblox-exclude-tags");
 			setExcludeTags(parseTagList(typeOf(raw) === "string" ? (raw as string) : undefined));
 		});
+		const recentConn = marker.GetAttributeChangedSignal("storyblox-recent").Connect(() => {
+			const raw = marker.GetAttribute("storyblox-recent");
+			const picked = parseFavorites(typeOf(raw) === "string" ? (raw as string) : undefined);
+			recentRef.current = picked;
+			setRecentList(picked);
+		});
 		setIncludeTags(parseTagList(typeOf(marker.GetAttribute("storyblox-include-tags")) === "string" ? (marker.GetAttribute("storyblox-include-tags") as string) : undefined));
 		setExcludeTags(parseTagList(typeOf(marker.GetAttribute("storyblox-exclude-tags")) === "string" ? (marker.GetAttribute("storyblox-exclude-tags") as string) : undefined));
+		const savedRecent = parseFavorites(
+			typeOf(marker.GetAttribute("storyblox-recent")) === "string"
+				? (marker.GetAttribute("storyblox-recent") as string)
+				: undefined,
+		);
+		recentRef.current = savedRecent;
+		setRecentList(savedRecent);
 		const remountConn = marker
 			.GetAttributeChangedSignal("storyblox-remount")
 			.Connect(() => setRemount((current) => current + 1));
@@ -662,6 +685,7 @@ function Storyblox(props: StorybloxProps) {
 			focusConn.Disconnect();
 			includeConn.Disconnect();
 			excludeConn.Disconnect();
+			recentConn.Disconnect();
 			remountConn.Disconnect();
 			chromeConn.Disconnect();
 			caseConn.Disconnect();
@@ -741,6 +765,7 @@ function Storyblox(props: StorybloxProps) {
 				selected={selectedStory?.title}
 				focusSearch={focusSearch}
 				favorites={favoriteList}
+				recent={recentList}
 				includeTags={includeTags.join(",")}
 				excludeTags={excludeTags.join(",")}
 				onIncludeTagsChange={(value) => {
