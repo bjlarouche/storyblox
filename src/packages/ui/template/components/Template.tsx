@@ -27,7 +27,7 @@ import { BoxRect, collectGuiBoxes, guiBox } from "packages/layoutTools";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
 import { hasStoryControls, storyArgs } from "../storyControls";
 import { storyLabel } from "../storyLabel";
-import { CaseResult, createCaseClock, createSeed, runCase } from "packages/storyCases";
+import { CaseResult, createCaseClock, createSeed, pointerClick, runCase } from "packages/storyCases";
 import { ActionLogContext } from "../actionLogContext";
 import InspectorPane from "./InspectorPane";
 import OutlineOverlay from "./OutlineOverlay";
@@ -406,6 +406,26 @@ function Template({
 				body as Parameters<typeof runCase>[1],
 				{
 					find: (target: string) => mountFrame.current?.FindFirstChild(target, true),
+					click: (target: string) => {
+						const inst = mountFrame.current?.FindFirstChild(target, true);
+						pointerClick(inst, (x, y, down) => {
+							let layer: Instance | undefined = inst;
+							while (layer !== undefined && !layer.IsA("LayerCollector")) layer = layer.Parent;
+							const mouse = (
+								game.GetService as unknown as (name: string) => {
+									SendMouseButtonEvent: (
+										x: number,
+										y: number,
+										button: number,
+										down: boolean,
+										layer?: Instance,
+										repeats?: number,
+									) => void;
+								}
+							)("VirtualInputManager");
+							mouse.SendMouseButtonEvent(x, y, 0, down, layer, 0);
+						});
+					},
 					args: () => argsRef.current,
 					setArg: (arg: string, value: unknown) => setArgs((current) => applyArg(current, arg, value)),
 					wait: (seconds?: number) => task.wait(seconds),

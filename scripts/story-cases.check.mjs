@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 Array.prototype.size = function () {
 	return this.length;
 };
@@ -6,7 +9,7 @@ Array.prototype.sort = function (less) {
 	return nativeSort.call(this, less ? (a, b) => (less(a, b) ? -1 : less(b, a) ? 1 : 0) : undefined);
 };
 
-const { createCaseClock, createSeed, runCase, MAX_CASE_FAILURES } = await import("../src/packages/storyCases.ts");
+const { createCaseClock, createSeed, pointerClick, runCase, MAX_CASE_FAILURES } = await import("../src/packages/storyCases.ts");
 
 const clock = createCaseClock();
 const order = [];
@@ -56,5 +59,19 @@ if (thrown.failures[0] !== "threw: bad") throw new Error("thrown case");
 
 const stale = runCase("stale", () => {}, {}, () => true);
 if (stale.passed || stale.failures[0] !== "cancelled") throw new Error("cancelled case");
+
+const presses = [];
+const button = {
+	IsA: (className) => className === "GuiButton",
+	AbsolutePosition: { X: 10, Y: 20 },
+	AbsoluteSize: { X: 8, Y: 4 },
+};
+if (!pointerClick(button, (x, y, down) => presses.push([x, y, down]))) throw new Error("click button");
+if (presses.join(";") !== "14,22,true;14,22,false") throw new Error("click point");
+if (pointerClick({ IsA: () => false, AbsolutePosition: { X: 0, Y: 0 }, AbsoluteSize: { X: 1, Y: 1 } }, () => presses.push("no"))) {
+	throw new Error("click ignores frames");
+}
+const template = readFileSync(join(process.cwd(), "src/packages/ui/template/components/Template.tsx"), "utf8");
+if (!template.includes("pointerClick(") || !template.includes("VirtualInputManager")) throw new Error("click wiring");
 
 console.log("story cases ok");
