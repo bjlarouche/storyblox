@@ -171,6 +171,7 @@ function StoriesSidebar({
 		const connection = UserInputService.InputBegan.Connect((input, gameProcessed) => {
 			const box = UserInputService.GetFocusedTextBox();
 			const host = sidebar.current?.Parent;
+			if (host === undefined) return;
 			const key = input.KeyCode;
 			const searchFocused = box !== undefined && host !== undefined && box.IsDescendantOf(host);
 			if (searchFocused) {

@@ -55,9 +55,15 @@ if (host.includes("press Reload")) {
 }
 if (host.includes("ReactRoblox.act")) throw new Error("host must not use act; it throws outside test mode");
 const unmountAt = host.indexOf("handle:unmount()");
-const drainAt = host.indexOf("while not drained");
+const drainAt = host.indexOf("if not drained");
 if (unmountAt < 0 || drainAt < unmountAt || !host.includes("React.createElement(Drained)")) {
-	throw new Error("host cleanup must yield until the unmount effects ran");
+	throw new Error("host cleanup must check the unmount effects ran");
+}
+if (host.includes("task.wait") || !host.includes("handle = nil")) {
+	throw new Error("host cleanup must not wait on a dirty React or keep its root");
+}
+if (!storyblox.includes("storyConns.current.push(") || !storyblox.includes("hostPlugin?.Destroying.Connect(stop)")) {
+	throw new Error("story module listeners must stop when the clone is destroyed");
 }
 for (const rel of ["plugin/shell/init.server.luau", "plugin/shell-release/init.server.luau"]) {
 	const shell = read(rel);

@@ -278,6 +278,7 @@ function Storyblox(props: StorybloxProps) {
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [extraList, setExtraList] = useState(extraRoots);
 	const seenModules = useRef<ModuleScript[]>([]);
+	const storyConns = useRef<RBXScriptConnection[]>([]);
 	const lastTitle = useRef("");
 	const [focusSearch, setFocusSearch] = useState(0);
 	const [remount, setRemount] = useState(0);
@@ -378,6 +379,7 @@ function Storyblox(props: StorybloxProps) {
 					seenModules.current.push(root);
 					try {
 						const story = loadedStory(root, suffix);
+						if (generation.current !== token) return;
 						if (story === undefined) {
 							logDebug(`Rejected story export ${root.GetFullName()}`);
 							return;
@@ -415,7 +417,7 @@ function Storyblox(props: StorybloxProps) {
 						} as Story);
 
 						// Remove story if root is being removed
-						root.Destroying.Connect(() => {
+						const destroyingConnection = root.Destroying.Connect(() => {
 							session.remove(story.title);
 
 							// Disconnect signal
@@ -423,6 +425,7 @@ function Storyblox(props: StorybloxProps) {
 
 							logDebug(`Story removed: ${story.title} because ${root.GetFullName()} was destroyed`);
 						});
+						storyConns.current.push(geChangedConnection, destroyingConnection);
 					} catch (error) {
 						if (generation.current === token) {
 							failed.current = true;
@@ -485,10 +488,17 @@ function Storyblox(props: StorybloxProps) {
 			setPreviewKey((key) => key + 1);
 		});
 
-		return () => {
+		const stop = () => {
+			gone?.Disconnect();
 			task.cancel(pending);
+			generation.current = nextGeneration(generation.current);
 			for (const conn of added) conn.Disconnect();
+			for (const conn of storyConns.current) conn.Disconnect();
+			storyConns.current = [];
 		};
+		// Story modules outlive this tree; a failed unmount skips the cleanup, so the clone going away must stop these too.
+		const gone = hostPlugin?.Destroying.Connect(stop);
+		return stop;
 	}, [root, extraList, findStories, logDebug]);
 
 	const primaryThemeEnabled = theme === primaryTheme;
@@ -721,7 +731,7 @@ function Storyblox(props: StorybloxProps) {
 		let alive = true;
 		const title = selectedStory.title;
 		const tick = () => {
-			if (!alive) return;
+			if (!alive || (hostPlugin !== undefined && hostPlugin.Parent === undefined)) return;
 			const scroll = findCanvasScroll(hostRef.current);
 			if (scroll && storyInsideCanvas(scroll)) {
 				const build = (marker.GetAttribute("storyblox-build") as number | undefined) ?? 0;

@@ -82,16 +82,14 @@ return function(plugin, widget, root)
 	end
 	return function()
 		if stopHarness then pcall(stopHarness) end
-		-- Unmount is scheduled, not sync. Yield until the last sibling's effect cleanup runs so this clone's React is idle before the shell destroys it.
-		pcall(function()
+		if handle == nil then return end
+		-- Unmount flushes sync, so the last sibling's cleanup has run unless it threw. A copy that threw is dirty; never call into it again.
+		local ok, err = pcall(function()
 			handle:unmount()
 		end)
-		local deadline = os.clock() + 2
-		while not drained and os.clock() < deadline do
-			task.wait()
-		end
+		handle = nil
 		if not drained then
-			warn("[Storyblox] unmount did not finish before reload")
+			warn("[Storyblox] unmount did not finish before reload: ", if ok then "effects did not drain" else err)
 		end
 	end
 end
