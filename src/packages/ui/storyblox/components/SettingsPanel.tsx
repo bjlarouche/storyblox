@@ -2,6 +2,9 @@ import React, { useState } from "@rbxts/react";
 import { Button, Chip, Input, Typography, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import { DEFAULT_STORY_ROOTS, encodeRootList, parseRootList } from "packages/storyRoots";
 
+const row = (order: number) =>
+	({ LayoutOrder: order, Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }) as WriteableStyle<TextLabel>;
+
 export interface SettingsPanelProps {
 	extraRoots?: string;
 	onExtraRootsChange?: (value: string) => void;
@@ -31,13 +34,13 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 		>
 			<uipadding PaddingTop={new UDim(0, gap)} PaddingBottom={new UDim(0, gap)} PaddingLeft={new UDim(0, gap)} PaddingRight={new UDim(0, gap)} />
 			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, gap)} SortOrder={Enum.SortOrder.LayoutOrder} />
-			<Typography key="Title" text="Story folders" variant="h6" className={{ LayoutOrder: 1 } as WriteableStyle<TextLabel>} />
+			<Typography key="Title" text="Story folders" variant="h6" className={row(1)} />
 			<Typography
 				key="DefaultsLabel"
 				text="Always scanned"
 				variant="caption"
 				color="secondary"
-				className={{ LayoutOrder: 2 } as WriteableStyle<TextLabel>}
+				className={row(2)}
 			/>
 			<>
 				{DEFAULT_STORY_ROOTS.map((path, index) => (
@@ -45,7 +48,7 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 						key={`default-${path}`}
 						text={path}
 						variant="body"
-						className={{ LayoutOrder: 3 + index } as WriteableStyle<TextLabel>}
+						className={row(3 + index)}
 					/>
 				))}
 			</>
@@ -54,7 +57,7 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 				text="Extra folders"
 				variant="caption"
 				color="secondary"
-				className={{ LayoutOrder: 20 } as WriteableStyle<TextLabel>}
+				className={row(20)}
 			/>
 			{extras.size() > 0 ? (
 				<>
@@ -77,7 +80,7 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange }: SettingsPanelPro
 					text="None"
 					variant="body"
 					color="secondary"
-					className={{ LayoutOrder: 21 } as WriteableStyle<TextLabel>}
+					className={row(21)}
 				/>
 			)}
 			<Input
