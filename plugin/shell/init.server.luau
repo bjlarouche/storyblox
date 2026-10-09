@@ -55,7 +55,7 @@ local function runCleanup()
 	loaded = nil
 end
 
-local function load()
+local function mount()
 	bindRemember()
 	runCleanup()
 	root:ClearAllChildren()
@@ -85,6 +85,24 @@ local function load()
 		return
 	end
 	if type(result) == "function" then cleanupFn = result end
+end
+
+-- Cleanup yields until React is idle, so a second load must wait instead of rendering into root mid-unmount.
+local loading, again = false, false
+local function load()
+	if loading then
+		again = true
+		return
+	end
+	loading = true
+	repeat
+		again = false
+		local ok, err = pcall(mount)
+		if not ok then
+			warn("[Storyblox] ", err)
+		end
+	until not again
+	loading = false
 end
 
 local function schedule()

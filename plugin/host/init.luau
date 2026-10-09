@@ -29,8 +29,17 @@ return function(plugin, widget, root)
 	if type(savedLast) == "string" and savedLast ~= "" then
 		stories:SetAttribute("storyblox-select", savedLast)
 	end
+	local drained = false
+	local function Drained()
+		React.useEffect(function()
+			return function()
+				drained = true
+			end
+		end, {})
+		return nil
+	end
 	local handle = ReactRoblox.createRoot(root)
-	handle:render(React.createElement(ErrorBoundary, { fallback = crashed }, React.createElement(Storyblox, {
+	handle:render(React.createElement(React.Fragment, nil, React.createElement(ErrorBoundary, { fallback = crashed }, React.createElement(Storyblox, {
 		themeName = saved == "light" and "light" or "dark",
 		onThemeChange = function(name)
 			plugin:SetSetting("theme", name)
@@ -51,7 +60,7 @@ return function(plugin, widget, root)
 		onLastStoryChange = function(title)
 			plugin:SetSetting("lastStory", title)
 		end,
-	})))
+	})), React.createElement(Drained)))
 	local stopHarness
 	local storybloxRoot = TS.getModule(script, "@rbxts", "storyblox")
 	local fixtures = storybloxRoot:FindFirstChild("fixtures")
@@ -73,16 +82,16 @@ return function(plugin, widget, root)
 	end
 	return function()
 		if stopHarness then pcall(stopHarness) end
-		-- Flush while this clone's React is still alive. Destroying the clone first leaves the dispatcher on the stack.
-		local flushed = pcall(function()
-			ReactRoblox.act(function()
-				handle:unmount()
-			end)
+		-- Unmount is scheduled, not sync. Yield until the last sibling's effect cleanup runs so this clone's React is idle before the shell destroys it.
+		pcall(function()
+			handle:unmount()
 		end)
-		if not flushed then
-			pcall(function()
-				handle:unmount()
-			end)
+		local deadline = os.clock() + 2
+		while not drained and os.clock() < deadline do
+			task.wait()
+		end
+		if not drained then
+			warn("[Storyblox] unmount did not finish before reload")
 		end
 	end
 end
