@@ -21,6 +21,7 @@ import {
 import { extraGlobalEntries, mergeGlobals } from "packages/storyGlobals";
 import { collectLoaders, settleLoaders } from "packages/storyLoaders";
 import { bindActionArgs, createActionLog } from "packages/storyActions";
+import { actionFilter, allowAction, canvasLayout, docsPage } from "packages/storyParameters";
 import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
 import { BoxRect, collectGuiBoxes, guiBox } from "packages/layoutTools";
 import { applyArg, ArgValues, copyArgs } from "../storyArgs";
@@ -258,19 +259,23 @@ function Template({
 			features?: { actions?: boolean; interactions?: boolean; docs?: boolean };
 		} | undefined
 	)?.features;
-	const actionsEnabled = features?.actions === true;
+	const storyParameters = (story as { parameters?: unknown } | undefined)?.parameters;
+	const layout = canvasLayout(storyParameters);
+	const page = docsPage(storyParameters);
+	const filter = actionFilter(storyParameters);
+	const actionsLogged = filter !== "off" && (features?.actions === true || filter !== "all");
 	const interactionsEnabled = features?.interactions === true;
-	const docsEnabled = features?.docs === true;
+	const docsEnabled = page !== false && (features?.docs === true || typeOf(page) === "string");
 	const actionApi = useMemo(
 		() => ({
-			disabled: !actionsEnabled,
+			disabled: !actionsLogged,
 			record: (name: string, ...values: unknown[]) => {
-				if (!actionsEnabled) return;
+				if (!actionsLogged) return;
 				actionLog.record(name, ...values);
 				setActionVersion((current) => current + 1);
 			},
 		}),
-		[actionLog, actionsEnabled],
+		[actionLog, actionsLogged],
 	);
 	if (storyKey !== argsStory) {
 		setArgsStory(storyKey);
@@ -491,7 +496,7 @@ function Template({
 			return;
 		}
 
-		const renderArgs = actionsEnabled ? bindActionArgs(args, actionApi.record) : args;
+		const renderArgs = actionsLogged ? bindActionArgs(args, actionApi.record, (path) => allowAction(filter, path)) : args;
 		const session = (story as { nativeSession?: { update?: (args: unknown) => void } }).nativeSession;
 		if (native && mounted.current === mountKey && themeMounted.current === previewTheme && session?.update !== undefined) {
 			try {
@@ -525,7 +530,7 @@ function Template({
 				preloaded: hasLoaders ? preloaded : undefined,
 			}) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
 			const parsed = readTemplateResult(element, callback);
-			const inset = theme.padding.calc(2);
+			const inset = layout === "fullscreen" ? 0 : theme.padding.calc(2);
 			const logical = (
 				story as {
 					preview?: { kind?: unknown; width?: unknown; height?: unknown; background?: unknown; orientation?: unknown };
@@ -546,6 +551,13 @@ function Template({
 				: 1;
 			const scale = fitScale * zoom;
 			const gridColor = theme.palette.text.secondary;
+			const storyElement = viewport ? (
+				<HostScene yaw={yaw} onOrbit={(dx) => setYaw((current) => dragYaw(current, dx))}>
+					{parsed.element as React.Element}
+				</HostScene>
+			) : (
+				(parsed.element as React.Element)
+			);
 			setFailure(undefined);
 			onRenderError?.(undefined);
 			setTemplate(
@@ -566,10 +578,18 @@ function Template({
 						PaddingLeft={new UDim(0, inset)}
 						PaddingRight={new UDim(0, inset)}
 					/>
-					{viewport ? (
-						<HostScene yaw={yaw} onOrbit={(dx) => setYaw((current) => dragYaw(current, dx))}>{parsed.element as React.Element}</HostScene>
+					{layout === "centered" ? (
+						<frame key="Story" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
+							<uilistlayout
+								key="Center"
+								FillDirection={Enum.FillDirection.Vertical}
+								HorizontalAlignment={Enum.HorizontalAlignment.Center}
+								VerticalAlignment={Enum.VerticalAlignment.Center}
+							/>
+							{storyElement}
+						</frame>
 					) : (
-						(parsed.element as React.Element)
+						storyElement
 					)}
 					{(outline || measure) && outlineOrigin !== undefined ? (
 						<OutlineOverlay theme={theme} boxes={outlineBoxes} measure={measure} origin={outlineOrigin} scale={scale} />
@@ -615,6 +635,10 @@ function Template({
 		hasLoaders,
 		loaderPhase,
 		preloaded,
+		layout,
+		actionsLogged,
+		filter,
+		actionApi,
 	]);
 
 	useEffect(() => {
@@ -1058,13 +1082,13 @@ function Template({
 								fallback={(failure) => {
 									onRenderError?.(failure);
 									return (
-										<Canvas className={canvas}>
+										<Canvas className={canvas} flush={layout === "fullscreen"}>
 											{storyError(storyKey.size() > 0 ? storyKey : "story", failure)}
 										</Canvas>
 									);
 								}}
 							>
-								<Canvas className={canvas}>
+								<Canvas className={canvas} flush={layout === "fullscreen"}>
 									<ActionLogContext.Provider value={actionApi}>
 										{hasLoaders && loaderPhase === "loading"
 											? loaderStatus(theme)
@@ -1091,7 +1115,7 @@ function Template({
 									onChange={(key, value) => setArgs((current) => applyArg(current, key, value))}
 									onReset={() => setArgs(copyArgs(storyArgs(story as never)))}
 									actions={
-										actionsEnabled
+										actionsLogged
 											? {
 													events: actionLog.events,
 													onReset: () => {
@@ -1127,6 +1151,7 @@ function Template({
 											? {
 													title: storyKey,
 													description: (story as { description?: unknown } | undefined)?.description,
+													page: typeOf(page) === "string" ? page : undefined,
 													argTypes,
 													source: (story as { sourceText?: string } | undefined)?.sourceText ?? story?.source,
 												}

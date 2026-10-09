@@ -6,6 +6,7 @@ export interface DocsPanelProps {
 	theme: Theme;
 	title?: string;
 	description?: unknown;
+	page?: string;
 	argTypes?: unknown;
 	source?: string;
 }
@@ -32,7 +33,7 @@ function propRows(argTypes: unknown): Array<{ name: string; type: string; note: 
 	return rows;
 }
 
-function DocsPanel({ theme, title, description, argTypes, source }: DocsPanelProps) {
+function DocsPanel({ theme, title, description, page, argTypes, source }: DocsPanelProps) {
 	const [listFrame, setListFrame] = useState<ScrollingFrame>();
 	useDragScroll(listFrame);
 	const gap = new UDim(0, theme.padding.calc(1));
@@ -65,6 +66,25 @@ function DocsPanel({ theme, title, description, argTypes, source }: DocsPanelPro
 			<textlabel
 				key="Description"
 				Text={description as string}
+				LayoutOrder={order}
+				Size={new UDim2(1, 0, 0, 0)}
+				AutomaticSize={Enum.AutomaticSize.Y}
+				TextWrapped={true}
+				BackgroundTransparency={1}
+				Font={theme.typography.fontFamilies.default}
+				TextSize={theme.typography.fontSizes.caption}
+				TextColor3={theme.palette.text.primary}
+				TextXAlignment={Enum.TextXAlignment.Left}
+			/>,
+		);
+		order += 1;
+	}
+
+	if (typeOf(page) === "string" && (page as string).size() > 0) {
+		rows.push(
+			<textlabel
+				key="Page"
+				Text={page as string}
 				LayoutOrder={order}
 				Size={new UDim2(1, 0, 0, 0)}
 				AutomaticSize={Enum.AutomaticSize.Y}

@@ -45,9 +45,10 @@ function bindValue(
 	path: string,
 	record: (name: string, ...values: unknown[]) => void,
 	seen: Array<defined>,
+	allow?: (path: string) => boolean,
 ): unknown {
 	if (typeOf(value) === "function") {
-		if (path.size() === 0) return value;
+		if (path.size() === 0 || (allow !== undefined && !allow(path))) return value;
 		const fn = value as (...incoming: unknown[]) => unknown;
 		return (...incoming: unknown[]) => {
 			record(path, ...incoming);
@@ -64,15 +65,19 @@ function bindValue(
 	for (const [key, child] of pairs(value as object)) {
 		const name = tostring(key);
 		const childPath = path.size() === 0 ? name : `${path}.${name}`;
-		const wrapped = bindValue(child, childPath, record, seen);
+		const wrapped = bindValue(child, childPath, record, seen, allow);
 		bound[key as string] = wrapped;
 		if (wrapped !== child) changed = true;
 	}
 	return changed ? bound : value;
 }
 
-export function bindActionArgs(args: unknown, record: (name: string, ...values: unknown[]) => void) {
-	return bindValue(args, "", record, new Array<defined>());
+export function bindActionArgs(
+	args: unknown,
+	record: (name: string, ...values: unknown[]) => void,
+	allow?: (path: string) => boolean,
+) {
+	return bindValue(args, "", record, new Array<defined>(), allow);
 }
 
 export function wrapStory(
