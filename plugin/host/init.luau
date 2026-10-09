@@ -73,6 +73,16 @@ return function(plugin, widget, root)
 	end
 	return function()
 		if stopHarness then pcall(stopHarness) end
-		handle:unmount()
+		-- Flush while this clone's React is still alive. Destroying the clone first leaves the dispatcher on the stack.
+		local flushed = pcall(function()
+			ReactRoblox.act(function()
+				handle:unmount()
+			end)
+		end)
+		if not flushed then
+			pcall(function()
+				handle:unmount()
+			end)
+		end
 	end
 end

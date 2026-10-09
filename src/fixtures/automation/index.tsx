@@ -134,11 +134,18 @@ export = function (storiesRoot: Instance) {
 		HttpService.JSONEncode(catalog.map((entry) => entry.title)),
 	);
 
+	const unmountRoot = (root: ReactRoblox.Root) => {
+		const [flushed] = pcall(() => {
+			ReactRoblox.act(() => root.unmount());
+		});
+		if (!flushed) pcall(() => root.unmount());
+	};
+
 	const teardown = () => {
 		templateCleanup?.();
 		templateCleanup = undefined;
 		if (reactRoot !== undefined) {
-			pcall(() => reactRoot!.unmount());
+			unmountRoot(reactRoot);
 			reactRoot = undefined;
 		}
 		destroyGui();
