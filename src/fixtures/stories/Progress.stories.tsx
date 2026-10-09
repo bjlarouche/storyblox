@@ -37,32 +37,47 @@ function ProgressStory(args: Args) {
 				: theme.palette.primary.main;
 
 	return (
-		<frame key="ProgressHost" Size={new UDim2(0, 220, 0, 72)} BackgroundTransparency={1}>
-			{args.kind === "circular" ? (
-				<CircularProgress
-					value={args.indeterminate ? undefined : args.value}
-					size={args.size}
-					thickness={args.thickness}
-					color={color}
-					reducedMotion={args.reducedMotion}
-					disabled={args.disabled}
-				/>
-			) : (
-				<LinearProgress
-					value={args.value}
-					indeterminate={args.indeterminate}
-					reducedMotion={args.reducedMotion}
-					disabled={args.disabled}
-					color={color}
-					className={{ Size: new UDim2(1, 0, 0, 8) }}
-				/>
-			)}
+		<frame AutomaticSize={Enum.AutomaticSize.Y} Size={new UDim2(0, 220, 0, 0)} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 8)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<frame key="ProgressHost" LayoutOrder={1} Size={new UDim2(1, 0, 0, 72)} BackgroundTransparency={1}>
+				{args.kind === "circular" ? (
+					<CircularProgress
+						value={args.indeterminate ? undefined : args.value}
+						size={args.size}
+						thickness={args.thickness}
+						color={color}
+						reducedMotion={args.reducedMotion}
+						disabled={args.disabled}
+					/>
+				) : (
+					<LinearProgress
+						value={args.value}
+						indeterminate={args.indeterminate}
+						reducedMotion={args.reducedMotion}
+						disabled={args.disabled}
+						color={color}
+						className={{ Size: new UDim2(1, 0, 0, 8) }}
+					/>
+				)}
+			</frame>
+			<frame LayoutOrder={2} Size={new UDim2(1, 0, 0, 8)} BackgroundTransparency={1}>
+				<LinearProgress value={0.65} indeterminate={false} reducedMotion={true} color={color} className={{ Size: new UDim2(1, 0, 0, 8) }} />
+			</frame>
+			<frame LayoutOrder={3} Size={new UDim2(1, 0, 0, 8)} BackgroundTransparency={1}>
+				<LinearProgress indeterminate={true} reducedMotion={true} color={color} className={{ Size: new UDim2(1, 0, 0, 8) }} />
+			</frame>
+			<frame LayoutOrder={4} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, 12)} SortOrder={Enum.SortOrder.LayoutOrder} />
+				<CircularProgress value={0.6} size={32} thickness={4} color={color} reducedMotion={true} />
+				<CircularProgress size={32} thickness={4} color={color} reducedMotion={true} />
+			</frame>
 		</frame>
 	);
 }
 
 export default {
 	title: "Feedback/Progress",
+	preview: { kind: "gui", width: 260, height: 180 },
 	args: {
 		kind: "circular",
 		value: 0.4,
