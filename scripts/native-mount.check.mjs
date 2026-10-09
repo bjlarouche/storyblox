@@ -1,10 +1,20 @@
-globalThis.typeOf = (value) => (typeof value === "object" && value !== null ? "table" : typeof value);
+globalThis.typeOf = (value) => {
+	if (value && value.__host) return "Instance";
+	return typeof value === "object" && value !== null ? "table" : typeof value;
+};
+globalThis.pcall = (fn) => {
+	try {
+		return [true, fn()];
+	} catch (error) {
+		return [false, error];
+	}
+};
 globalThis.pairs = (record) => Object.keys(record).map((key) => [key, record[key]]);
 Array.prototype.size = function size() {
 	return this.length;
 };
 
-const { mountNative } = await import("../src/packages/ui/storyblox/nativeMount.ts");
+const { mountNative, placeNativeHost } = await import("../src/packages/ui/storyblox/nativeMount.ts");
 const { copyArgs, patchArg } = await import("../src/packages/ui/template/storyArgs.ts");
 
 function instance(name) {
@@ -173,5 +183,39 @@ mountNative(
 	scene,
 );
 if (seenScene.sceneRoot !== scene.sceneRoot || seenScene.camera !== scene.camera) throw new Error("scene context");
+
+function lockedTarget() {
+	const target = { Name: "NativeStory", destroyed: false };
+	let parent;
+	Object.defineProperty(target, "Parent", {
+		get: () => parent,
+		set(value) {
+			if (target.destroyed) {
+				const shown = value && value.Name !== undefined ? value.Name : value;
+				throw new Error(`locked, new parent ${shown}`);
+			}
+			parent = value;
+		},
+	});
+	target.Destroy = () => {
+		target.destroyed = true;
+		parent = undefined;
+	};
+	return target;
+}
+
+const hostFrame = { Name: "1", __host: true };
+const container = lockedTarget();
+placeNativeHost(container, hostFrame);
+if (container.Parent !== hostFrame) throw new Error("parent host");
+placeNativeHost(container, undefined);
+if (container.Parent !== undefined) throw new Error("unparent");
+placeNativeHost(container, hostFrame);
+placeNativeHost(container, 1);
+if (container.Parent !== undefined) throw new Error("number parent");
+placeNativeHost(container, hostFrame);
+container.Destroy();
+placeNativeHost(container, hostFrame);
+if (container.Parent !== undefined) throw new Error("reparent destroyed");
 
 console.log("native mount ok");
