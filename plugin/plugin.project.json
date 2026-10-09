@@ -32,6 +32,9 @@
           "NativeScene.stories": {
             "$path": "../fixtures/scene"
           },
+          "labelText": {
+            "$path": "../out/fixtures/stories/labelText.luau"
+          },
           "WorkspaceScene.stories": {
             "$path": "../fixtures/workspace"
           },
@@ -46,6 +49,9 @@
           },
           "BounceNative.stories": {
             "$path": "../fixtures/bounce"
+          },
+          "bounceMath": {
+            "$path": "../out/fixtures/stories/bounceMath.luau"
           }
         },
         "node_modules": {

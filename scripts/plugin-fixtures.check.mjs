@@ -7,13 +7,15 @@ const root = process.cwd();
 const dev = JSON.parse(readFileSync(join(root, "plugin/plugin.project.json"), "utf8"));
 const stories = dev.tree.ServerStorage.StorybloxPlugin.stories;
 const storyJson = JSON.stringify(stories);
-if (storyJson.includes("fixtures/stories")) {
+if (stories.$path) {
 	throw new Error("dev stories folder hoists out/fixtures/stories");
 }
 if (
 	!storyJson.includes("fixtures/native") ||
 	!storyJson.includes("fixtures/viewport") ||
-	!storyJson.includes("fixtures/functionStory")
+	!storyJson.includes("fixtures/functionStory") ||
+	!storyJson.includes("labelText.luau") ||
+	!storyJson.includes("bounceMath.luau")
 ) {
 	throw new Error("dev plugin project is missing fixture stories");
 }
