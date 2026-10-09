@@ -73,6 +73,9 @@ if (pointerClick({ IsA: () => false, AbsolutePosition: { X: 0, Y: 0 }, AbsoluteS
 }
 const template = readFileSync(join(process.cwd(), "src/packages/ui/template/components/Template.tsx"), "utf8");
 if (!template.includes("pointerClick(") || !template.includes("VirtualInputManager")) throw new Error("click wiring");
+if (!template.includes("GetService(name: string)") || !template.includes("SendMouseButtonEvent(\n")) {
+	throw new Error("GetService and SendMouseButtonEvent must be methods so they compile to colon calls");
+}
 if (!readFileSync(join(process.cwd(), "src/packages/storyCases.ts"), "utf8").includes("IsA(className: string): boolean")) {
 	throw new Error("IsA must be a method so it compiles to a colon call");
 }

@@ -412,17 +412,19 @@ function Template({
 							let layer: Instance | undefined = inst;
 							while (layer !== undefined && !layer.IsA("LayerCollector")) layer = layer.Parent;
 							const mouse = (
-								game.GetService as unknown as (name: string) => {
-									SendMouseButtonEvent: (
-										x: number,
-										y: number,
-										button: number,
-										down: boolean,
-										layer?: Instance,
-										repeats?: number,
-									) => void;
+								game as unknown as {
+									GetService(name: string): {
+										SendMouseButtonEvent(
+											x: number,
+											y: number,
+											button: number,
+											down: boolean,
+											layer?: Instance,
+											repeats?: number,
+										): void;
+									};
 								}
-							)("VirtualInputManager");
+							).GetService("VirtualInputManager");
 							mouse.SendMouseButtonEvent(x, y, 0, down, layer, 0);
 						});
 					},
