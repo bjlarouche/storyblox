@@ -20,11 +20,14 @@ export function guiBox(gui: GuiObject): BoxRect {
 	};
 }
 
+const OVERLAY_NAME = "OutlineOverlay";
+
 export function collectGuiBoxes(root: Instance, max = 64): BoxRect[] {
 	const boxes = new Array<BoxRect>();
 	const stack: Instance[] = [root];
 	while (stack.size() > 0 && boxes.size() < max) {
 		const node = stack.pop()!;
+		if (node !== root && node.Name === OVERLAY_NAME) continue;
 		if (node.IsA("GuiObject")) {
 			const gui = node as GuiObject;
 			if (gui.AbsoluteSize.X > 0 && gui.AbsoluteSize.Y > 0) boxes.push(guiBox(gui));
@@ -32,6 +35,23 @@ export function collectGuiBoxes(root: Instance, max = 64): BoxRect[] {
 		for (const child of node.GetChildren()) stack.push(child);
 	}
 	return boxes;
+}
+
+function scaleFactor(scale: number) {
+	if (scale !== scale || scale <= 0 || scale === math.huge || scale === -math.huge) return 1;
+	return scale;
+}
+
+export function overlayLocal(box: BoxRect, origin: BoxRect, scale: number): BoxRect {
+	const factor = scaleFactor(scale);
+	return {
+		x: (box.x - origin.x) / factor,
+		y: (box.y - origin.y) / factor,
+		width: box.width / factor,
+		height: box.height / factor,
+		name: box.name,
+		className: box.className,
+	};
 }
 
 export function formatMeasure(box: BoxRect): string {
