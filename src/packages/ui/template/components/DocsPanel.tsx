@@ -234,7 +234,9 @@ function DocsPanel({ theme, title, description, page, argTypes, source }: DocsPa
 					TextXAlignment={Enum.TextXAlignment.Left}
 				/>
 			) : (
-				rows
+				<>
+					{rows}
+				</>
 			)}
 		</scrollingframe>
 	);

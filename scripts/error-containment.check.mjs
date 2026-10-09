@@ -90,12 +90,79 @@ if (!releaseScript.includes("dist/storyblox.rbxm") || !releaseScript.includes('e
 	throw new Error("plugin-release must write dist/storyblox.rbxm and reject bundled stories");
 }
 
+function jsxDepthChange(line) {
+	const opens = line.match(/<[A-Za-z]/g)?.length ?? 0;
+	const closes = line.match(/<\/[A-Za-z]/g)?.length ?? 0;
+	const selfCloses = line.match(/\/>/g)?.length ?? 0;
+	return opens - selfCloses - closes;
+}
+
+function elementArrayNames(source) {
+	const names = new Set();
+	for (const match of source.matchAll(/(?:const|let)\s+([A-Za-z_]\w*)[^=\n]*=\s*(?:new Array<React\.Element>\(\)|\[\])/g)) {
+		if (match[0].includes("React.Element")) names.add(match[1]);
+	}
+	for (const match of source.matchAll(/([A-Za-z_]\w*)\s*:\s*Array<React\.Element>/g)) names.add(match[1]);
+	return names;
+}
+
+function arrayFactories(source, names) {
+	const factories = new Set();
+	const heads = [...source.matchAll(/^function ([A-Za-z_]\w*)/gm)];
+	for (let i = 0; i < heads.length; i++) {
+		const body = source.slice(heads[i].index, heads[i + 1]?.index ?? source.length);
+		for (const name of names) {
+			if (body.includes(`return ${name};`)) factories.add(heads[i][1]);
+		}
+	}
+	return factories;
+}
+
+function bareArrayChild(line, names, factories) {
+	const trimmed = line.trim();
+	if (names.has(trimmed)) return trimmed;
+	const ident = trimmed.match(/^\{([A-Za-z_]\w*)\}$/);
+	if (ident && names.has(ident[1])) return ident[1];
+	const call = trimmed.match(/^\{([A-Za-z_]\w*)\(/);
+	if (call && factories.has(call[1])) return call[1];
+	return undefined;
+}
+
+function hasElementSibling(lines, depths, index) {
+	const depth = depths[index];
+	let start = index;
+	while (start > 0 && depths[start] >= depth) start--;
+	let end = index + 1;
+	while (end < lines.length && depths[end] >= depth) end++;
+	for (let j = start + 1; j < end; j++) {
+		if (j === index) continue;
+		const trimmed = lines[j].trim();
+		if (trimmed.startsWith("<") && !trimmed.startsWith("</") && !trimmed.startsWith("<>")) return true;
+		if (trimmed.startsWith("{") && depths[j] === depth) return true;
+	}
+	return false;
+}
+
 for (const rel of readdirSync(join(root, "src/packages"), { recursive: true })) {
 	if (!rel.endsWith(".tsx")) continue;
-	const lines = read(join("src/packages", rel)).split("\n");
+	const source = read(join("src/packages", rel));
+	const lines = source.split("\n");
+	const names = elementArrayNames(source);
+	const factories = arrayFactories(source, names);
+	const depths = [];
+	let depth = 0;
+	for (const line of lines) {
+		depths.push(depth);
+		depth += jsxDepthChange(line);
+	}
 	lines.forEach((line, i) => {
 		if (/^\s*\{[^}]*\.map\(/.test(line) && lines[i - 1].trim() !== "<>") {
 			throw new Error(`${rel}:${i + 1} mapped children must be wrapped in <> (ReactLua rekeys bare arrays into text)`);
+		}
+		const child = bareArrayChild(line, names, factories);
+		const wrapped = (lines[i - 1] ?? "").trim() === "<>" || line.includes("<>");
+		if (child && !wrapped && hasElementSibling(lines, depths, i)) {
+			throw new Error(`${rel}:${i + 1} element array ${child} must be wrapped in <> (bare arrays beside other children rekey into text)`);
 		}
 	});
 }

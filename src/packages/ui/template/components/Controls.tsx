@@ -774,7 +774,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			editor = (
 				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
-					{itemRows}
+					<>
+						{itemRows}
+					</>
 					<textbutton
 						key="Up"
 						Text="Up"
@@ -850,7 +852,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			editor = (
 				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
-					{fieldRows}
+					<>
+						{fieldRows}
+					</>
 				</frame>
 			);
 		} else if (editor === undefined && spec?.type === "union") {
@@ -886,7 +890,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 							commit(switchUnion(tag, incoming, seed));
 						}}
 					/>
-					{fieldRows}
+					<>
+						{fieldRows}
+					</>
 				</frame>
 			);
 		} else if (editor === undefined && spec?.type === "object") {
@@ -904,7 +910,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			editor = (
 				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
-					{fieldRows}
+					<>
+						{fieldRows}
+					</>
 				</frame>
 			);
 		} else if (editor === undefined && spec?.type === "dictionary") {
@@ -923,7 +931,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 			editor = (
 				<frame key={name} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 					<uilistlayout FillDirection={Enum.FillDirection.Vertical} />
-					{fieldRows}
+					<>
+						{fieldRows}
+					</>
 					<textbutton
 						key="Delete"
 						Text="Delete"
@@ -1130,7 +1140,9 @@ function Controls({ theme, args, argTypes, defaults, description, resetKey = "",
 					/>
 				)}
 			</frame>
-			{rows}
+			<>
+				{rows}
+			</>
 			{order <= 1 && (
 				<textlabel
 					key="NoControls"
