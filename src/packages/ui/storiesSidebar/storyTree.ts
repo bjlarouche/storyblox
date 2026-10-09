@@ -170,3 +170,21 @@ export function storyBranches(stories: StoryNode[], icons: StoryIcons): StoryBra
 	sortByTitle(roots);
 	return roots;
 }
+
+function trimText(value: string): string {
+	let start = 1;
+	let finish = value.size();
+	while (start <= finish && value.sub(start, start) === " ") start += 1;
+	while (finish >= start && value.sub(finish, finish) === " ") finish -= 1;
+	if (start > finish) return "";
+	return value.sub(start, finish);
+}
+
+export function storyById<T extends { title: string; id?: string }>(stories: T[], query: string): T | undefined {
+	const text = trimText(query);
+	if (text.size() === 0) return undefined;
+	for (const story of stories) {
+		if (story.title === text || story.id === text) return story;
+	}
+	return undefined;
+}

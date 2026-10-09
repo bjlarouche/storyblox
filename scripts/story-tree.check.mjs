@@ -4,11 +4,17 @@ import { join } from "node:path";
 String.prototype.size = function size() {
 	return this.length;
 };
+String.prototype.sub = function sub(start, finish) {
+	const len = this.length;
+	const from = start < 0 ? len + start : start - 1;
+	const to = finish === undefined ? len : finish < 0 ? len + finish + 1 : finish;
+	return this.slice(from, to);
+};
 Array.prototype.size = function size() {
 	return this.length;
 };
 
-const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch, adoptTree, orderedStoryTitles, stepStoryTitle, navStoryTitles } = await import(
+const { storyBranches, parseFavorites, toggleFavorite, favoriteBranch, adoptTree, orderedStoryTitles, stepStoryTitle, navStoryTitles, storyById } = await import(
 	"../src/packages/ui/storiesSidebar/storyTree.ts"
 );
 
@@ -92,6 +98,14 @@ if (!sidebar.includes("KeyCode.LeftAlt") || !sidebar.includes("stepStoryTitle"))
 if (!storyblox.includes('key="CopyId"') || !storyblox.includes("copyText") || !storyblox.includes('key="CopyIdBox"')) {
 	throw new Error("copy id");
 }
+if (!storyblox.includes('key="OpenId"') || !storyblox.includes("storyById")) throw new Error("open id");
+const listed = [
+	{ title: "Shell/Actions", id: "shell-actions" },
+	{ title: "Shell/Docs" },
+];
+if (storyById(listed, "  Shell/Actions ")?.title !== "Shell/Actions") throw new Error("open by title");
+if (storyById(listed, "shell-actions")?.title !== "Shell/Actions") throw new Error("open by id");
+if (storyById(listed, "missing") !== undefined || storyById(listed, "  ") !== undefined) throw new Error("open miss");
 if (!readFileSync(join(root, "src/packages/ui/template/components/ErrorPanel.tsx"), "utf8").includes("export function selectText")) {
 	throw new Error("copy fallback");
 }
