@@ -37,5 +37,5 @@ console.log("3. For each play row, mount the story, then on the client:");
 console.log("   hover: move the pointer over StarterGui.StorybloxViewport.Host");
 console.log("   press: mouse down on that Host");
 console.log("   drag (name contains drag): mouse down, move, mouse up");
-console.log("4. Capture StarterGui.StorybloxViewport to STORYBLOX_CAPTURES or ./captures/storybook-parity/play/<name>.png");
+console.log("4. Capture StarterGui.StorybloxViewport to STORYBLOX_CAPTURES or ./captures/parity/play/<name>.png");
 console.log("5. Stop play.");
