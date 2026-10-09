@@ -16,7 +16,7 @@
           "$path": "host"
         },
         "stories": {
-          "$path": "../out/fixtures/stories",
+          "$className": "Folder",
           "Native.stories": {
             "$path": "../fixtures/native"
           },

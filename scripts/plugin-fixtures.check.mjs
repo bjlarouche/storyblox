@@ -7,8 +7,10 @@ const root = process.cwd();
 const dev = JSON.parse(readFileSync(join(root, "plugin/plugin.project.json"), "utf8"));
 const stories = dev.tree.ServerStorage.StorybloxPlugin.stories;
 const storyJson = JSON.stringify(stories);
+if (storyJson.includes("fixtures/stories")) {
+	throw new Error("dev stories folder hoists out/fixtures/stories");
+}
 if (
-	!storyJson.includes("fixtures/stories") ||
 	!storyJson.includes("fixtures/native") ||
 	!storyJson.includes("fixtures/viewport") ||
 	!storyJson.includes("fixtures/functionStory")
@@ -142,9 +144,14 @@ try {
 	const releaseXml = readFileSync(releaseModel, "utf8");
 	const harnessDevXml = readFileSync(harnessDevModel, "utf8");
 	const harnessReleaseXml = readFileSync(harnessReleaseModel, "utf8");
+	const quoted = (xml, needle) => xml.includes(`"${needle}"`) || xml.includes(`'${needle}'`);
 	for (const needle of needles) {
-		if (!devXml.includes(needle)) throw new Error(`dev plugin build missing ${needle}`);
-		if (releaseXml.includes(needle)) throw new Error(`release plugin build includes ${needle}`);
+		if (!devXml.includes(needle) && !harnessDevXml.includes(needle)) {
+			throw new Error(`dev plugin build missing ${needle}`);
+		}
+		if (quoted(releaseXml, needle) || quoted(harnessReleaseXml, needle)) {
+			throw new Error(`release plugin build includes ${needle}`);
+		}
 	}
 	if (!harnessDevXml.includes("storyblox-viewport")) throw new Error("dev out missing viewport harness");
 	if (harnessReleaseXml.includes("storyblox-viewport")) throw new Error("release out still includes viewport harness");

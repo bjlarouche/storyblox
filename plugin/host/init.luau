@@ -1,4 +1,5 @@
 local TS = require(game:GetService("ReplicatedStorage"):WaitForChild("StorybloxInclude"):WaitForChild("RuntimeLib"))
+local ServerStorage = game:GetService("ServerStorage")
 local React = TS.import(script, TS.getModule(script, "@rbxts", "react"))
 local ReactRoblox = TS.import(script, TS.getModule(script, "@rbxts", "react-roblox"))
 local Storyblox = TS.import(script, TS.getModule(script, "@rbxts", "storyblox")).Storyblox
@@ -18,7 +19,8 @@ end
 
 return function(plugin, widget, root)
 	widget.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	local stories = game:GetService("ServerStorage"):WaitForChild("StorybloxPlugin"):WaitForChild("stories")
+	local place = ServerStorage:FindFirstChild("StorybloxPlugin")
+	local stories = (place and place:FindFirstChild("stories")) or script.Parent:WaitForChild("stories")
 	local saved = plugin:GetSetting("theme")
 	local savedFavorites = plugin:GetSetting("favorites")
 	local savedInspector = plugin:GetSetting("inspectorOpen")
