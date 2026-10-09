@@ -50,6 +50,41 @@ const withArgs = normalizeExport(
 if (withArgs.kind !== "native" || withArgs.title !== "FunctionLabel/Native" || withArgs.args.label !== "Hi" || withArgs.argTypes.label.type !== "string") {
 	throw new Error("function table");
 }
+const plain = normalizeExport(
+	{
+		story: fn,
+		controls: { label: "Hi", enabled: true, count: 2 },
+	},
+	"FunctionLabel.story",
+	".story",
+);
+if (
+	plain.kind !== "native" ||
+	plain.mount !== fn ||
+	plain.args.label !== "Hi" ||
+	plain.args.enabled !== true ||
+	plain.args.count !== 2 ||
+	plain.argTypes.label.type !== "string" ||
+	plain.argTypes.enabled.type !== "boolean" ||
+	plain.argTypes.count.type !== "number"
+) {
+	throw new Error("plain controls");
+}
+const overridden = normalizeExport(
+	{ story: fn, args: { label: "Yo" }, controls: { label: "Hi" } },
+	"FunctionLabel.story",
+	".story",
+);
+if (overridden.kind !== "native" || overridden.args.label !== "Yo") throw new Error("args override controls");
+const badControl = normalizeExport({ story: fn, controls: { label: { nope: true } } }, "FunctionLabel.story", ".story");
+if (badControl.kind !== "reject" || badControl.reason !== "args") throw new Error("bad control value");
+const previousTypeOf = globalThis.typeOf;
+globalThis.typeOf = (value) => (value && value.__type ? value.__type : previousTypeOf(value));
+const colored = normalizeExport({ story: fn, controls: { paint: { __type: "Color3" } } }, "FunctionLabel.story", ".story");
+globalThis.typeOf = previousTypeOf;
+if (colored.kind !== "native" || colored.argTypes.paint.type !== "color" || colored.args.paint.__type !== "Color3") {
+	throw new Error("color control");
+}
 const named = normalizeExport({ fn, title: "Panel/Base", args: { count: "nope" }, argTypes: { count: { type: "number" } } }, "FunctionLabel.story", ".story");
 if (named.kind !== "reject" || named.reason !== "args") throw new Error("function table args");
 

@@ -269,18 +269,71 @@ function decoratorsOf(value: unknown): Array<(inner: (args: unknown) => unknown)
 	return kept;
 }
 
+const INFERRED_CONTROLS: { [key: string]: string } = {
+	string: "string",
+	number: "number",
+	boolean: "boolean",
+	Color3: "color",
+	BrickColor: "brickColor",
+	Vector2: "vector2",
+	Vector3: "vector3",
+	UDim: "udim",
+	UDim2: "udim2",
+	CFrame: "cframe",
+	NumberRange: "numberRange",
+	Rect: "rect",
+	EnumItem: "EnumItem",
+};
+
+function inferredSpec(value: unknown): { type: string } | undefined {
+	const kind = INFERRED_CONTROLS[typeOf(value) as string];
+	if (kind === undefined) return undefined;
+	return { type: kind };
+}
+
+function controlsToArgs(controls: unknown, args: unknown): { args: unknown; argTypes: unknown } | undefined {
+	if (controls === undefined) return { args, argTypes: undefined };
+	if (typeOf(controls) !== "table") return undefined;
+	const values: { [key: string]: unknown } = {};
+	if (typeOf(args) === "table") {
+		for (const [key, value] of pairs(args as object)) values[key as string] = value;
+	}
+	const argTypes: { [key: string]: unknown } = {};
+	let primitive = false;
+	for (const [key, value] of pairs(controls as object)) {
+		const name = key as string;
+		if (typeOf(value) === "table" && typeOf((value as { type?: unknown }).type) === "string") {
+			argTypes[name] = value;
+			continue;
+		}
+		const spec = inferredSpec(value);
+		if (spec === undefined) return undefined;
+		primitive = true;
+		argTypes[name] = spec;
+		if (values[name] === undefined) values[name] = value;
+	}
+	if (!primitive) return { args, argTypes: controls };
+	return { args: values, argTypes };
+}
+
 function functionTable(mod: { [key: string]: unknown }, moduleName: string, suffix: string): NormalizedStory | undefined {
 	if (mod.default !== undefined || mod.renderer !== undefined || typeOf(mod.mount) === "function") return undefined;
-	if (typeOf(mod.fn) !== "function") return undefined;
-	const argTypes = mod.argTypes !== undefined ? mod.argTypes : mod.controls;
-	if (!argsMatch(mod.args, argTypes)) return { kind: "reject", reason: "args" };
+	const mount = typeOf(mod.story) === "function" ? mod.story : mod.fn;
+	if (typeOf(mount) !== "function") return undefined;
 	const title = typeOf(mod.title) === "string" ? (mod.title as string) : titleFromModuleName(moduleName, suffix);
+	const read =
+		mod.argTypes !== undefined
+			? argsMatch(mod.args, mod.argTypes)
+				? { args: mod.args, argTypes: mod.argTypes }
+				: undefined
+			: controlsToArgs(mod.controls, mod.args);
+	if (read === undefined || !argsMatch(read.args, read.argTypes)) return { kind: "reject", reason: "args" };
 	return {
 		kind: "native",
 		title,
-		mount: mod.fn as (target: unknown) => unknown,
-		args: mod.args,
-		argTypes,
+		mount: mount as (target: unknown) => unknown,
+		args: read.args,
+		argTypes: read.argTypes,
 	};
 }
 
