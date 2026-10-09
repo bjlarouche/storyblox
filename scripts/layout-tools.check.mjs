@@ -15,5 +15,7 @@ if (rel.x !== 5 || rel.y !== 15 || rel.width !== 40.6) throw new Error("relative
 const template = readFileSync("src/packages/ui/template/components/Template.tsx", "utf8");
 if (template.includes("outlineEnabled") || template.includes("measureEnabled")) throw new Error("outline gate");
 if (!template.includes('key="Outline"') || !template.includes('key="Measure"')) throw new Error("toolbar");
+if (template.includes("declared ? <uistroke")) throw new Error("bounds stroke is always on");
+if (!template.includes("declared && grid ? <uistroke")) throw new Error("bounds stroke follows grid");
 
 console.log("layout tools ok");
