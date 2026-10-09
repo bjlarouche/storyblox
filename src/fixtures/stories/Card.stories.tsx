@@ -13,34 +13,41 @@ interface Args {
 
 function CardStory(args: Args) {
 	const { theme } = useTheme();
+	const action = args.showActions ? (
+		<textbutton
+			Size={new UDim2(0, 64, 0, 24)}
+			BackgroundTransparency={1}
+			Text="Action"
+			TextSize={14}
+			Font={Enum.Font.SourceSans}
+			TextColor3={theme.palette.primary.main}
+		/>
+	) : undefined;
 	return (
-		<Card
-			title={args.title}
-			subtitle={args.subtitle}
-			elevation={args.elevation}
-			square={args.square}
-			actions={
-				args.showActions ? (
-					<textbutton
-						Size={new UDim2(0, 64, 0, 24)}
+		<frame Size={new UDim2(0, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 12)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<frame LayoutOrder={0} Size={new UDim2(0, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
+				<Card
+					title={args.title}
+					subtitle={args.subtitle}
+					elevation={args.elevation}
+					square={args.square}
+					actions={action}
+				>
+					<textlabel
+						Size={new UDim2(1, 0, 0, 24)}
 						BackgroundTransparency={1}
-						Text="Action"
-						TextSize={14}
+						Text={args.body}
+						TextSize={16}
 						Font={Enum.Font.SourceSans}
-						TextColor3={theme.palette.primary.main}
+						TextColor3={theme.palette.text.primary}
 					/>
-				) : undefined
-			}
-		>
-			<textlabel
-				Size={new UDim2(1, 0, 0, 24)}
-				BackgroundTransparency={1}
-				Text={args.body}
-				TextSize={16}
-				Font={Enum.Font.SourceSans}
-				TextColor3={theme.palette.text.primary}
-			/>
-		</Card>
+				</Card>
+			</frame>
+			<frame LayoutOrder={1} Size={new UDim2(0, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
+				<Card title="Save these changes before you leave" subtitle="Regular face under the heading" elevation="flat" />
+			</frame>
+		</frame>
 	);
 }
 

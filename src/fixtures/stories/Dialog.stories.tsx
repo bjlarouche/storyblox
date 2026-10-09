@@ -55,7 +55,7 @@ function DialogStory(args: Args) {
 
 export default {
 	title: "Components/Dialog",
-	args: { open: true, title: "Confirm", showActions: true },
+	args: { open: true, title: "Save these changes before you leave", showActions: true },
 	argTypes: {
 		open: { type: "boolean" },
 		title: { type: "string" },
