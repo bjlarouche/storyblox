@@ -11,7 +11,7 @@ function SortStory() {
 	const [column, setColumn] = useState(1);
 	const [direction, setDirection] = useState("asc");
 	return (
-		<frame Size={new UDim2(0, 280, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} BorderSizePixel={0}>
+		<frame Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} BorderSizePixel={0}>
 			<Table
 				columns={[
 					{ header: "Name", sortable: true },

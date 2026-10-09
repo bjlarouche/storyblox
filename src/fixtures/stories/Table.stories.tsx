@@ -12,12 +12,12 @@ const CELL = "A longer role that stays inside the cell padding";
 function TableStory(args: Args) {
 	const [selected, setSelected] = useArg(args.selected);
 	return (
-		<frame Size={new UDim2(0, 320, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} BorderSizePixel={0}>
+		<frame Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1} BorderSizePixel={0}>
 			<Table
-				columns={["Name", HEADING]}
+				columns={[{ header: "Name", width: 0.32 }, { header: HEADING, wrap: true }]}
 				rows={[
 					["Ada", "Engineer"],
-					["Grace", CELL],
+					["Grace Hopper", CELL],
 				]}
 				selected={selected}
 				dense={args.dense}
