@@ -52,17 +52,27 @@ export default {
 			);
 		},
 	},
+	preview: { kind: "gui", width: 240, height: 200 },
 	render: (args: Args) => (
-		<frame key="SkeletonHost" Size={new UDim2(0, args.width, 0, 120)} BackgroundTransparency={1}>
-			<Skeleton
-				variant={args.variant}
-				width={args.width}
-				height={args.height}
-				lines={args.variant === "text" ? args.lines : 1}
-				gap={args.gap}
-				animation={args.animation === "still" ? false : args.animation}
-				reducedMotion={args.reducedMotion}
-			/>
+		<frame AutomaticSize={Enum.AutomaticSize.Y} Size={new UDim2(0, 220, 0, 0)} BackgroundTransparency={1}>
+			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 12)} SortOrder={Enum.SortOrder.LayoutOrder} />
+			<frame key="SkeletonHost" LayoutOrder={1} Size={new UDim2(0, args.width, 0, 120)} BackgroundTransparency={1}>
+				<Skeleton
+					variant={args.variant}
+					width={args.width}
+					height={args.height}
+					lines={args.variant === "text" ? args.lines : 1}
+					gap={args.gap}
+					animation={args.animation === "still" ? false : args.animation}
+					reducedMotion={args.reducedMotion}
+				/>
+			</frame>
+			<frame LayoutOrder={2} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<Skeleton variant="rounded" width={120} height={36} animation={false} />
+			</frame>
+			<frame LayoutOrder={3} AutomaticSize={Enum.AutomaticSize.XY} Size={UDim2.fromScale(0, 0)} BackgroundTransparency={1}>
+				<Skeleton variant="circular" width={40} height={40} animation={false} />
+			</frame>
 		</frame>
 	),
 };
