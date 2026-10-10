@@ -18,7 +18,7 @@ pnpm plugin:fixtures
 pnpm plugin:install:local
 ```
 
-That builds an rbxm into your Roblox Plugins folder (`$HOME/Documents/Roblox/Plugins` on macOS). The shell loads `ServerStorage.StorybloxPlugin` with fixtures.
+That builds an rbxm into your local Studio plugins folder. The shell loads `ServerStorage.StorybloxPlugin` with fixtures.
 
 ## Store rbxm
 
@@ -26,4 +26,8 @@ That builds an rbxm into your Roblox Plugins folder (`$HOME/Documents/Roblox/Plu
 pnpm plugin:release
 ```
 
-Writes `dist/storyblox.rbxm` (no fixtures). Does not publish.
+Writes `dist/storyblox.rbxm` (no fixtures) and `dist/StorybloxRelease.rbxm`.
+
+`StorybloxRelease` is the copy to publish. Root name `StorybloxRelease`, attribute `Version` from package.json, RunContext Plugin so it does not run in the place. Insert that model under `ReplicatedStorage` and replace the old one. Right-click it and use Publish as Plugin. The dev plugin does not load it.
+
+Does not publish.
