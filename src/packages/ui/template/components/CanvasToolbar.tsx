@@ -69,13 +69,13 @@ function Slot(props: {
 				Event={{ MouseButton1Click: props.onClick }}
 			>
 				<uicorner key="Round" CornerRadius={new UDim(0, theme.shape.borderRadius)} />
-				{labeled && (
+				{labeled ? (
 					<uipadding
 						key="Pad"
 						PaddingLeft={new UDim(0, theme.spacing.calc(0.75))}
 						PaddingRight={new UDim(0, theme.spacing.calc(0.75))}
 					/>
-				)}
+				) : undefined}
 				{props.children}
 			</textbutton>
 		</tip.Tooltip>

@@ -149,10 +149,35 @@ function hasElementSibling(lines, depths, index) {
 	return false;
 }
 
+// ReactLua rekeys a false slot ahead of a children array into text on update. Use `? … : undefined` under raw host tags.
+function falseSlotBeforeChildren(lines) {
+	const indentOf = (line) => line.match(/^\s*/)[0].length;
+	for (let i = 0; i < lines.length; i++) {
+		if (!/^\s*\{[^{}]*&&\s*(\(|<)/.test(lines[i])) continue;
+		const depth = indentOf(lines[i]);
+		let children = false;
+		for (let j = i + 1; j < lines.length; j++) {
+			if (lines[j].trim() === "") continue;
+			if (indentOf(lines[j]) < depth) break;
+			if (indentOf(lines[j]) === depth && /^\s*\{(props\.)?children\}\s*$/.test(lines[j])) children = true;
+		}
+		if (!children) continue;
+		for (let j = i - 1; j >= 0; j--) {
+			const trimmed = lines[j].trim();
+			if (indentOf(lines[j]) >= depth || !trimmed.startsWith("<") || trimmed.startsWith("</")) continue;
+			if (/^<[a-z]/.test(trimmed)) return i + 1;
+			break;
+		}
+	}
+	return undefined;
+}
+
 for (const rel of readdirSync(join(root, "src/packages"), { recursive: true })) {
 	if (!rel.endsWith(".tsx")) continue;
 	const source = read(join("src/packages", rel));
 	const lines = source.split("\n");
+	const slot = falseSlotBeforeChildren(lines);
+	if (slot !== undefined) throw new Error(`${rel}:${slot} false slot before {children} under a host tag`);
 	const names = elementArrayNames(source);
 	const factories = arrayFactories(source, names);
 	const depths = [];
