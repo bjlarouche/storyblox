@@ -1,5 +1,5 @@
 import React from "@rbxts/react";
-import { useTheme } from "@rbxts/uiblox";
+import { Typography, useTheme } from "@rbxts/uiblox";
 import { Dialog, useArg } from "./kitBreadth";
 
 interface Args {
@@ -40,14 +40,7 @@ function DialogStory(args: Args) {
 					) : undefined
 				}
 			>
-				<textlabel
-					Size={new UDim2(1, 0, 0, 24)}
-					BackgroundTransparency={1}
-					Text="Body"
-					TextSize={16}
-					Font={Enum.Font.SourceSans}
-					TextColor3={theme.palette.text.primary}
-				/>
+				<Typography text="Body" />
 			</Dialog>
 		</>
 	);
