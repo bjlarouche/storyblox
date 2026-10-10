@@ -1,5 +1,25 @@
 import { createStyles, makeStyles, Theme, WriteableStyle } from "@rbxts/uiblox";
 
+function searchRowMetrics(theme: Theme) {
+	const inset = theme.padding.calc(1);
+	const title = theme.typography.variants.body;
+	const path = theme.typography.variants.caption;
+	const titleHeight = math.ceil(title.size * (title.leading ?? 1));
+	const pathHeight = math.ceil(path.size * (path.leading ?? 1));
+	const pathTop = inset + titleHeight + theme.spacing.calc(1);
+	return {
+		inset,
+		titleHeight,
+		pathHeight,
+		pathTop,
+		slot: pathTop + pathHeight + inset + theme.padding.calc(1),
+	};
+}
+
+export function searchRowSlot(theme: Theme) {
+	return searchRowMetrics(theme).slot;
+}
+
 const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 	const filterOffset = theme.spacing.calc(4) + theme.padding.calc(2);
 	const filterHeight = theme.spacing.calc(3) + theme.padding.calc(1);
@@ -7,6 +27,7 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 	const storiesOffset = tagOffset + filterHeight + theme.padding.calc(2);
 	const moreOffset = theme.spacing.calc(5) + theme.padding.calc(2);
 	const light = theme.type === "Light";
+	const row = searchRowMetrics(theme);
 
 	return createStyles({
 		logo: {
@@ -71,20 +92,22 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 			ZIndex: 5210,
 		} as WriteableStyle<ImageLabel>,
 		resultLeaf: {
-			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(2) + theme.padding.calc(1)),
-			Position: new UDim2(0, theme.spacing.calc(1.5) + theme.padding.calc(3), 0, theme.padding.calc(1)),
+			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, row.titleHeight),
+			Position: new UDim2(0, theme.spacing.calc(1.5) + theme.padding.calc(3), 0, row.inset),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 			TextXAlignment: Enum.TextXAlignment.Left,
+			TextYAlignment: Enum.TextYAlignment.Bottom,
 			TextTruncate: Enum.TextTruncate.AtEnd,
 			ZIndex: 5210,
 		} as WriteableStyle<TextLabel>,
 		resultPath: {
-			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, theme.spacing.calc(2)),
-			Position: new UDim2(0, theme.spacing.calc(1.5) + theme.padding.calc(3), 0, theme.spacing.calc(3)),
+			Size: new UDim2(1, -(theme.spacing.calc(2) + theme.padding.calc(4)), 0, row.pathHeight),
+			Position: new UDim2(0, theme.spacing.calc(1.5) + theme.padding.calc(3), 0, row.pathTop),
 			BackgroundTransparency: 1,
 			BorderSizePixel: 0,
 			TextXAlignment: Enum.TextXAlignment.Left,
+			TextYAlignment: Enum.TextYAlignment.Top,
 			TextTruncate: Enum.TextTruncate.AtEnd,
 			ZIndex: 5210,
 		} as WriteableStyle<TextLabel>,

@@ -18,7 +18,7 @@ import {
 	useTheme,
 } from "@rbxts/uiblox";
 import { Story } from "interfaces";
-import useStoriesSidebarStyles from "./StoriesSidebar.styles";
+import useStoriesSidebarStyles, { searchRowSlot } from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
 import { searchStories, stepSearchIndex, StorySearchHit } from "../storySearch";
@@ -324,7 +324,7 @@ function StoriesSidebar({
 						className={resultsList}
 						items={hits}
 						getKey={(hit) => hit.title}
-						itemHeight={theme.spacing.calc(6)}
+						itemHeight={searchRowSlot(theme)}
 						listRef={resultsRef}
 						renderItem={(hit, index) => {
 							const emphasized = index === active || index === hover || hit.title === selected;
