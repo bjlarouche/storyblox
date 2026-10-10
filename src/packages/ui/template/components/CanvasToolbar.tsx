@@ -291,7 +291,7 @@ function CanvasToolbar(props: CanvasToolbarProps) {
 				id="Size"
 				tip="Canvas size"
 				order={6}
-				label={`${props.sizeLabel} ▾`}
+				label={props.sizeLabel}
 				active={props.sizeActive}
 				anchorRef={sizeRef}
 				onClick={() => setSizeOpen((open) => !open)}
