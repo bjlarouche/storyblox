@@ -5,11 +5,15 @@ interface Args {
 	message: string;
 	open: boolean;
 	action: string;
-	variant: "default" | "success" | "error" | "warning";
+	variant: "default" | "success" | "error" | "warning" | "info";
 }
 
 const LINE = "This snackbar line stays inside the padding when it wraps.";
-const VARIANTS = ["default", "success", "warning", "error"] as const;
+const VARIANTS = ["default", "success", "warning", "error", "info"] as const;
+
+function snackTone(variant: string) {
+	return variant as "default";
+}
 
 function slot(order: number, height: number, child: React.ReactNode) {
 	return (
@@ -35,7 +39,7 @@ function SnackbarStory(args: Args) {
 					message={args.message}
 					open={open}
 					action={args.action === "" ? undefined : args.action}
-					variant={args.variant}
+					variant={snackTone(args.variant)}
 					duration={1e6}
 					onAction={() => setOpen(false)}
 					onDismiss={() => setOpen(false)}
@@ -45,23 +49,23 @@ function SnackbarStory(args: Args) {
 				slot(
 					index + 2,
 					56,
-					<Snackbar message={variant} open={true} variant={variant} duration={1e6} onDismiss={() => {}} />,
+					<Snackbar message={variant} open={true} variant={snackTone(variant)} duration={1e6} onDismiss={() => {}} />,
 				),
 			)}
-			{slot(6, 80, <Snackbar message={LINE} open={true} variant="warning" duration={1e6} onDismiss={() => {}} />)}
+			{slot(7, 80, <Snackbar message={LINE} open={true} variant="warning" duration={1e6} onDismiss={() => {}} />)}
 		</frame>
 	);
 }
 
 export default {
 	title: "Components/Snackbar",
-	preview: { kind: "gui", width: 300, height: 420 },
+	preview: { kind: "gui", width: 300, height: 500 },
 	args: { message: "Saved", open: true, action: "Undo", variant: "success" },
 	argTypes: {
 		message: { type: "string" },
 		open: { type: "boolean" },
 		action: { type: "string" },
-		variant: { type: "enum", options: ["default", "success", "error", "warning"] },
+		variant: { type: "enum", options: ["default", "success", "error", "warning", "info"] },
 	},
 	render: (args: Args) => <SnackbarStory {...args} />,
 };
