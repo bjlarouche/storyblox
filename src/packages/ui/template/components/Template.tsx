@@ -612,9 +612,7 @@ function Template({
 					ClipsDescendants={declared}
 				>
 					<uiscale key="Scale" Scale={scale} />
-					{declared && grid ? <uistroke key="Bounds" Thickness={1} Color={gridColor} Transparency={0.45} /> : undefined}
-					{grid ? gridLines(logicalWidth, logicalHeight, gridColor) : undefined}
-					<frame key="Inset" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
+					<frame key="Inset" ZIndex={1} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
 						<uipadding
 							key="Pad"
 							PaddingTop={new UDim(0, inset)}
@@ -636,9 +634,14 @@ function Template({
 							storyElement
 						)}
 					</frame>
-					{(outline || measure) && outlineOrigin !== undefined ? (
-						<OutlineOverlay theme={theme} boxes={outlineBoxes} measure={measure} origin={outlineOrigin} scale={scale} />
-					) : undefined}
+					{/* Sibling above the story. Grid draws over content. */}
+					<frame key="Overlay" ZIndex={2} Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
+						{declared && grid ? <uistroke key="Bounds" Thickness={1} Color={gridColor} Transparency={0.45} /> : undefined}
+						{grid ? gridLines(logicalWidth, logicalHeight, gridColor) : undefined}
+						{(outline || measure) && outlineOrigin !== undefined ? (
+							<OutlineOverlay theme={theme} boxes={outlineBoxes} measure={measure} origin={outlineOrigin} scale={scale} />
+						) : undefined}
+					</frame>
 				</frame>,
 			);
 			themeMounted.current = previewTheme;
