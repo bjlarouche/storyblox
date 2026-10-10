@@ -1,7 +1,7 @@
 -- Store plugin: embeds StorybloxPlugin. No fixture stories, no sync Reload.
 local rs = game:GetService("ReplicatedStorage")
 local toolbar = plugin:CreateToolbar("Storyblox")
-local toggle = toolbar:CreateButton("Storyblox", "Toggle Storyblox", "rbxassetid://9311703342")
+local toggle = toolbar:CreateButton("Storyblox", "Toggle Storyblox", "rbxassetid://100703482666040")
 local widget = plugin:CreateDockWidgetPluginGui(
 	"Storyblox",
 	DockWidgetPluginGuiInfo.new(Enum.InitialDockState.Float, true, false, 420, 320, 240, 180)
