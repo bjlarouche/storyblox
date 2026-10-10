@@ -1,4 +1,5 @@
 import React, { useState } from "@rbxts/react";
+import { useTheme } from "@rbxts/uiblox";
 import { Menu, useArg } from "./kitBreadth";
 
 interface Args {
@@ -9,6 +10,7 @@ interface Args {
 }
 
 function MenuStory(args: Args) {
+	const { theme } = useTheme();
 	const [open, setOpen] = useArg(args.open);
 	const [anchor, setAnchor] = useState<TextButton>();
 	return (
@@ -19,8 +21,16 @@ function MenuStory(args: Args) {
 				Position={new UDim2(1, -8, 1, -8)}
 				Size={new UDim2(0, 96, 0, 28)}
 				Text="Open"
+				Font={theme.typography.fontFamilies.default}
+				TextSize={theme.typography.fontSizes.body}
+				TextColor3={theme.palette.text.primary}
+				BackgroundColor3={theme.palette.surface.paper}
+				BorderSizePixel={0}
 				Event={{ Activated: () => setOpen(true) }}
-			/>
+			>
+				<uicorner CornerRadius={new UDim(0, theme.shape.borderRadius)} />
+				<uistroke Color={theme.palette.border} ApplyStrokeMode={Enum.ApplyStrokeMode.Border} />
+			</textbutton>
 			<Menu
 				anchor={anchor}
 				open={open}
