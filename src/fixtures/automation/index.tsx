@@ -245,11 +245,14 @@ export = function (storiesRoot: Instance) {
 		}
 		host.Parent = gui;
 
+		const layout = canvasLayout(story.parameters);
+		const inset = new UDim(0, layout === "fullscreen" ? 0 : theme.padding.calc(2));
 		reactRoot = ReactRoblox.createRoot(host);
 		reactRoot.render(
 			<ThemeProvider theme={theme}>
 				<frame key="Story" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
-					{canvasLayout(story.parameters) === "centered" ? (
+					<uipadding key="Pad" PaddingTop={inset} PaddingBottom={inset} PaddingLeft={inset} PaddingRight={inset} />
+					{layout === "centered" ? (
 						<uilistlayout
 							key="Center"
 							FillDirection={Enum.FillDirection.Vertical}
