@@ -44,6 +44,7 @@ export const ToggleButtonGroup = kit.ToggleButtonGroup;
 export const Link = kit.Link;
 export const Markdown = kit.Markdown;
 export const MarkdownEditor = kit.MarkdownEditor;
+export const CodeEditor = kit.CodeEditor;
 export const Rating = kit.Rating;
 export const Stack = kit.Stack;
 export const ScrollView = kit.ScrollView;
