@@ -2,8 +2,8 @@ import React, { useState } from "@rbxts/react";
 import SettingsPanel from "../../packages/ui/storyblox/components/SettingsPanel";
 
 function SettingsStory() {
-	const [extra, setExtra] = useState("Workspace.Stories");
-	return <SettingsPanel extraRoots={extra} onExtraRootsChange={setExtra} />;
+	const [extra, setExtra] = useState("Workspace,Workspace.Stories");
+	return <SettingsPanel extraRoots={extra} onExtraRootsChange={setExtra} onClose={() => undefined} />;
 }
 
 export default {
