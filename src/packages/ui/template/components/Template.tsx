@@ -289,19 +289,17 @@ function Template({
 		setArgsStory(storyKey);
 		setArgs(copyArgs(storyArgs(story as never)));
 		setYaw(0);
-		setOutline(false);
-		setMeasure(false);
 		setOutlineBoxes([]);
 		setOutlineOrigin(undefined);
 		setCaseResults([]);
 		setCaseRunning(undefined);
 		setLastCase(undefined);
 		setA11yFindings([]);
-		setBgStep(0);
 		setGlobalPatch({});
-		const previewOrientation = (story as { preview?: { orientation?: unknown } } | undefined)?.preview?.orientation;
-		setOrientation(previewOrientation === "landscape" ? "landscape" : "portrait");
-		setSizePick(undefined);
+		if (argsStory === "") {
+			const previewOrientation = (story as { preview?: { orientation?: unknown } } | undefined)?.preview?.orientation;
+			setOrientation(previewOrientation === "landscape" ? "landscape" : "portrait");
+		}
 	}
 	const loaderFns = (
 		story as {

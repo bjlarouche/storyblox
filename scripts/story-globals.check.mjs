@@ -34,6 +34,13 @@ const storyChange = template.slice(template.indexOf("if (storyKey !== argsStory)
 if (!storyChange.includes("setGlobalPatch({})") || storyChange.includes("setDensity")) {
 	throw new Error("story change must clear the global patch and keep density");
 }
+for (const wiped of ["setSizePick", "setOutline(false)", "setMeasure(false)", "setBgStep", "setZoom", "setFit(", "setGrid("]) {
+	if (storyChange.includes(wiped)) throw new Error(`story change resets canvas chrome: ${wiped}`);
+}
+const seedAt = storyChange.indexOf('if (argsStory === "")');
+if (seedAt < 0 || storyChange.slice(0, seedAt).includes("setOrientation") || !storyChange.slice(seedAt).includes("setOrientation")) {
+	throw new Error("orientation seeds from the first story, then stays");
+}
 for (const needle of ['resetKey={`toolbar:', 'key="Density"', 'key="ResetGlobals"', "setGlobalPatch({})"]) {
 	if (!chrome.includes(needle)) throw new Error(`toolbar missing ${needle}`);
 }
