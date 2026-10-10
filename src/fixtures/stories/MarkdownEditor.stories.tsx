@@ -17,7 +17,12 @@ Write on the left, preview on the right.
 1. First
 2. Second
 
-> A short quote
+> A short quote that stays one paragraph
+> when the next line is only a soft wrap
+>
+> **Bold**, *italic*, and [links](https://example.com)
+> hard  
+> break
 
 ## Table
 
