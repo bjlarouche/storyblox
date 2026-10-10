@@ -65,7 +65,7 @@ function labelOf(variant: Variant) {
 	return VARIANTS.find((item) => item.id === variant)?.label ?? "Lantern";
 }
 
-function Preview(props: { color: Color3; fit: Fit; variant: Variant; tall: number }) {
+function Preview(props: { color: Color3; fit: Fit; variant: Variant; tall: number; wide: number }) {
 	const { theme } = useTheme();
 	const frameRef = useRef<ViewportFrame>();
 	const cameraRef = useRef<Camera>();
@@ -79,7 +79,7 @@ function Preview(props: { color: Color3; fit: Fit; variant: Variant; tall: numbe
 	return (
 		<viewportframe
 			ref={frameRef}
-			Size={new UDim2(1, 0, 0, props.tall)}
+			Size={UDim2.fromOffset(props.wide, props.tall)}
 			BackgroundColor3={theme.palette.surface.paper}
 			BorderSizePixel={0}
 			Ambient={Color3.fromRGB(170, 176, 184)}
@@ -202,7 +202,7 @@ function ItemConfigurator() {
 	};
 
 	const options = (
-		<Stack direction="column" gap={1.5} sx={STACK}>
+		<Stack direction="column" gap={1.5} sx={{ ...STACK, LayoutOrder: 1 }}>
 			<Typography text="Harbor light" variant="h3" sx={{ Size: new UDim2(1, 0, 0, 28) }} />
 			<Typography text="Pick a finish, a body, and a size." color="textSecondary" sx={STACK} />
 			<Typography text="Finish" variant="subtitle2" sx={{ Size: new UDim2(1, 0, 0, 20) }} />
@@ -268,9 +268,18 @@ function ItemConfigurator() {
 		</Paper>
 	);
 
+	const page = view.width > 0 ? view.width : 880;
+	const inset = theme.spacing.calc(2) * 2;
+	const previewW = math.max(200, stacked ? page - inset * 2 : page - 380 - 16 - 8 - inset);
 	const preview = (
-		<Paper elevation="raised" sx={{ Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y }}>
-			<Preview color={swatch.color} fit={fit} variant={variant} tall={stacked ? 240 : math.max(280, view.height - bar - 48)} />
+		<Paper elevation="raised" sx={{ Size: new UDim2(1, 0, 0, 0), AutomaticSize: Enum.AutomaticSize.Y, LayoutOrder: 0 }}>
+			<Preview
+				color={swatch.color}
+				fit={fit}
+				variant={variant}
+				wide={previewW}
+				tall={stacked ? 240 : math.max(280, view.height - bar - 48)}
+			/>
 		</Paper>
 	);
 
