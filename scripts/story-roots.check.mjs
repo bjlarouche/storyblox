@@ -13,6 +13,13 @@ String.prototype.gsub = function gsub(pattern, replacement) {
 	return [this.replace(new RegExp(pattern, "g"), replacement), 0];
 };
 globalThis.typeOf = (value) => (typeof value === "object" && value !== null ? "table" : typeof value);
+globalThis.pcall = (fn) => {
+	try {
+		return [true, fn()];
+	} catch (error) {
+		return [false, error];
+	}
+};
 
 const {
 	DEFAULT_STORY_ROOTS,
@@ -22,6 +29,8 @@ const {
 	collapseRootPaths,
 	mergeStoryRootPaths,
 	splitRootPath,
+	lookupRootPath,
+	rootPathIssue,
 } = await import("../src/packages/storyRoots.ts");
 
 if (DEFAULT_STORY_ROOTS.join(",") !== "ServerStorage.StorybloxPlugin.stories,ReplicatedStorage,ServerStorage,StarterPlayer.StarterPlayerScripts") {
@@ -43,4 +52,21 @@ const merged = mergeStoryRootPaths(["ReplicatedStorage.UI", "Workspace.Stories"]
 if (merged.join(",") !== "ReplicatedStorage,ServerStorage,StarterPlayer.StarterPlayerScripts,Workspace.Stories") {
 	throw new Error(`merge ${merged}`);
 }
+const node = (children = {}) => ({ FindFirstChild: (name) => children[name] });
+const stories = node();
+const game = {
+	FindService(name) {
+		if (name !== "ReplicatedStorage") throw new Error(`${name} is not a valid Service name`);
+		return node({ Stories: stories });
+	},
+};
+if (lookupRootPath("ReplicatedStorage.Stories", game) !== stories) throw new Error("lookup nested");
+if (lookupRootPath("ReplicatedStorage.Missing", game) !== undefined) throw new Error("lookup missing child");
+if (lookupRootPath("Replicatedtss", game) !== undefined) throw new Error("lookup bad service");
+const resolve = (path) => lookupRootPath(path, game);
+if (rootPathIssue("  ", [], resolve) !== "") throw new Error("issue empty");
+if (rootPathIssue("ReplicatedStorage.Stories", ["ReplicatedStorage.Stories"], resolve) !== "Already added") throw new Error("issue dupe");
+if (rootPathIssue("ServerStorage", [], resolve) !== "Already added") throw new Error("issue built-in");
+if (rootPathIssue("Replicatedtss", [], resolve) !== "Not found") throw new Error("issue missing");
+if (rootPathIssue(" ReplicatedStorage.Stories ", [], resolve) !== undefined) throw new Error("issue valid");
 console.log("story roots ok");

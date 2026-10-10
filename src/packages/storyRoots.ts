@@ -39,6 +39,25 @@ export function splitRootPath(path: string): string[] {
 	return parts;
 }
 
+export function lookupRootPath(path: string, root: DataModel = game): Instance | undefined {
+	const parts = splitRootPath(path);
+	if (parts.size() === 0) return undefined;
+	const [ok, service] = pcall(() => root.FindService(parts[0]));
+	let current: Instance | undefined = ok ? service : undefined;
+	for (let index = 1; index < parts.size(); index++) {
+		if (current === undefined) return undefined;
+		current = current.FindFirstChild(parts[index]);
+	}
+	return current;
+}
+
+export function rootPathIssue(path: string, extras: string[], resolve = lookupRootPath): string | undefined {
+	const name = trimPath(path);
+	if (name.size() === 0) return "";
+	if (extras.includes(name) || DEFAULT_STORY_ROOTS.includes(name)) return "Already added";
+	return resolve(name) === undefined ? "Not found" : undefined;
+}
+
 export function uniqueRootPaths(paths: string[]): string[] {
 	const kept = new Array<string>();
 	for (const path of paths) {

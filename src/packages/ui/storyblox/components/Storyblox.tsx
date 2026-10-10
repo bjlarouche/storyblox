@@ -25,7 +25,7 @@ import { ClaimedId, claimStoryId, releaseStoryId } from "packages/defineStory";
 import { checkRequest, PROTOCOL_VERSION } from "packages/bridgeProtocol";
 import { decoratorsFrom, stackDecorators, wrapStory } from "packages/storyActions";
 import { filterStoriesByTags, parseTagList } from "packages/storyTags";
-import { STORY_ROOT_CLASSES, mergeStoryRootPaths, parseRootList, splitRootPath } from "packages/storyRoots";
+import { STORY_ROOT_CLASSES, lookupRootPath, mergeStoryRootPaths, parseRootList } from "packages/storyRoots";
 import { narrowShell } from "../shellLayout";
 import SettingsPanel from "./SettingsPanel";
 
@@ -168,16 +168,6 @@ function loadedStory(root: ModuleScript, suffix: string) {
 		template: (props: unknown, context: unknown) =>
 			wrapStory((args: unknown) => inner(args, context), decorators)(props),
 	} as unknown as Story;
-}
-function lookupRootPath(path: string): Instance | undefined {
-	const parts = splitRootPath(path);
-	if (parts.size() === 0) return undefined;
-	let current = game.FindFirstChild(parts[0]);
-	for (let index = 1; index < parts.size(); index++) {
-		if (current === undefined) return undefined;
-		current = current.FindFirstChild(parts[index]);
-	}
-	return current;
 }
 
 function collapseScanRoots(roots: Instance[]): Instance[] {
@@ -811,30 +801,14 @@ function Storyblox(props: StorybloxProps) {
 		onToggleFavorite: selectedStory !== undefined ? () => toggleFavoriteStory(selectedStory.title) : undefined,
 	};
 	const settingsCanvas = (
-		<frame key="SettingsHost" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
-			<textbutton
-				key="CloseSettings"
-				Text="Close"
-				Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
-				AutomaticSize={Enum.AutomaticSize.X}
-				Position={new UDim2(1, 0, 0, 0)}
-				AnchorPoint={new Vector2(1, 0)}
-				BackgroundTransparency={1}
-				Font={theme.typography.fontFamilies.semibold}
-				TextSize={theme.typography.fontSizes.caption}
-				TextColor3={theme.palette.primary.main}
-				Event={{ MouseButton1Click: toggleSettings }}
-			/>
-			<frame key="SettingsBody" Size={new UDim2(1, 0, 1, -theme.spacing.calc(2))} Position={new UDim2(0, 0, 0, theme.spacing.calc(2))} BackgroundTransparency={1}>
-				<SettingsPanel
-					extraRoots={extraList}
-					onExtraRootsChange={(value) => {
-						setExtraList(value);
-						if (onExtraRootsChange) onExtraRootsChange(value);
-					}}
-				/>
-			</frame>
-		</frame>
+		<SettingsPanel
+			extraRoots={extraList}
+			onExtraRootsChange={(value) => {
+				setExtraList(value);
+				if (onExtraRootsChange) onExtraRootsChange(value);
+			}}
+			onClose={toggleSettings}
+		/>
 	);
 	const onRenderError = (failure: unknown | undefined) => {
 		renderError.current = failure;
