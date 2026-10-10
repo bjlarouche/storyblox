@@ -6,7 +6,7 @@ function FieldStory() {
 	const [shown, setShown] = useState({ year: 2026, month: 10 });
 	const [time, setTime] = useState({ hour: 9, minute: 30 });
 	return (
-		<frame Size={new UDim2(0, 160, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
+		<frame Size={new UDim2(0, 280, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 			<uilistlayout FillDirection={Enum.FillDirection.Vertical} Padding={new UDim(0, 8)} SortOrder={Enum.SortOrder.LayoutOrder} />
 			<DateRangePicker
 				year={shown.year}
