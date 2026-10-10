@@ -26,25 +26,44 @@ const PRESET_LABELS: { [name: string]: string } = {
 	desktop: "Desktop",
 };
 
-export function stepPreviewPreset(current: string | undefined) {
-	if (current === undefined) return PREVIEW_PRESETS[0];
-	for (let i = 0; i < PREVIEW_PRESETS.size(); i++) {
-		if (PREVIEW_PRESETS[i] === current) {
-			const step = i + 1;
-			return step < PREVIEW_PRESETS.size() ? PREVIEW_PRESETS[step] : undefined;
-		}
-	}
-	return undefined;
+export function sizeChoice(picked: string | undefined, storyPreview: unknown) {
+	if (picked === "phone" || picked === "tablet" || picked === "desktop") return picked;
+	if (picked === "responsive") return "responsive";
+	if (picked === "story" && previewSize(storyPreview) !== undefined) return "story";
+	if (picked === "story") return "responsive";
+	return previewSize(storyPreview) !== undefined ? "story" : "responsive";
 }
 
-export function previewPresetLabel(current: string | undefined) {
-	if (current === undefined) return "Size";
-	return PRESET_LABELS[current] ?? "Size";
+export function sizeChoiceLabel(choice: string) {
+	if (choice === "responsive") return "Responsive";
+	if (choice === "story") return "Story";
+	return PRESET_LABELS[choice] ?? "Size";
+}
+
+export function sizeChoiceActive(picked: string | undefined, storyPreview: unknown) {
+	const choice = sizeChoice(picked, storyPreview);
+	const natural = previewSize(storyPreview) !== undefined ? "story" : "responsive";
+	return choice !== natural;
+}
+
+export function storySizeLabel(storyPreview: unknown) {
+	const size = previewSize(storyPreview);
+	if (size === undefined) return undefined;
+	return `Story ${math.floor(size.width)}×${math.floor(size.height)}`;
+}
+
+export function presetMenuLabel(name: string) {
+	const size = PRESETS[name];
+	const title = PRESET_LABELS[name];
+	if (size === undefined || title === undefined) return name;
+	return `${title} ${size.width}×${size.height}`;
 }
 
 export function activePreview(storyPreview: unknown, picked: string | undefined) {
-	if (picked !== undefined) return { preset: picked };
-	return storyPreview;
+	const choice = sizeChoice(picked, storyPreview);
+	if (choice === "responsive") return undefined;
+	if (choice === "story") return storyPreview;
+	return { preset: choice };
 }
 
 export function previewSize(preview: unknown, orientation?: "portrait" | "landscape") {
@@ -75,16 +94,35 @@ export function flipOrientation(current: "portrait" | "landscape"): "portrait" |
 	return current === "portrait" ? "landscape" : "portrait";
 }
 
-export const ZOOM_STEPS = [0.5, 1, 2];
+export const ZOOM_STEPS = [0.25, 0.33, 0.5, 0.67, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 3, 4];
 
 export function stepZoom(current: number, direction: number) {
-	let index = 1;
+	let index = -1;
 	for (let i = 0; i < ZOOM_STEPS.size(); i++) {
-		if (ZOOM_STEPS[i] === current) index = i;
+		if (math.abs(ZOOM_STEPS[i] - current) < 0.001) index = i;
 	}
-	const step = index + direction;
-	if (step < 0 || step >= ZOOM_STEPS.size()) return current;
-	return ZOOM_STEPS[step];
+	if (index >= 0) {
+		const step = index + direction;
+		if (step < 0 || step >= ZOOM_STEPS.size()) return current;
+		return ZOOM_STEPS[step];
+	}
+	if (direction >= 0) {
+		for (let i = 0; i < ZOOM_STEPS.size(); i++) {
+			if (ZOOM_STEPS[i] > current) return ZOOM_STEPS[i];
+		}
+		return ZOOM_STEPS[ZOOM_STEPS.size() - 1];
+	}
+	for (let i = ZOOM_STEPS.size() - 1; i >= 0; i--) {
+		if (ZOOM_STEPS[i] < current) return ZOOM_STEPS[i];
+	}
+	return ZOOM_STEPS[0];
+}
+
+export function zoomPresetId(current: number) {
+	for (let i = 0; i < ZOOM_STEPS.size(); i++) {
+		if (math.abs(ZOOM_STEPS[i] - current) < 0.001) return `${math.round(ZOOM_STEPS[i] * 100)}`;
+	}
+	return undefined;
 }
 
 export const GRID_CELL = 8;

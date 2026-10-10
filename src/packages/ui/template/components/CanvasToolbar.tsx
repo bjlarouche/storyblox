@@ -1,7 +1,7 @@
-import React from "@rbxts/react";
-import { IconButton, Icons, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import React, { useRef, useState } from "@rbxts/react";
+import { IconButton, Icons, Menu, Theme, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
-import { previewPresetLabel } from "packages/previewScale";
+import { PREVIEW_PRESETS, presetMenuLabel, ZOOM_STEPS, zoomPresetId } from "packages/previewScale";
 
 const REMOUNT_ICON = "rbxassetid://75431112013973" as Icons;
 const INSPECTOR_ICON = "rbxassetid://94615499225611" as Icons;
@@ -34,6 +34,7 @@ function Slot(props: {
 	active?: boolean;
 	label?: string;
 	onClick: () => void;
+	anchorRef?: React.Ref<TextButton>;
 	children?: React.ReactNode;
 }) {
 	const { theme } = useTheme();
@@ -54,6 +55,7 @@ function Slot(props: {
 		>
 			<textbutton
 				key={props.id}
+				ref={props.anchorRef}
 				Text={props.label ?? ""}
 				AutoButtonColor={false}
 				AutomaticSize={labeled ? Enum.AutomaticSize.X : Enum.AutomaticSize.None}
@@ -187,7 +189,6 @@ function OrientMark(props: { portrait: boolean }) {
 interface CanvasToolbarProps {
 	zoom: number;
 	fit: boolean;
-	sizePick?: string;
 	orientation: "portrait" | "landscape";
 	canOrient: boolean;
 	grid: boolean;
@@ -201,8 +202,13 @@ interface CanvasToolbarProps {
 	showInspector: boolean;
 	showSettings: boolean;
 	onZoom: (direction: number) => void;
+	onZoomValue: (zoom: number) => void;
 	onFit: () => void;
-	onSize: () => void;
+	sizeLabel: string;
+	sizeActive: boolean;
+	sizeSelected: string;
+	storyOption?: string;
+	onSizePick: (id: string) => void;
 	onOrient: () => void;
 	onGrid: () => void;
 	onOutline: () => void;
@@ -218,6 +224,23 @@ interface CanvasToolbarProps {
 function CanvasToolbar(props: CanvasToolbarProps) {
 	const { theme } = useTheme();
 	const bg = props.bgStep === 0 ? "Bg" : props.bgStep === 1 ? "Paper" : "Canvas";
+	const [zoomOpen, setZoomOpen] = useState(false);
+	const [sizeOpen, setSizeOpen] = useState(false);
+	const zoomRef = useRef<TextButton>();
+	const sizeRef = useRef<TextButton>();
+	const zoomItems = new Array<{ id: string; text: string; disabled?: boolean }>();
+	for (const step of ZOOM_STEPS) {
+		const id = `${math.round(step * 100)}`;
+		zoomItems.push({ id, text: `${id}%` });
+	}
+	zoomItems.push({ id: "split", text: "—", disabled: true });
+	zoomItems.push({ id: "fit", text: "Fit" });
+	zoomItems.push({ id: "reset", text: "Reset to 100%" });
+	const sizeItems = new Array<{ id: string; text: string; disabled?: boolean }>();
+	sizeItems.push({ id: "responsive", text: "Responsive" });
+	if (props.storyOption !== undefined) sizeItems.push({ id: "story", text: props.storyOption });
+	sizeItems.push({ id: "split", text: "—", disabled: true });
+	for (const name of PREVIEW_PRESETS) sizeItems.push({ id: name, text: presetMenuLabel(name) });
 	return (
 		<>
 			<textbutton
@@ -233,16 +256,20 @@ function CanvasToolbar(props: CanvasToolbarProps) {
 				TextColor3={theme.palette.text.secondary}
 				Event={{ MouseButton1Click: () => props.onZoom(-1) }}
 			/>
-			<textlabel
+			<textbutton
 				key="Zoom"
-				Text={`${math.floor(props.zoom * 100)}%`}
+				ref={zoomRef}
+				Text={`${math.round(props.zoom * 100)}%`}
 				LayoutOrder={2}
-				AutomaticSize={Enum.AutomaticSize.X}
-				Size={new UDim2(0, 0, 0, theme.spacing.calc(2))}
+				Size={new UDim2(0, 40, 0, theme.spacing.calc(2))}
 				BackgroundTransparency={1}
+				BorderSizePixel={0}
 				Font={theme.typography.fontFamilies.semibold}
 				TextSize={theme.typography.fontSizes.caption}
 				TextColor3={theme.palette.text.primary}
+				TextXAlignment={Enum.TextXAlignment.Center}
+				AutoButtonColor={false}
+				Event={{ MouseButton1Click: () => setZoomOpen((open) => !open) }}
 			/>
 			<textbutton
 				key="ZoomIn"
@@ -262,11 +289,12 @@ function CanvasToolbar(props: CanvasToolbarProps) {
 			<Slot
 				key="Size"
 				id="Size"
-				tip="Story, phone, tablet, or desktop"
+				tip="Canvas size"
 				order={6}
-				label={previewPresetLabel(props.sizePick)}
-				active={props.sizePick !== undefined}
-				onClick={props.onSize}
+				label={`${props.sizeLabel} ▾`}
+				active={props.sizeActive}
+				anchorRef={sizeRef}
+				onClick={() => setSizeOpen((open) => !open)}
 			/>
 			{props.canOrient && (
 				<Slot
@@ -329,6 +357,31 @@ function CanvasToolbar(props: CanvasToolbarProps) {
 					onClick={props.onSettings}
 				/>
 			)}
+			<Menu
+				anchor={zoomRef.current}
+				open={zoomOpen}
+				dense
+				items={zoomItems}
+				selected={zoomPresetId(props.zoom)}
+				onSelect={(id) => {
+					if (id === "fit") props.onFit();
+					else if (id === "reset") props.onZoomValue(1);
+					else {
+						const value = tonumber(id);
+						if (value !== undefined) props.onZoomValue(value / 100);
+					}
+				}}
+				onClose={() => setZoomOpen(false)}
+			/>
+			<Menu
+				anchor={sizeRef.current}
+				open={sizeOpen}
+				dense
+				items={sizeItems}
+				selected={props.sizeSelected}
+				onSelect={props.onSizePick}
+				onClose={() => setSizeOpen(false)}
+			/>
 		</>
 	);
 }

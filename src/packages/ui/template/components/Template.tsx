@@ -15,8 +15,11 @@ import {
 	gridLineCount,
 	previewScale,
 	previewSize,
-	stepPreviewPreset,
+	sizeChoice,
+	sizeChoiceActive,
+	sizeChoiceLabel,
 	stepZoom,
+	storySizeLabel,
 } from "packages/previewScale";
 import { extraGlobalEntries, mergeGlobals } from "packages/storyGlobals";
 import { collectLoaders, settleLoaders } from "packages/storyLoaders";
@@ -803,7 +806,10 @@ function Template({
 							<CanvasToolbar
 								zoom={zoom}
 								fit={fit}
-								sizePick={sizePick}
+								sizeLabel={sizeChoiceLabel(sizeChoice(sizePick, (story as { preview?: unknown } | undefined)?.preview))}
+								sizeActive={sizeChoiceActive(sizePick, (story as { preview?: unknown } | undefined)?.preview)}
+								sizeSelected={sizeChoice(sizePick, (story as { preview?: unknown } | undefined)?.preview)}
+								storyOption={storySizeLabel((story as { preview?: unknown } | undefined)?.preview)}
 								orientation={orientation}
 								canOrient={
 									previewSize(activePreview((story as { preview?: unknown } | undefined)?.preview, sizePick)) !==
@@ -820,8 +826,12 @@ function Template({
 								showInspector={onToggleInspector !== undefined}
 								showSettings={onToggleSettings !== undefined}
 								onZoom={(direction) => setZoom((current) => stepZoom(current, direction))}
+								onZoomValue={(value) => {
+									setZoom(value);
+									setFit(false);
+								}}
 								onFit={() => setFit((current) => !current)}
-								onSize={() => setSizePick((current) => stepPreviewPreset(current))}
+								onSizePick={setSizePick}
 								onOrient={() => setOrientation((current) => flipOrientation(current))}
 								onGrid={() => setGrid((current) => !current)}
 								onOutline={() =>

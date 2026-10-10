@@ -1,4 +1,4 @@
-globalThis.math = { min: Math.min, max: Math.max, floor: Math.floor, huge: Infinity };
+globalThis.math = { min: Math.min, max: Math.max, floor: Math.floor, round: Math.round, abs: Math.abs, huge: Infinity };
 
 Array.prototype.size = function () {
 	return this.length;
@@ -6,7 +6,7 @@ Array.prototype.size = function () {
 
 globalThis.typeOf = (value) => (value === null || value === undefined ? "nil" : typeof value === "object" ? "table" : typeof value);
 
-const { previewScale, gridLineCount, GRID_CELL, stepZoom, previewSize, flipOrientation, stepPreviewPreset, previewPresetLabel, activePreview } =
+const { previewScale, gridLineCount, GRID_CELL, stepZoom, previewSize, flipOrientation, sizeChoice, sizeChoiceLabel, sizeChoiceActive, storySizeLabel, presetMenuLabel, activePreview, zoomPresetId } =
 	await import("../src/packages/previewScale.ts");
 
 const phone = previewSize({ preset: "phone" });
@@ -30,18 +30,24 @@ if (previewScale("fit", 0, 100, 100, 100) !== 1) throw new Error("empty logical 
 if (gridLineCount(320, GRID_CELL) !== 39) throw new Error("grid columns");
 if (gridLineCount(48, GRID_CELL) !== 5) throw new Error("grid rows");
 if (gridLineCount(0, GRID_CELL) !== 0) throw new Error("empty grid");
-if (stepZoom(1, 1) !== 2) throw new Error("zoom in");
-if (stepZoom(1, -1) !== 0.5) throw new Error("zoom out");
-if (stepZoom(2, 1) !== 2) throw new Error("zoom stays at 200");
-if (stepZoom(0.5, -1) !== 0.5) throw new Error("zoom stays at 50");
-if (stepPreviewPreset(undefined) !== "phone") throw new Error("size starts at phone");
-if (stepPreviewPreset("phone") !== "tablet" || stepPreviewPreset("tablet") !== "desktop") throw new Error("size cycle");
-if (stepPreviewPreset("desktop") !== undefined || stepPreviewPreset("watch") !== undefined) throw new Error("size returns to story");
-if (previewPresetLabel(undefined) !== "Size" || previewPresetLabel("phone") !== "Phone" || previewPresetLabel("desktop") !== "Desktop") {
-	throw new Error("size label");
-}
+if (stepZoom(1, 1) !== 1.1) throw new Error("zoom in");
+if (stepZoom(1, -1) !== 0.9) throw new Error("zoom out");
+if (stepZoom(4, 1) !== 4) throw new Error("zoom stays at 400");
+if (stepZoom(0.25, -1) !== 0.25) throw new Error("zoom stays at 25");
+if (stepZoom(0.4, 1) !== 0.5) throw new Error("zoom steps up to the next preset");
+if (stepZoom(0.4, -1) !== 0.33) throw new Error("zoom steps down to the previous preset");
+if (zoomPresetId(1) !== "100" || zoomPresetId(0.4) !== undefined) throw new Error("zoom preset id");
+if (sizeChoice(undefined, { width: 320, height: 48 }) !== "story") throw new Error("sized story defaults to story");
+if (sizeChoice(undefined, undefined) !== "responsive") throw new Error("unset size is responsive");
+if (sizeChoice("responsive", { width: 320, height: 48 }) !== "responsive") throw new Error("responsive forces fill");
+if (sizeChoiceLabel("phone") !== "Phone" || sizeChoiceLabel("responsive") !== "Responsive") throw new Error("size label");
+if (sizeChoiceActive(undefined, { width: 320, height: 48 }) !== false) throw new Error("story default is not a pill");
+if (sizeChoiceActive("phone", { width: 320, height: 48 }) !== true) throw new Error("device pick is a pill");
+if (storySizeLabel({ width: 320, height: 48 }) !== "Story 320×48") throw new Error("story option");
+if (presetMenuLabel("phone") !== "Phone 390×844") throw new Error("phone option");
 const storySize = { width: 320, height: 48, preset: "phone" };
 if (previewSize(activePreview(storySize, undefined))?.width !== 320) throw new Error("story size stays");
+if (previewSize(activePreview(storySize, "responsive")) !== undefined) throw new Error("responsive fills");
 if (previewSize(activePreview(storySize, "tablet"))?.width !== 1024) throw new Error("picked preset");
 
 console.log("preview scale ok");
