@@ -1,5 +1,5 @@
 import React, { useState } from "@rbxts/react";
-import { Button, Card, Container, Icon, IconButton, Icons, Input, ListItem, Typography, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import { Button, Card, Container, controlMetrics, Icon, IconButton, Icons, Input, ListItem, Typography, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import { DEFAULT_STORY_ROOTS, encodeRootList, lookupRootPath, parseRootList, rootPathIssue } from "packages/storyRoots";
 
 const SHORTCUTS = [
@@ -129,7 +129,7 @@ function SettingsPanel({ extraRoots = "", onExtraRootsChange, onClose }: Setting
 							text="Add"
 							size="small"
 							disabled={issue !== undefined}
-							className={{ LayoutOrder: 2, Size: UDim2.fromOffset(addWidth, 0) } as WriteableStyle<TextButton>}
+							className={{ LayoutOrder: 2, Size: UDim2.fromOffset(addWidth, controlMetrics(theme.density, "small").height) } as WriteableStyle<TextButton>}
 							onLeftClick={() => add()}
 						/>
 					</frame>
