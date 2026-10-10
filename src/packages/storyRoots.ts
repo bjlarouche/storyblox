@@ -32,16 +32,15 @@ export const STORY_ROOT_CLASSES = [
 
 export function splitRootPath(path: string): string[] {
 	const parts = new Array<string>();
-	for (const part of path.split(".")) {
-		const name = trimPath(part);
-		if (name.size() > 0) parts.push(name);
-	}
+	for (const part of path.split(".")) parts.push(trimPath(part));
 	return parts;
 }
 
 export function lookupRootPath(path: string, root: DataModel = game): Instance | undefined {
 	const parts = splitRootPath(path);
-	if (parts.size() === 0) return undefined;
+	for (const part of parts) {
+		if (part.size() === 0) return undefined;
+	}
 	const [ok, service] = pcall(() => root.FindService(parts[0]));
 	let current: Instance | undefined = ok ? service : undefined;
 	for (let index = 1; index < parts.size(); index++) {
