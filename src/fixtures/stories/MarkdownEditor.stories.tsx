@@ -17,12 +17,12 @@ Write on the left, preview on the right.
 1. First
 2. Second
 
-> A short quote that stays one paragraph
-> when the next line is only a soft wrap
+> This package is a work in progress.
+> this is second line
+> this is a third line
+> this is a fourth line
 >
-> **Bold**, *italic*, and [links](https://example.com)
-> hard  
-> break
+> **Bold**, *italic*, \`code\`, and [links](https://example.com)
 
 ## Table
 
