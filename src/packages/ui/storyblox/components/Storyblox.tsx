@@ -259,6 +259,7 @@ function Storyblox(props: StorybloxProps) {
 	} = props;
 
 	const [stories, setStories] = useState<Story[]>([]);
+	const [scanning, setScanning] = useState(true);
 	const [includeTags, setIncludeTags] = useState<string[]>([]);
 	const [excludeTags, setExcludeTags] = useState<string[]>([]);
 	const [selectedStory, setSelectedStory] = useState<Story | undefined>();
@@ -364,8 +365,9 @@ function Storyblox(props: StorybloxProps) {
 		[session, logDebug, lastStory],
 	);
 
+	const scanLeft = useRef(0);
 	const findStories = useCallback(
-		(root: Instance): void => {
+		(root: Instance, finish: boolean = false): void => {
 			const token = generation.current;
 			task.spawn(() => {
 				if (generation.current !== token) return;
@@ -431,14 +433,26 @@ function Storyblox(props: StorybloxProps) {
 						warn(`Storyblox could not load ${root.GetFullName()}: ${error}`);
 					}
 				} else if (STORY_ROOT_CLASSES.includes(root.ClassName)) {
+					const modules = new Array<ModuleScript>();
 					for (const child of root.GetDescendants()) {
 						if (underOriginal(child)) continue;
 						if (child.IsA("ModuleScript") && storyModuleSuffix(child.Name, extension) !== undefined) {
-							findStories(child);
+							modules.push(child);
 						}
 					}
+					const started = os.clock();
+					for (let index = 0; index < modules.size(); index++) {
+						if (generation.current !== token) break;
+						findStories(modules[index]);
+						if ((index + 1) % 8 === 0) task.wait();
+					}
+					logDebug(`scan ${modules.size()} stories ${math.floor((os.clock() - started) * 1000)}ms`);
 				} else {
 					logDebug(`${root.GetFullName()} has invalid root type: ${root.ClassName}`);
+				}
+				if (finish && generation.current === token) {
+					scanLeft.current -= 1;
+					if (scanLeft.current <= 0) setScanning(false);
 				}
 			});
 		},
@@ -464,6 +478,8 @@ function Storyblox(props: StorybloxProps) {
 		setStories([]);
 		storyIds.current = [];
 		const scanRoots = storyScanRoots(root, extraList);
+		scanLeft.current = scanRoots.size();
+		setScanning(scanRoots.size() > 0);
 		const added = new Array<RBXScriptConnection>();
 		for (const storiesRoot of scanRoots) {
 			added.push(
@@ -473,7 +489,7 @@ function Storyblox(props: StorybloxProps) {
 					logDebug(`Descendant added: ${descendant.GetFullName()} checking for stories`);
 				}),
 			);
-			findStories(storiesRoot);
+			findStories(storiesRoot, true);
 			logDebug(`Finding stories in ${storiesRoot.GetFullName()}`);
 		}
 		const pending = task.delay(0.3, () => {
@@ -783,6 +799,7 @@ function Storyblox(props: StorybloxProps) {
 				recent={recentList}
 				includeTags={includeTags.join(",")}
 				excludeTags={excludeTags.join(",")}
+				pending={scanning}
 				onIncludeTagsChange={(value) => {
 					setIncludeTags(parseTagList(value));
 					controlRoot(root)?.SetAttribute("storyblox-include-tags", value.size() > 0 ? value : undefined);

@@ -36,6 +36,7 @@ export interface StoriesSidebarProps {
 	recent?: string[];
 	includeTags?: string;
 	excludeTags?: string;
+	pending?: boolean;
 	onIncludeTagsChange?: (value: string) => void;
 	onExcludeTagsChange?: (value: string) => void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,6 +53,7 @@ function StoriesSidebar({
 	recent = [],
 	includeTags = "",
 	excludeTags = "",
+	pending = false,
 	onIncludeTagsChange,
 	onExcludeTagsChange,
 	onClick,
@@ -212,7 +214,9 @@ function StoriesSidebar({
 				? "1 match"
 				: `${hits.size()} matches`
 		: stories.size() === 0
-			? "No stories found"
+			? pending
+				? "Loading stories…"
+				: "No stories found"
 			: stories.size() === 1
 				? "1 story"
 				: `${stories.size()} stories`;
@@ -311,7 +315,7 @@ function StoriesSidebar({
 
 				{((searching && hits.size() === 0) || (!searching && stories.size() === 0)) && (
 					<Typography
-						text="No stories found"
+						text={!searching && pending ? "Loading stories…" : "No stories found"}
 						variant="caption"
 						color="textSecondary"
 						className={emptyLabel as WriteableStyle<TextLabel>}
