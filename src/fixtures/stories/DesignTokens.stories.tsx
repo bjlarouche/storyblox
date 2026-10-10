@@ -74,7 +74,7 @@ function DesignTokens() {
 			</>
 			{heading(20, "Spacing", muted, font)}
 			<frame LayoutOrder={21} Size={new UDim2(1, 0, 0, theme.spacing.calc(4))} BackgroundTransparency={1}>
-				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(1))} VerticalAlignment={Enum.VerticalAlignment.Bottom} />
+				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(1))} VerticalAlignment={Enum.VerticalAlignment.Bottom} SortOrder={Enum.SortOrder.LayoutOrder} />
 				<>
 					{STEPS.map((step, index) => {
 						const px = theme.spacing.calc(step);
@@ -86,7 +86,7 @@ function DesignTokens() {
 			</frame>
 			{heading(30, "Palette", muted, font)}
 			<frame LayoutOrder={31} Size={new UDim2(1, 0, 0, 36)} BackgroundTransparency={1}>
-				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(1))} />
+				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(1))} SortOrder={Enum.SortOrder.LayoutOrder} />
 				<>
 					{swatches.map((swatch, index) => (
 						<frame key={swatch.name} LayoutOrder={index} Size={new UDim2(0, 36, 0, 36)} BackgroundColor3={swatch.color} BorderSizePixel={0}>
@@ -98,7 +98,7 @@ function DesignTokens() {
 			</frame>
 			{heading(40, "Radii", muted, font)}
 			<frame LayoutOrder={41} Size={new UDim2(1, 0, 0, 40)} BackgroundTransparency={1}>
-				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} VerticalAlignment={Enum.VerticalAlignment.Center} />
+				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} VerticalAlignment={Enum.VerticalAlignment.Center} SortOrder={Enum.SortOrder.LayoutOrder} />
 				<>
 					{(
 						[
@@ -117,7 +117,7 @@ function DesignTokens() {
 			</frame>
 			{heading(50, "Controls", muted, font)}
 			<frame LayoutOrder={51} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
-				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} VerticalAlignment={Enum.VerticalAlignment.Center} />
+				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} VerticalAlignment={Enum.VerticalAlignment.Center} SortOrder={Enum.SortOrder.LayoutOrder} />
 				<>
 					{SIZES.map((size, index) => (
 						<frame key={size} LayoutOrder={index} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
@@ -128,7 +128,7 @@ function DesignTokens() {
 			</frame>
 			{heading(60, "Icons", muted, font)}
 			<frame LayoutOrder={61} Size={new UDim2(1, 0, 0, icons.large)} BackgroundTransparency={1}>
-				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} VerticalAlignment={Enum.VerticalAlignment.Center} />
+				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} VerticalAlignment={Enum.VerticalAlignment.Center} SortOrder={Enum.SortOrder.LayoutOrder} />
 				<>
 					{(
 						[
@@ -143,7 +143,7 @@ function DesignTokens() {
 			</frame>
 			{heading(70, "Elevation", muted, font)}
 			<frame LayoutOrder={71} Size={new UDim2(1, 0, 0, 48)} BackgroundTransparency={1}>
-				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} />
+				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} SortOrder={Enum.SortOrder.LayoutOrder} />
 				<>
 					{ELEVATION.map((elevation, index) => (
 						<frame key={elevation} LayoutOrder={index} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
