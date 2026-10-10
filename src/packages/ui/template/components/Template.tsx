@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "@rbxts/react";
 import { Story } from "interfaces";
-import { ErrorBoundary, IconButton, Icons, Shadow, Theme, ThemeProvider, useTheme, WriteableStyle } from "@rbxts/uiblox";
+import Log from "@rbxts/log";
+import { CircularProgress, ErrorBoundary, IconButton, Icons, Shadow, Theme, ThemeProvider, useTheme, WriteableStyle } from "@rbxts/uiblox";
 import * as Uiblox from "@rbxts/uiblox";
 import { Canvas } from "../../canvas";
 import { StoryCallback, StoryElement } from "interfaces/Story";
@@ -19,6 +20,7 @@ import {
 } from "packages/previewScale";
 import { extraGlobalEntries, mergeGlobals } from "packages/storyGlobals";
 import { collectLoaders, settleLoaders } from "packages/storyLoaders";
+import { acceptStoryLoad, revealStoryLoad, STORY_LOAD_REVEAL } from "packages/storyLoad";
 import { bindActionArgs, createActionLog } from "packages/storyActions";
 import { actionFilter, allowAction, canvasLayout, docsPage } from "packages/storyParameters";
 import { scanA11y, A11yFinding } from "packages/a11yHeuristics";
@@ -168,6 +170,8 @@ export interface TemplateProps {
 	argsRequest?: { args?: { [key: string]: unknown }; id: number };
 	onCaseResult?: (result: CaseResult) => void;
 	onRenderError?: (failure: unknown | undefined) => void;
+	onLoading?: (label: string | undefined) => void;
+	debug?: boolean;
 }
 
 function loaderStatus(theme: Theme) {
@@ -208,6 +212,8 @@ function Template({
 	argsRequest,
 	onCaseResult,
 	onRenderError,
+	onLoading,
+	debug,
 }: TemplateProps) {
 	const { root, container, corner, navBar, storyBar, title, preview, canvas } = useTemplateStyles();
 	const { theme } = useTheme();
@@ -337,6 +343,14 @@ function Template({
 	const mounted = useRef("");
 	const themeMounted = useRef<Theme | undefined>(undefined);
 	const mountFrame = useRef<Frame>();
+	const loadGen = useRef(0);
+	const committedPaint = useRef("");
+	const onLoadingRef = useRef(onLoading);
+	onLoadingRef.current = onLoading;
+	const debugRef = useRef(debug);
+	debugRef.current = debug;
+	const [storyHold, setStoryHold] = useState(false);
+	const [loadShown, setLoadShown] = useState(false);
 	const argsRef = useRef(args);
 	argsRef.current = args;
 
@@ -485,6 +499,20 @@ function Template({
 	}, [story, args, globalPatch, density, primaryThemeEnabled, hasLoaders, loaderFns, epoch]);
 
 	useEffect(() => {
+		const token = loadGen.current + 1;
+		loadGen.current = token;
+		const paintKey = `${storyKey}@${epoch}`;
+		const switching = story !== undefined && committedPaint.current !== paintKey;
+		let reveal: thread | undefined;
+		const release = () => {
+			if (reveal !== undefined) pcall(() => task.cancel(reveal as thread));
+			if (!acceptStoryLoad(token, loadGen.current)) return;
+			setStoryHold(false);
+			setLoadShown(false);
+			onLoadingRef.current?.(undefined);
+		};
+		const work = () => {
+		if (!acceptStoryLoad(token, loadGen.current)) return;
 		if (story === undefined) {
 			setTemplate(undefined);
 			setFailure(undefined);
@@ -492,12 +520,15 @@ function Template({
 			gate.replace(undefined);
 			mounted.current = "";
 			themeMounted.current = undefined;
+			committedPaint.current = "";
+			release();
 			return;
 		}
 		if (hasLoaders && (loaderPhase !== "ready" || preloaded === undefined)) {
 			setTemplate(undefined);
 			gate.replace(undefined);
 			mounted.current = "";
+			release();
 			return;
 		}
 
@@ -528,12 +559,17 @@ function Template({
 			const props = renderArgs;
 			const themeName = primaryThemeEnabled ? "dark" : "light";
 			const globals = mergeGlobals(story.globals, globalPatch, themeName, density);
+			const renderStarted = os.clock();
 			const [element, callback] = render(props, {
 				theme: previewTheme,
 				globals,
 				parameters: story.parameters,
 				preloaded: hasLoaders ? preloaded : undefined,
-			}) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
+			}			) as LuaTuple<[StoryElement, StoryCallback | undefined]>;
+			if (debugRef.current === true) {
+				Log.Debug(`story render ${math.floor((os.clock() - renderStarted) * 1000)}ms`);
+			}
+			if (!acceptStoryLoad(token, loadGen.current)) return;
 			const parsed = readTemplateResult(element, callback);
 			const inset = layout === "fullscreen" ? 0 : theme.padding.calc(2);
 			const logical = (
@@ -610,14 +646,44 @@ function Template({
 				mounted.current = mountKey;
 				gate.replace(parsed.cleanup);
 			}
+			committedPaint.current = paintKey;
+			release();
 		} catch (error) {
+			if (!acceptStoryLoad(token, loadGen.current)) return;
 			setTemplate(undefined);
 			gate.replace(undefined);
 			mounted.current = "";
 			themeMounted.current = undefined;
 			setFailure(error);
 			onRenderError?.(error);
+			committedPaint.current = paintKey;
+			release();
 		}
+		};
+		if (!switching) {
+			work();
+			return;
+		}
+		setStoryHold(true);
+		setLoadShown(false);
+		onLoadingRef.current?.("Loading story…");
+		const started = os.clock();
+		reveal = task.delay(STORY_LOAD_REVEAL, () => {
+			if (!acceptStoryLoad(token, loadGen.current)) return;
+			setLoadShown(true);
+		});
+		task.defer(() => {
+			if (!acceptStoryLoad(token, loadGen.current)) return;
+			if (revealStoryLoad(os.clock() - started, true)) {
+				task.defer(work);
+				return;
+			}
+			work();
+		});
+		return () => {
+			loadGen.current += 1;
+			pcall(() => task.cancel(reveal));
+		};
 	}, [
 		story,
 		gate,
@@ -1019,6 +1085,46 @@ function Template({
 							</ThemeProvider>
 						}
 					/>
+					{storyHold && (
+						<textbutton
+							key="StoryLoad"
+							Size={UDim2.fromScale(1, 1)}
+							BackgroundColor3={theme.palette.surface.paper}
+							BackgroundTransparency={loadShown ? 0.35 : 1}
+							BorderSizePixel={0}
+							Text=""
+							AutoButtonColor={false}
+							Active={true}
+							ZIndex={20}
+						>
+							{loadShown && (
+								<frame
+									key="LoadFace"
+									AnchorPoint={new Vector2(0.5, 0.5)}
+									Position={UDim2.fromScale(0.5, 0.5)}
+									Size={new UDim2(0, 160, 0, 56)}
+									BackgroundTransparency={1}
+									BorderSizePixel={0}
+								>
+									<uilistlayout
+										FillDirection={Enum.FillDirection.Vertical}
+										HorizontalAlignment={Enum.HorizontalAlignment.Center}
+										VerticalAlignment={Enum.VerticalAlignment.Center}
+										Padding={new UDim(0, 6)}
+									/>
+									<CircularProgress />
+									<textlabel
+										Text="Loading story…"
+										Size={new UDim2(1, 0, 0, 18)}
+										BackgroundTransparency={1}
+										Font={theme.typography.fontFamilies.semibold}
+										TextSize={theme.typography.fontSizes.caption}
+										TextColor3={theme.palette.text.primary}
+									/>
+								</frame>
+							)}
+						</textbutton>
+					)}
 				</frame>
 			</frame>
 		</frame>
