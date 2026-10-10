@@ -58,6 +58,12 @@ if (template.includes("declared ? <uistroke")) throw new Error("bounds stroke is
 if (!template.includes("declared && grid ? <uistroke")) throw new Error("bounds stroke follows grid");
 if (!template.includes("ClipsDescendants={declared}")) throw new Error("preview frame does not clip");
 if (!template.includes('key="Inset"')) throw new Error("padding shares the overlay parent");
+const insetAt = template.indexOf('key="Inset"');
+const overlayAt = template.indexOf('key="Overlay"');
+if (overlayAt < 0 || overlayAt < insetAt) throw new Error("overlay is not above the story");
+const overlayTag = template.slice(overlayAt, overlayAt + 80);
+if (!overlayTag.includes("ZIndex={2}")) throw new Error("overlay is not above the story");
+if (!template.includes('key="Inset" ZIndex={1}')) throw new Error("story mount has no z index");
 
 const origin = { x: 100, y: 200, width: 160, height: 360, name: "mount", className: "Frame" };
 const story = { x: 116, y: 216, width: 80, height: 32, name: "One", className: "TextButton" };
@@ -88,6 +94,11 @@ const inset = gui("Inset", 0, 0, 240, 120, [button]);
 const insetRoot = gui("mount", 0, 0, 240, 120, [inset]);
 const insetNames = collectGuiBoxes(insetRoot).map((box) => box.name).join(",");
 if (insetNames !== "mount,One") throw new Error(`inset was outlined: ${insetNames}`);
+const gridLine = gui("gx-8", 8, 0, 1, 120, []);
+const overlayLayer = gui("Overlay", 0, 0, 240, 120, [gridLine, overlay]);
+const layered = gui("mount", 0, 0, 240, 120, [inset, overlayLayer]);
+const layeredNames = collectGuiBoxes(layered).map((box) => box.name).join(",");
+if (layeredNames !== "mount,One") throw new Error(`overlay layer leaked into measure: ${layeredNames}`);
 for (let i = 0; i < first.length; i++) {
 	if (first[i].x !== second[i].x || first[i].y !== second[i].y) throw new Error("second toggle moved");
 }
