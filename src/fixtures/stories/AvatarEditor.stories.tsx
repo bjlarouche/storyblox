@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
-import { ScrollView, Tabs, Typography, useTheme } from "@rbxts/uiblox";
+import { ScrollView, Tabs, Typography, useBreakpoints, useTheme } from "@rbxts/uiblox";
 
 import { CATEGORIES, Category, Equipped, lookOf, PIECES, Piece, sceneBlocks, STARTER } from "./avatarEditor";
 
@@ -93,16 +93,24 @@ function Tile(props: { piece: Piece; picked: boolean; order: number; onPick: (pi
 
 function AvatarEditor() {
 	const { theme } = useTheme();
+	const [host, setHost] = useState<Frame>();
+	const view = useBreakpoints(host);
+	const narrow = view.width > 0 && view.width < 760;
 	const [category, setCategory] = useState<Category>("Clothing");
 	const [equipped, setEquipped] = useState(STARTER);
 	const pad = theme.spacing.calc(1.5);
 	const gap = theme.spacing.calc(1);
 	const rail = theme.spacing.calc(16);
 	const grid = theme.spacing.calc(44);
+	const stageH = theme.spacing.calc(26);
+	const tabH = theme.spacing.calc(4);
 	const noteH = theme.spacing.calc(8);
 	const showNote = category === "Animations";
 	const items = PIECES.filter((piece) => piece.category === category);
 	const panel = grid + rail + gap * 3;
+	const stageSize = narrow ? new UDim2(1, 0, 0, stageH) : new UDim2(1, -(panel + gap), 1, 0);
+	const panelPos = narrow ? new UDim2(0, 0, 0, stageH + gap) : new UDim2(1, -panel, 0, 0);
+	const panelSize = narrow ? new UDim2(1, 0, 1, -(stageH + gap)) : new UDim2(0, panel, 1, 0);
 
 	const pick = (piece: Piece) => {
 		const worn = { ...equipped };
@@ -111,19 +119,24 @@ function AvatarEditor() {
 	};
 
 	return (
-		<frame Size={UDim2.fromScale(1, 1)} BackgroundColor3={theme.palette.surface.canvas} BorderSizePixel={0}>
+		<frame
+			ref={setHost}
+			Size={UDim2.fromScale(1, 1)}
+			BackgroundColor3={theme.palette.surface.canvas}
+			BorderSizePixel={0}
+		>
 			<uipadding
 				PaddingTop={new UDim(0, pad)}
 				PaddingBottom={new UDim(0, pad)}
 				PaddingLeft={new UDim(0, pad)}
 				PaddingRight={new UDim(0, pad)}
 			/>
-			<frame Size={new UDim2(1, -(panel + gap), 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
+			<frame Size={stageSize} BackgroundTransparency={1} BorderSizePixel={0}>
 				<Stage equipped={equipped} />
 			</frame>
 			<frame
-				Position={new UDim2(1, -panel, 0, 0)}
-				Size={new UDim2(0, panel, 1, 0)}
+				Position={panelPos}
+				Size={panelSize}
 				BackgroundColor3={theme.palette.surface.paper}
 				BorderSizePixel={0}
 			>
@@ -134,12 +147,21 @@ function AvatarEditor() {
 					PaddingLeft={new UDim(0, gap)}
 					PaddingRight={new UDim(0, gap)}
 				/>
-				<frame Size={new UDim2(0, rail, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
-					<Tabs value={category} options={CATEGORIES} orientation="vertical" onChange={setCategory} />
+				<frame
+					Size={narrow ? new UDim2(1, 0, 0, tabH) : new UDim2(0, rail, 1, 0)}
+					BackgroundTransparency={1}
+					BorderSizePixel={0}
+				>
+					<Tabs
+						value={category}
+						options={CATEGORIES}
+						orientation={narrow ? "horizontal" : "vertical"}
+						onChange={setCategory}
+					/>
 				</frame>
 				<frame
-					Position={new UDim2(0, rail + gap, 0, 0)}
-					Size={new UDim2(1, -(rail + gap), 1, 0)}
+					Position={narrow ? new UDim2(0, 0, 0, tabH + gap) : new UDim2(0, rail + gap, 0, 0)}
+					Size={narrow ? new UDim2(1, 0, 1, -(tabH + gap)) : new UDim2(1, -(rail + gap), 1, 0)}
 					BackgroundTransparency={1}
 					BorderSizePixel={0}
 				>
