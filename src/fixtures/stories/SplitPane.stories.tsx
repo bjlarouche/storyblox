@@ -1,14 +1,18 @@
 import React from "@rbxts/react";
+import { Typography } from "@rbxts/uiblox";
 import { SplitPane, useArg } from "./kit";
 
 function pane(text: string) {
 	return (
-		<textlabel
-			Size={new UDim2(1, 0, 1, 0)}
-			BackgroundTransparency={1}
-			Text={text}
-			TextSize={18}
-			Font={Enum.Font.SourceSans}
+		<Typography
+			text={text}
+			variant="body"
+			align="center"
+			sx={{
+				Size: UDim2.fromScale(1, 1),
+				AutomaticSize: Enum.AutomaticSize.None,
+				TextYAlignment: Enum.TextYAlignment.Center,
+			}}
 		/>
 	);
 }
