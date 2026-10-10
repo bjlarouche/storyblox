@@ -76,10 +76,10 @@ function DesignTokens() {
 			<frame LayoutOrder={21} Size={new UDim2(1, 0, 0, theme.spacing.calc(4))} BackgroundTransparency={1}>
 				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(1))} VerticalAlignment={Enum.VerticalAlignment.Bottom} />
 				<>
-					{STEPS.map((step) => {
+					{STEPS.map((step, index) => {
 						const px = theme.spacing.calc(step);
 						return (
-							<frame key={`s-${step}`} Size={new UDim2(0, px, 0, px)} BackgroundColor3={theme.palette.primary.main} BorderSizePixel={0} />
+							<frame key={`s-${step}`} LayoutOrder={index} Size={new UDim2(0, px, 0, px)} BackgroundColor3={theme.palette.primary.main} BorderSizePixel={0} />
 						);
 					})}
 				</>
@@ -88,9 +88,10 @@ function DesignTokens() {
 			<frame LayoutOrder={31} Size={new UDim2(1, 0, 0, 36)} BackgroundTransparency={1}>
 				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(1))} />
 				<>
-					{swatches.map((swatch) => (
-						<frame key={swatch.name} Size={new UDim2(0, 36, 0, 36)} BackgroundColor3={swatch.color} BorderSizePixel={0}>
+					{swatches.map((swatch, index) => (
+						<frame key={swatch.name} LayoutOrder={index} Size={new UDim2(0, 36, 0, 36)} BackgroundColor3={swatch.color} BorderSizePixel={0}>
 							<uicorner CornerRadius={new UDim(0, theme.shape.borderRadius)} />
+							<uistroke Color={theme.palette.border} Thickness={1} />
 						</frame>
 					))}
 				</>
@@ -105,8 +106,8 @@ function DesignTokens() {
 							["default", radius?.default ?? theme.shape.borderRadius],
 							["large", radius?.large ?? theme.shape.borderRadius],
 						] as const
-					).map(([name, value]) => (
-						<frame key={name} Size={new UDim2(0, 48, 0, 28)} BackgroundColor3={theme.palette.surface.paper} BorderSizePixel={0}>
+					).map(([name, value], index) => (
+						<frame key={name} LayoutOrder={index} Size={new UDim2(0, 48, 0, 28)} BackgroundColor3={theme.palette.surface.paper} BorderSizePixel={0}>
 							<uicorner CornerRadius={new UDim(0, value)} />
 							<uistroke Color={theme.palette.border} Thickness={1} />
 							<textlabel Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} Text={`${name} ${value}`} TextSize={10} Font={font} TextColor3={ink} />
@@ -118,8 +119,10 @@ function DesignTokens() {
 			<frame LayoutOrder={51} Size={new UDim2(1, 0, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} VerticalAlignment={Enum.VerticalAlignment.Center} />
 				<>
-					{SIZES.map((size) => (
-						<Button key={size} text={size} size={size} />
+					{SIZES.map((size, index) => (
+						<frame key={size} LayoutOrder={index} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
+							<Button text={size} size={size} />
+						</frame>
 					))}
 				</>
 			</frame>
@@ -133,8 +136,8 @@ function DesignTokens() {
 							["medium", icons.medium],
 							["large", icons.large],
 						] as const
-					).map(([name, px]) => (
-						<frame key={name} Size={new UDim2(0, px, 0, px)} BackgroundColor3={theme.palette.text.primary} BorderSizePixel={0} />
+					).map(([name, px], index) => (
+						<frame key={name} LayoutOrder={index} Size={new UDim2(0, px, 0, px)} BackgroundColor3={theme.palette.text.primary} BorderSizePixel={0} />
 					))}
 				</>
 			</frame>
@@ -142,8 +145,9 @@ function DesignTokens() {
 			<frame LayoutOrder={71} Size={new UDim2(1, 0, 0, 48)} BackgroundTransparency={1}>
 				<uilistlayout FillDirection={Enum.FillDirection.Horizontal} Padding={new UDim(0, theme.padding.calc(2))} />
 				<>
-					{ELEVATION.map((elevation) => (
-						<Paper key={elevation} elevation={elevation}>
+					{ELEVATION.map((elevation, index) => (
+						<frame key={elevation} LayoutOrder={index} AutomaticSize={Enum.AutomaticSize.XY} BackgroundTransparency={1}>
+						<Paper elevation={elevation}>
 							<textlabel
 								Size={new UDim2(0, 88, 0, 36)}
 								BackgroundTransparency={1}
@@ -153,6 +157,7 @@ function DesignTokens() {
 								TextColor3={ink}
 							/>
 						</Paper>
+						</frame>
 					))}
 				</>
 			</frame>
