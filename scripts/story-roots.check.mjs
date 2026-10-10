@@ -45,6 +45,10 @@ if (encodeRootList(["x", "x", "y"]) !== "x,y") throw new Error("encode");
 if (splitRootPath(" ReplicatedStorage.UI.stories ").join("/") !== "ReplicatedStorage/UI/stories") {
 	throw new Error("split");
 }
+if (splitRootPath("ReplicatedStorage.").join("/") !== "ReplicatedStorage/") throw new Error("split trailing");
+if (splitRootPath("ReplicatedStorage..").join("/") !== "ReplicatedStorage//") throw new Error("split doubled");
+if (splitRootPath(".ReplicatedStorage").join("/") !== "/ReplicatedStorage") throw new Error("split leading");
+if (splitRootPath("ReplicatedStorage..Stories").join("/") !== "ReplicatedStorage//Stories") throw new Error("split gap");
 if (collapseRootPaths(["ServerStorage.StorybloxPlugin.stories", "ServerStorage"]).join(",") !== "ServerStorage") {
 	throw new Error("nested plugin folder");
 }
@@ -60,13 +64,24 @@ const game = {
 		return node({ Stories: stories });
 	},
 };
+const service = lookupRootPath("ReplicatedStorage", game);
+if (service === undefined || service.FindFirstChild("Stories") !== stories) throw new Error("lookup service");
 if (lookupRootPath("ReplicatedStorage.Stories", game) !== stories) throw new Error("lookup nested");
 if (lookupRootPath("ReplicatedStorage.Missing", game) !== undefined) throw new Error("lookup missing child");
 if (lookupRootPath("Replicatedtss", game) !== undefined) throw new Error("lookup bad service");
+if (lookupRootPath("ReplicatedStorage.", game) !== undefined) throw new Error("lookup trailing");
+if (lookupRootPath("ReplicatedStorage..", game) !== undefined) throw new Error("lookup doubled");
+if (lookupRootPath(".ReplicatedStorage", game) !== undefined) throw new Error("lookup leading");
+if (lookupRootPath("ReplicatedStorage..Stories", game) !== undefined) throw new Error("lookup gap");
 const resolve = (path) => lookupRootPath(path, game);
 if (rootPathIssue("  ", [], resolve) !== "") throw new Error("issue empty");
 if (rootPathIssue("ReplicatedStorage.Stories", ["ReplicatedStorage.Stories"], resolve) !== "Already added") throw new Error("issue dupe");
 if (rootPathIssue("ServerStorage", [], resolve) !== "Already added") throw new Error("issue built-in");
 if (rootPathIssue("Replicatedtss", [], resolve) !== "Not found") throw new Error("issue missing");
 if (rootPathIssue(" ReplicatedStorage.Stories ", [], resolve) !== undefined) throw new Error("issue valid");
+if (rootPathIssue("ReplicatedStorage", [], resolve) !== "Already added") throw new Error("issue service");
+if (rootPathIssue("ReplicatedStorage.", [], resolve) !== "Not found") throw new Error("issue trailing");
+if (rootPathIssue("ReplicatedStorage..", [], resolve) !== "Not found") throw new Error("issue doubled");
+if (rootPathIssue(".ReplicatedStorage", [], resolve) !== "Not found") throw new Error("issue leading");
+if (rootPathIssue("ReplicatedStorage..Stories", [], resolve) !== "Not found") throw new Error("issue gap");
 console.log("story roots ok");
