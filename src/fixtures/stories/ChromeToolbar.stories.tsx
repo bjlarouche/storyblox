@@ -21,7 +21,10 @@ function row(order: number, live: boolean) {
 			<CanvasToolbar
 				zoom={live ? 1.5 : 1}
 				fit={live}
-				sizePick={live ? "phone" : undefined}
+				sizeLabel={live ? "Phone" : "Responsive"}
+				sizeActive={live}
+				sizeSelected={live ? "phone" : "responsive"}
+				storyOption="Story 320×48"
 				orientation={live ? "landscape" : "portrait"}
 				canOrient
 				grid={live}
@@ -35,8 +38,9 @@ function row(order: number, live: boolean) {
 				showInspector
 				showSettings
 				onZoom={noop}
+				onZoomValue={noop}
 				onFit={noop}
-				onSize={noop}
+				onSizePick={noop}
 				onOrient={noop}
 				onGrid={noop}
 				onOutline={noop}
