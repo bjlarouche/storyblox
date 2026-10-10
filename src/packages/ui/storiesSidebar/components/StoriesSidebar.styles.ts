@@ -2,10 +2,8 @@ import { createStyles, makeStyles, Theme, WriteableStyle } from "@rbxts/uiblox";
 
 function searchRowMetrics(theme: Theme) {
 	const inset = theme.padding.calc(1);
-	const title = theme.typography.variants.body;
-	const path = theme.typography.variants.caption;
-	const titleHeight = math.ceil(title.size * (title.leading ?? 1));
-	const pathHeight = math.ceil(path.size * (path.leading ?? 1));
+	const titleHeight = theme.typography.variants.body.size;
+	const pathHeight = theme.typography.variants.caption.size;
 	const pathTop = inset + titleHeight + theme.spacing.calc(1);
 	return {
 		inset,
