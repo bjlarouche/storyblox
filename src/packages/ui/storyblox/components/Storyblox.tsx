@@ -157,8 +157,15 @@ function folderDecorators(module: ModuleScript) {
 	return stackDecorators(levels);
 }
 
-function loadedStory(root: ModuleScript, suffix: string) {
-	const story = adaptStory(normalizeExport(loadStoryModule(root), root.Name, suffix));
+function loadedStory(root: ModuleScript, suffix: string, log?: (message: string) => void) {
+	const started = os.clock();
+	const exported = loadStoryModule(root);
+	const required = os.clock();
+	const story = adaptStory(normalizeExport(exported, root.Name, suffix));
+	const adapted = os.clock();
+	log?.(
+		`story ${root.Name} require ${math.floor((required - started) * 1000)}ms adapt ${math.floor((adapted - required) * 1000)}ms`,
+	);
 	if (story === undefined) return undefined;
 	const decorators = folderDecorators(root);
 	if (decorators.size() === 0) return story;
@@ -368,7 +375,7 @@ function Storyblox(props: StorybloxProps) {
 					if (seenModules.current.includes(root)) return;
 					seenModules.current.push(root);
 					try {
-						const story = loadedStory(root, suffix);
+						const story = loadedStory(root, suffix, logDebug);
 						if (generation.current !== token) return;
 						if (story === undefined) {
 							logDebug(`Rejected story export ${root.GetFullName()}`);
@@ -379,7 +386,7 @@ function Storyblox(props: StorybloxProps) {
 						const geChangedConnection = (root.Changed as RBXScriptSignal).Connect(() => {
 							logDebug(`Story source updated: ${root.GetFullName()}`);
 
-							const updatedStory = loadedStory(root, suffix);
+							const updatedStory = loadedStory(root, suffix, logDebug);
 							if (updatedStory === undefined) {
 								session.remove(story.title);
 								return;
@@ -722,6 +729,10 @@ function Storyblox(props: StorybloxProps) {
 		const title = selectedStory.title;
 		const tick = () => {
 			if (!alive || (hostPlugin !== undefined && hostPlugin.Parent === undefined)) return;
+			if (marker.GetAttribute("storyblox-loading") !== undefined) {
+				task.delay(0.05, tick);
+				return;
+			}
 			const scroll = findCanvasScroll(hostRef.current);
 			if (scroll && storyInsideCanvas(scroll)) {
 				const build = (marker.GetAttribute("storyblox-build") as number | undefined) ?? 0;
@@ -855,6 +866,8 @@ function Storyblox(props: StorybloxProps) {
 									respond(marker, { requestId, ok: result.passed, generation: bridgeGeneration.current, result });
 								}}
 								onRenderError={onRenderError}
+								onLoading={(label) => controlRoot(root)?.SetAttribute("storyblox-loading", label)}
+								debug={debugEnabled}
 								{...chrome}
 							/>
 						</ErrorBoundary>

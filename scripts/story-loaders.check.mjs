@@ -11,6 +11,12 @@ Array.prototype.size = function () {
 };
 
 const { collectLoaders, settleLoaders, isThenable } = await import("../src/packages/storyLoaders.ts");
+const { revealStoryLoad, acceptStoryLoad, STORY_LOAD_REVEAL } = await import("../src/packages/storyLoad.ts");
+
+if (revealStoryLoad(0.05, true) !== false) throw new Error("spinner waits");
+if (revealStoryLoad(STORY_LOAD_REVEAL, true) !== true) throw new Error("spinner reveals");
+if (revealStoryLoad(1, false) !== false) throw new Error("spinner hides when idle");
+if (acceptStoryLoad(2, 2) !== true || acceptStoryLoad(2, 3) !== false) throw new Error("stale load");
 
 if (isThenable({ then: () => {} }) !== true) throw new Error("thenable");
 if (isThenable({ greeting: "hi" }) !== false) throw new Error("plain table");
