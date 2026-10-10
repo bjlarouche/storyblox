@@ -42,7 +42,7 @@ export function splitRootPath(path: string): string[] {
 export function lookupRootPath(path: string, root: DataModel = game): Instance | undefined {
 	const parts = splitRootPath(path);
 	if (parts.size() === 0) return undefined;
-	const [ok, service] = pcall(() => root.GetService(parts[0] as keyof Services));
+	const [ok, service] = pcall(() => root.FindService(parts[0]));
 	let current: Instance | undefined = ok ? service : undefined;
 	for (let index = 1; index < parts.size(); index++) {
 		if (current === undefined) return undefined;

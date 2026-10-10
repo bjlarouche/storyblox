@@ -55,7 +55,7 @@ if (merged.join(",") !== "ReplicatedStorage,ServerStorage,StarterPlayer.StarterP
 const node = (children = {}) => ({ FindFirstChild: (name) => children[name] });
 const stories = node();
 const game = {
-	GetService(name) {
+	FindService(name) {
 		if (name !== "ReplicatedStorage") throw new Error(`${name} is not a valid Service name`);
 		return node({ Stories: stories });
 	},
