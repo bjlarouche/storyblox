@@ -70,7 +70,7 @@ function InspectorPane(props: InspectorPaneProps) {
 	const tabs = availableTabs(props);
 	const [tab, setTab] = useState<InspectorTab>("controls");
 	const current = tabs.includes(tab) ? tab : "controls";
-	const barHeight = theme.spacing.calc(1.5);
+	const barHeight = theme.spacing.calc(3);
 
 	return (
 		<frame key="InspectorPane" Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1} BorderSizePixel={0}>
