@@ -6,7 +6,7 @@ export default {
 	render: () => (
 		<frame Size={new UDim2(0, 280, 0, 0)} AutomaticSize={Enum.AutomaticSize.Y} BackgroundTransparency={1}>
 			<Markdown
-				value={"# A heading\n\nA longer sentence that wraps inside the padding.\n\n```luau\nlocal function ready()\n\treturn true\nend\n```\n\nSee the [north route](route) before dusk."}
+				value={"# A heading\n\nA longer sentence that wraps inside the padding.\n\n> The ridge stays lit after the gate closes, and the note wraps onto the next line.\n\n```luau\nlocal function ready()\n\treturn true\nend\n```\n\nSee the [north route](route) before dusk."}
 			/>
 		</frame>
 	),
