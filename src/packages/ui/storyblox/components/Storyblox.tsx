@@ -367,7 +367,7 @@ function Storyblox(props: StorybloxProps) {
 
 	const scanLeft = useRef(0);
 	const findStories = useCallback(
-		(root: Instance, finish = false): void => {
+		(root: Instance, finish: boolean = false): void => {
 			const token = generation.current;
 			task.spawn(() => {
 				if (generation.current !== token) return;
