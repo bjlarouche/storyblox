@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
-import { Players } from "@rbxts/services";
+import { Players, RunService } from "@rbxts/services";
 import { ScrollView, Tabs, Typography, useBreakpoints, useTheme } from "@rbxts/uiblox";
 
 import {
@@ -20,13 +20,46 @@ function stand(model: Model) {
 	model.PivotTo(lifted.mul(CFrame.Angles(0, math.rad(180), 0)));
 }
 
+function stepAnimations(animator: Animator, dt: number) {
+	(animator as Animator & { StepAnimations(deltaTime: number): void }).StepAnimations(dt);
+}
+
 function Stage(props: { equipped: Equipped }) {
 	const { theme } = useTheme();
 	const frameRef = useRef<ViewportFrame>();
 	const cameraRef = useRef<Camera>();
 	const rigRef = useRef<Folder>();
+	const animatorRef = useRef<Animator>();
+	const trackRef = useRef<AnimationTrack>();
+	const tokenRef = useRef(0);
+	const clipRef = useRef(0);
+	const pausedRef = useRef(false);
 	const equipped = props.equipped;
-	const look = `${equipped.skin}/${equipped.face}/${equipped.shirt}/${equipped.pants}/${equipped.hair}/${equipped.hat}/${equipped.pose}`;
+	const body = `${equipped.skin}/${equipped.face}/${equipped.shirt}/${equipped.pants}/${equipped.hair}/${equipped.hat}`;
+	const clipId = animationId(equipped);
+	clipRef.current = clipId;
+	pausedRef.current = theme.reducedMotion === true;
+
+	const play = (animator: Animator) => {
+		const token = ++tokenRef.current;
+		const id = clipRef.current;
+		trackRef.current?.Stop();
+		trackRef.current = undefined;
+		if (id <= 0) return;
+		const animation = new Instance("Animation");
+		animation.AnimationId = `rbxassetid://${id}`;
+		const [played, loaded] = pcall(() => animator.LoadAnimation(animation));
+		animation.Destroy();
+		if (!played || token !== tokenRef.current || animatorRef.current !== animator) {
+			if (played) (loaded as AnimationTrack).Stop();
+			return;
+		}
+		const clip = loaded as AnimationTrack;
+		clip.Looped = true;
+		clip.Priority = Enum.AnimationPriority.Action;
+		clip.Play();
+		trackRef.current = clip;
+	};
 
 	useEffect(() => {
 		const frame = frameRef.current;
@@ -39,8 +72,18 @@ function Stage(props: { equipped: Equipped }) {
 		if (folder === undefined) return;
 		let alive = true;
 		let rig: Model | undefined;
+		let animator: Animator | undefined;
+		let blocked = false;
 		const description = descriptionOf(equipped);
-		const clipId = animationId(equipped);
+		const conn = RunService.Heartbeat.Connect((dt) => {
+			const current = animator;
+			if (blocked || current === undefined || pausedRef.current) return;
+			const [ok, err] = pcall(() => stepAnimations(current, dt));
+			if (!ok) {
+				blocked = true;
+				warn(`avatar step: ${err}`);
+			}
+		});
 		task.spawn(() => {
 			const [ok, result] = pcall(() =>
 				Players.CreateHumanoidModelFromDescription(description, Enum.HumanoidRigType.R15),
@@ -64,26 +107,32 @@ function Stage(props: { equipped: Equipped }) {
 			}
 			model.Parent = folder;
 			rig = model;
-			if (humanoid === undefined || clipId <= 0) return;
-			const animation = new Instance("Animation");
-			animation.AnimationId = `rbxassetid://${clipId}`;
-			const [played, track] = pcall(() => humanoid.LoadAnimation(animation));
-			animation.Destroy();
-			if (!alive) {
-				model.Destroy();
-				return;
+			if (humanoid === undefined) return;
+			let found = humanoid.FindFirstChildOfClass("Animator");
+			if (found === undefined) {
+				found = new Instance("Animator");
+				found.Parent = humanoid;
 			}
-			if (!played) return;
-			const clip = track as AnimationTrack;
-			clip.Looped = true;
-			clip.Priority = Enum.AnimationPriority.Action;
-			clip.Play();
+			animator = found;
+			animatorRef.current = found;
+			play(found);
 		});
 		return () => {
 			alive = false;
+			tokenRef.current++;
+			conn.Disconnect();
+			trackRef.current?.Stop();
+			trackRef.current = undefined;
+			animatorRef.current = undefined;
 			rig?.Destroy();
 		};
-	}, [look]);
+	}, [body]);
+
+	useEffect(() => {
+		const animator = animatorRef.current;
+		if (animator === undefined) return;
+		play(animator);
+	}, [clipId]);
 
 	return (
 		<viewportframe
@@ -171,8 +220,6 @@ function AvatarEditor(props: { seed: Equipped }) {
 	const grid = theme.spacing.calc(44);
 	const stageH = theme.spacing.calc(26);
 	const tabH = theme.spacing.calc(4);
-	const noteH = theme.spacing.calc(8);
-	const showNote = category === "Animations";
 	const items = PIECES.filter((piece) => piece.category === category);
 	const panel = grid + rail + gap * 3;
 	const stageSize = narrow ? new UDim2(1, 0, 0, stageH) : new UDim2(1, -(panel + gap), 1, 0);
@@ -232,20 +279,7 @@ function AvatarEditor(props: { seed: Equipped }) {
 					BackgroundTransparency={1}
 					BorderSizePixel={0}
 				>
-					{showNote && (
-						<Typography
-							text="Clips load on the rig. This viewport stays on the rest pose."
-							variant="body"
-							color="textSecondary"
-							sx={{ Size: new UDim2(1, 0, 0, noteH), AutomaticSize: Enum.AutomaticSize.None }}
-						/>
-					)}
-					<ScrollView
-						sx={{
-							Position: showNote ? new UDim2(0, 0, 0, noteH + gap) : UDim2.fromOffset(0, 0),
-							Size: showNote ? new UDim2(1, 0, 1, -(noteH + gap)) : UDim2.fromScale(1, 1),
-						}}
-					>
+					<ScrollView sx={{ Size: UDim2.fromScale(1, 1) }}>
 						<frame
 							Size={new UDim2(1, 0, 0, 0)}
 							AutomaticSize={Enum.AutomaticSize.Y}
