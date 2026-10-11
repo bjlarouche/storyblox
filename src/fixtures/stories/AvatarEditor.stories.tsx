@@ -1,19 +1,89 @@
 import React, { useEffect, useRef, useState } from "@rbxts/react";
+import { Players } from "@rbxts/services";
 import { ScrollView, Tabs, Typography, useBreakpoints, useTheme } from "@rbxts/uiblox";
 
-import { CATEGORIES, Category, Equipped, lookOf, PIECES, Piece, sceneBlocks, STARTER } from "./avatarEditor";
+import {
+	animationId,
+	CATEGORIES,
+	Category,
+	descriptionOf,
+	Equipped,
+	equippedFrom,
+	PIECES,
+	Piece,
+} from "./avatarEditor";
+
+function stand(model: Model) {
+	const [cf, size] = model.GetBoundingBox();
+	const bottom = cf.Position.Y - size.Y / 2;
+	const lifted = model.GetPivot().add(new Vector3(0, -bottom, 0));
+	model.PivotTo(lifted.mul(CFrame.Angles(0, math.rad(180), 0)));
+}
 
 function Stage(props: { equipped: Equipped }) {
 	const { theme } = useTheme();
 	const frameRef = useRef<ViewportFrame>();
 	const cameraRef = useRef<Camera>();
-	const look = lookOf(props.equipped);
+	const rigRef = useRef<Folder>();
+	const equipped = props.equipped;
+	const look = `${equipped.skin}/${equipped.face}/${equipped.shirt}/${equipped.pants}/${equipped.hair}/${equipped.hat}/${equipped.pose}`;
 
 	useEffect(() => {
 		const frame = frameRef.current;
 		const camera = cameraRef.current;
 		if (frame !== undefined && camera !== undefined) frame.CurrentCamera = camera;
 	}, []);
+
+	useEffect(() => {
+		const folder = rigRef.current;
+		if (folder === undefined) return;
+		let alive = true;
+		let rig: Model | undefined;
+		const description = descriptionOf(equipped);
+		const clipId = animationId(equipped);
+		task.spawn(() => {
+			const [ok, result] = pcall(() =>
+				Players.CreateHumanoidModelFromDescription(description, Enum.HumanoidRigType.R15),
+			);
+			description.Destroy();
+			if (!ok) {
+				warn(`avatar rig: ${result}`);
+				return;
+			}
+			const model = result as Model;
+			if (!alive) {
+				model.Destroy();
+				return;
+			}
+			stand(model);
+			model.Name = "Avatar";
+			const humanoid = model.FindFirstChildOfClass("Humanoid");
+			if (humanoid !== undefined) {
+				humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None;
+				humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff;
+			}
+			model.Parent = folder;
+			rig = model;
+			if (humanoid === undefined || clipId <= 0) return;
+			const animation = new Instance("Animation");
+			animation.AnimationId = `rbxassetid://${clipId}`;
+			const [played, track] = pcall(() => humanoid.LoadAnimation(animation));
+			animation.Destroy();
+			if (!alive) {
+				model.Destroy();
+				return;
+			}
+			if (!played) return;
+			const clip = track as AnimationTrack;
+			clip.Looped = true;
+			clip.Priority = Enum.AnimationPriority.Action;
+			clip.Play();
+		});
+		return () => {
+			alive = false;
+			rig?.Destroy();
+		};
+	}, [look]);
 
 	return (
 		<viewportframe
@@ -29,24 +99,21 @@ function Stage(props: { equipped: Equipped }) {
 			<uicorner CornerRadius={new UDim(0, theme.shape.borderRadius)} />
 			<camera
 				ref={cameraRef}
-				CFrame={CFrame.lookAt(new Vector3(7.2, 5, 11.2), new Vector3(0, 3.5, 0))}
-				FieldOfView={36}
+				CFrame={CFrame.lookAt(new Vector3(8, 4.8, 13.2), new Vector3(0, 3.1, 0))}
+				FieldOfView={40}
 			/>
 			<worldmodel>
-				{sceneBlocks(look).map((part) => (
-					<part
-						key={part.id}
-						Anchored
-						CanCollide={false}
-						Size={part.size}
-						CFrame={part.cf}
-						Color={part.color}
-						Material={part.material ?? Enum.Material.SmoothPlastic}
-						Shape={part.shape ?? Enum.PartType.Block}
-						TopSurface={Enum.SurfaceType.Smooth}
-						BottomSurface={Enum.SurfaceType.Smooth}
-					/>
-				))}
+				<folder ref={rigRef} />
+				<part
+					Anchored
+					CanCollide={false}
+					Size={new Vector3(16, 0.4, 16)}
+					CFrame={new CFrame(0, -0.2, 0)}
+					Color={Color3.fromRGB(118, 78, 50)}
+					Material={Enum.Material.Wood}
+					TopSurface={Enum.SurfaceType.Smooth}
+					BottomSurface={Enum.SurfaceType.Smooth}
+				/>
 			</worldmodel>
 		</viewportframe>
 	);
@@ -91,13 +158,13 @@ function Tile(props: { piece: Piece; picked: boolean; order: number; onPick: (pi
 	);
 }
 
-function AvatarEditor() {
+function AvatarEditor(props: { seed: Equipped }) {
 	const { theme } = useTheme();
 	const [host, setHost] = useState<Frame>();
 	const view = useBreakpoints(host);
 	const narrow = view.width > 0 && view.width < 760;
 	const [category, setCategory] = useState<Category>("Clothing");
-	const [equipped, setEquipped] = useState(STARTER);
+	const [equipped, setEquipped] = useState(props.seed);
 	const pad = theme.spacing.calc(1.5);
 	const gap = theme.spacing.calc(1);
 	const rail = theme.spacing.calc(16);
@@ -167,7 +234,7 @@ function AvatarEditor() {
 				>
 					{showNote && (
 						<Typography
-							text="Animations in this preview are poses, not a full animator."
+							text="Clips load on the rig. This viewport stays on the rest pose."
 							variant="body"
 							color="textSecondary"
 							sx={{ Size: new UDim2(1, 0, 0, noteH), AutomaticSize: Enum.AutomaticSize.None }}
@@ -210,7 +277,7 @@ function AvatarEditor() {
 
 export default {
 	title: "3D/Avatar Editor",
-	description: "Dress a blocky character in a viewport.",
+	description: "Dress a character in a viewport.",
 	preview: { width: 1024, height: 720 },
-	render: () => <AvatarEditor />,
+	render: (args: Partial<Equipped>) => <AvatarEditor seed={equippedFrom(args)} />,
 };
