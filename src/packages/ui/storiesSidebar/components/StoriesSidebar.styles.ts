@@ -84,6 +84,10 @@ const useStoriesSidebarStyles = makeStyles((theme: Theme) => {
 		resultRowActive: {
 			BackgroundTransparency: light ? 0.92 : 0.85,
 		} as WriteableStyle<TextButton>,
+		resultRowHover: {
+			BackgroundColor3: theme.palette.action.hover,
+			BackgroundTransparency: 0,
+		} as WriteableStyle<TextButton>,
 		resultIcon: {
 			Position: new UDim2(0, theme.padding.calc(2), 0.5, 0),
 			AnchorPoint: new Vector2(0, 0.5),

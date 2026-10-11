@@ -21,10 +21,66 @@ import { Story } from "interfaces";
 import useStoriesSidebarStyles, { searchRowSlot } from "./StoriesSidebar.styles";
 import Log from "@rbxts/log";
 import { VERSION } from "constants/AppConstants";
-import { searchStories, stepSearchIndex, StorySearchHit } from "../storySearch";
+import { searchRowFace, searchStories, stepSearchIndex, StorySearchHit } from "../storySearch";
 import { adoptTree, favoriteBranch, navStoryTitles, sortByTitle, stepStoryTitle, storyBranches } from "../storyTree";
 
 const SEARCH_DELAY = 0.2;
+
+interface HoverState {
+	list: string;
+	title?: string;
+}
+
+function SearchHitRow(props: {
+	hit: StorySearchHit;
+	face: "selected" | "hover" | "idle";
+	hitKey: string;
+	setHover: React.Dispatch<React.SetStateAction<HoverState>>;
+	onOpen: (hit: StorySearchHit) => void;
+	suppressClick: () => boolean;
+}) {
+	const { hit, face, hitKey, setHover } = props;
+	const { resultRow, resultRowActive, resultRowHover, resultIcon, resultLeaf, resultPath } = useStoriesSidebarStyles();
+	const { theme } = useTheme();
+	useEffect(() => {
+		const title = hit.title;
+		return () => setHover((current) => (current.title === title ? { list: current.list } : current));
+	}, [hit.title, setHover]);
+	const rowStyle = {
+		...resultRow,
+		...(face === "selected" ? resultRowActive : face === "hover" ? resultRowHover : {}),
+	} as WriteableStyle<TextButton>;
+	return (
+		<textbutton
+			{...rowStyle}
+			Event={{
+				MouseButton1Click: () => {
+					if (props.suppressClick()) return;
+					props.onOpen(hit);
+				},
+				MouseEnter: () => setHover({ list: hitKey, title: hit.title }),
+				MouseLeave: () => setHover((current) => ({ list: current.list })),
+			}}
+		>
+			<Icon icon={Icons.Book} size="xs" tint={theme.palette.primary.main} className={resultIcon} />
+			<Typography
+				text={hit.leaf}
+				variant="body"
+				color="textPrimary"
+				family={face === "selected" ? "bold" : "default"}
+				className={resultLeaf as WriteableStyle<TextLabel>}
+			/>
+			{hit.breadcrumb.size() > 0 && (
+				<Typography
+					text={hit.breadcrumb}
+					variant="caption"
+					color="textSecondary"
+					className={resultPath as WriteableStyle<TextLabel>}
+				/>
+			)}
+		</textbutton>
+	);
+}
 
 export interface StoriesSidebarProps {
 	stories: Story[];
@@ -64,11 +120,6 @@ function StoriesSidebar({
 		tagFilters,
 		storiesTree,
 		resultsList,
-		resultRow,
-		resultRowActive,
-		resultIcon,
-		resultLeaf,
-		resultPath,
 		emptyLabel,
 		divider,
 		versionLabel,
@@ -79,7 +130,7 @@ function StoriesSidebar({
 	const resultsRef = useRef<VirtualListHandle>();
 	const searchingRef = useRef(false);
 	const hitsRef = useRef<StorySearchHit[]>([]);
-	const activeRef = useRef(0);
+	const cursorRef = useRef<string | undefined>();
 	const storiesRef = useRef(stories);
 	const selectedRef = useRef(selected);
 	const onClickRef = useRef(onClick);
@@ -95,8 +146,8 @@ function StoriesSidebar({
 
 	const [draft, setDraft] = useState("");
 	const [query, setQuery] = useState("");
-	const [active, setActive] = useState(0);
-	const [hover, setHover] = useState<number | undefined>();
+	const [cursor, setCursor] = useState<string | undefined>();
+	const [hover, setHover] = useState<HoverState>({ list: "" });
 	const treeRef = useRef<Tree>();
 	const [, setTreeRev] = useState(0);
 
@@ -146,16 +197,28 @@ function StoriesSidebar({
 	const searching = query.size() > 0;
 	searchingRef.current = searching;
 	hitsRef.current = hits;
-	activeRef.current = active;
+	let hitKey = "";
+	for (const hit of hits) {
+		if (hitKey.size() > 0) hitKey += "\0";
+		hitKey += hit.title;
+	}
+	const cursorTitle = cursor !== undefined && hits.some((hit) => hit.title === cursor) ? cursor : undefined;
+	const hoverTitle = hover.list === hitKey ? hover.title : undefined;
+	cursorRef.current = cursorTitle;
 
 	useEffect(() => {
-		setActive(0);
-		setHover(undefined);
-	}, [query]);
+		setHover((current) => (current.list === hitKey ? current : { list: hitKey }));
+	}, [hitKey]);
 
 	useEffect(() => {
-		if (searching) resultsRef.current?.ensureVisible(active);
-	}, [active, searching]);
+		if (cursor !== undefined && cursorTitle === undefined) setCursor(undefined);
+	}, [cursor, cursorTitle]);
+
+	useEffect(() => {
+		if (!searching || cursorTitle === undefined) return;
+		const index = hits.findIndex((hit) => hit.title === cursorTitle);
+		if (index >= 0) resultsRef.current?.ensureVisible(index);
+	}, [cursorTitle, searching, hitKey]);
 
 	const openHit = (hit: StorySearchHit) => {
 		const story = storiesRef.current.find((item) => item.title === hit.title);
@@ -185,10 +248,12 @@ function StoriesSidebar({
 				if (!searchingRef.current) return;
 				const count = hitsRef.current.size();
 				if (count === 0) return;
-				if (key === Enum.KeyCode.Up) {
-					setActive((current) => stepSearchIndex(current, -1, count));
-				} else if (key === Enum.KeyCode.Down) {
-					setActive((current) => stepSearchIndex(current, 1, count));
+				if (key === Enum.KeyCode.Up || key === Enum.KeyCode.Down) {
+					const delta = key === Enum.KeyCode.Up ? -1 : 1;
+					const list = hitsRef.current;
+					const current = list.findIndex((hit) => hit.title === cursorRef.current);
+					const picked = list[stepSearchIndex(current, delta, count)];
+					if (picked !== undefined) setCursor(picked.title);
 				}
 				return;
 			}
@@ -237,7 +302,7 @@ function StoriesSidebar({
 					onTextChanged: (text: string) => setDraft(text),
 					onEnterPressed: () => {
 						if (!searching) return;
-						const hit = hits[active];
+						const hit = hits.find((item) => item.title === cursorTitle) ?? hits[0];
 						if (hit !== undefined) openHit(hit);
 					},
 					startAdornment: (
@@ -330,48 +395,16 @@ function StoriesSidebar({
 						getKey={(hit) => hit.title}
 						itemHeight={searchRowSlot(theme)}
 						listRef={resultsRef}
-						renderItem={(hit, index) => {
-							const emphasized = index === active || index === hover || hit.title === selected;
-							const rowStyle = {
-								...resultRow,
-								...(emphasized ? resultRowActive : {}),
-							} as WriteableStyle<TextButton>;
-							return (
-								<textbutton
-									{...rowStyle}
-									Event={{
-										MouseButton1Click: () => {
-											if (resultsRef.current?.suppressClick()) return;
-											openHit(hit);
-										},
-										MouseEnter: () => setHover(index),
-										MouseLeave: () => setHover(undefined),
-									}}
-								>
-									<Icon
-										icon={Icons.Book}
-										size="xs"
-										tint={theme.palette.primary.main}
-										className={resultIcon}
-									/>
-									<Typography
-										text={hit.leaf}
-										variant="body"
-										color="textPrimary"
-										family={hit.title === selected || index === active ? "bold" : "default"}
-										className={resultLeaf as WriteableStyle<TextLabel>}
-									/>
-									{hit.breadcrumb.size() > 0 && (
-										<Typography
-											text={hit.breadcrumb}
-											variant="caption"
-											color="textSecondary"
-											className={resultPath as WriteableStyle<TextLabel>}
-										/>
-									)}
-								</textbutton>
-							);
-						}}
+						renderItem={(hit) => (
+							<SearchHitRow
+								hit={hit}
+								face={searchRowFace(hit.title, selected, cursorTitle, hoverTitle)}
+								hitKey={hitKey}
+								setHover={setHover}
+								onOpen={openHit}
+								suppressClick={() => resultsRef.current?.suppressClick() === true}
+							/>
+						)}
 					/>
 				)}
 			</frame>
