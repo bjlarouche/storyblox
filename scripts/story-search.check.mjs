@@ -14,7 +14,7 @@ Array.prototype.size = function size() {
 	return this.length;
 };
 
-const { storyMatches, searchStories, splitStoryTitle, stepSearchIndex } = await import(
+const { storyMatches, searchStories, splitStoryTitle, stepSearchIndex, searchRowFace } = await import(
 	"../src/packages/ui/storiesSidebar/storySearch.ts"
 );
 
@@ -37,5 +37,15 @@ if (searchStories(["Fixture/Styled"], "").size() !== 0) throw new Error("empty q
 if (stepSearchIndex(0, -1, 3) !== 2) throw new Error("wrap up");
 if (stepSearchIndex(2, 1, 3) !== 0) throw new Error("wrap down");
 if (stepSearchIndex(1, 1, 0) !== 0) throw new Error("empty step");
+if (stepSearchIndex(-1, 1, 3) !== 0) throw new Error("cursor down from none");
+if (stepSearchIndex(-1, -1, 3) !== 2) throw new Error("cursor up from none");
+
+const open = "Components/AvatarGroup";
+const first = "3D/Avatar Editor";
+if (searchRowFace(open, open, first) !== "selected") throw new Error("open story stays selected");
+if (searchRowFace(first, open, first) !== "hover") throw new Error("cursor is not a second selection");
+if (searchRowFace("Components/Avatar", open, undefined, "Components/Avatar") !== "hover") throw new Error("hover face");
+if (searchRowFace("Components/Avatar", open) !== "idle") throw new Error("idle row");
+if (searchRowFace(first, first, first, first) !== "selected") throw new Error("open story wins");
 
 console.log("story search ok");

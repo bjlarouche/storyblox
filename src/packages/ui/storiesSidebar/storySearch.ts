@@ -42,3 +42,9 @@ export function stepSearchIndex(current: number, delta: number, count: number): 
 	if (stepped >= count) return 0;
 	return stepped;
 }
+
+export function searchRowFace(title: string, open?: string, cursor?: string, hover?: string): "selected" | "hover" | "idle" {
+	if (open !== undefined && title === open) return "selected";
+	if ((cursor !== undefined && title === cursor) || (hover !== undefined && title === hover)) return "hover";
+	return "idle";
+}
